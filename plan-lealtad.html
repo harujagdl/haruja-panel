@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Plan de Lealtad HarujaGdl</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+      :root{
+        --fondo:#ffffff;
+        --texto:#383234;
+        --acento:#a7b59e;
+        --gris:#777;
+        --borde:#e9e9e9;
+        --beige:#ffffff;
+      }
+
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+      body{
+        font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: var(--beige);
+        color: var(--texto);
+        margin:0;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      .wrap{
+        max-width:760px;
+        margin:auto;
+        padding:12px;
+      }
+
+      .card{
+        background:#fff;
+        border-radius:16px;
+        padding:14px;
+        box-shadow:0 2px 10px rgba(0,0,0,.06);
+        margin:10px 0;
+        border:1px solid var(--borde);
+      }
+
+      h1{
+        text-align:center;
+        margin:8px 0 12px;
+        color: var(--texto);
+        font-weight:800;
+        letter-spacing:.3px;
+        font-size: clamp(20px, 4.5vw, 28px);
+      }
+
+      h2{
+        margin:0 0 8px;
+        font-size:17px;
+        color:var(--texto);
+        font-weight:800;
+      }
+
+      label{
+        font-weight:700;
+        display:block;
+        margin-top:10px;
+        color:var(--texto);
+        font-size:14px;
+      }
+
+      input,select,textarea{
+        width:100%;
+        padding:10px;
+        border:1px solid #ddd;
+        border-radius:12px;
+        margin-top:6px;
+        background:#fff;
+        color:var(--texto);
+        outline:none;
+        font-size:16px;
+        line-height:1.2;
+        resize: vertical;
+      }
+      input:focus, select:focus, textarea:focus{
+        border-color: var(--acento);
+        box-shadow:0 0 0 3px rgba(167,181,158,.25);
+      }
+
+      button{
+        width:100%;
+        padding:14px;
+        background:var(--acento);
+        color:#fff;
+        border:0;
+        border-radius:14px;
+        font-weight:800;
+        margin-top:14px;
+        cursor:pointer;
+        transition:.15s ease;
+        font-size:16px;
+        min-height:48px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+      }
+      button:hover{ filter:brightness(.97); transform:translateY(-1px); }
+      button:active{ transform:translateY(0); }
+      button[disabled]{ opacity:.6; cursor:not-allowed; transform:none; }
+
+      .row{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+      }
+
+      .tabs{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+        margin:6px 0 10px;
+      }
+      .tabBtn{
+        background:#fff;
+        color:var(--texto);
+        border:2px solid var(--borde);
+        padding:12px 10px;
+        border-radius:14px;
+        font-weight:800;
+        cursor:pointer;
+        box-shadow:0 2px 6px rgba(0,0,0,.04);
+        text-align:center;
+        font-size:15px;
+        min-height:48px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+      }
+      .tabBtn.active{
+        border-color: var(--acento);
+        background: var(--acento);
+        color:#fff;
+        transform: translateY(-1px);
+        box-shadow:0 6px 12px rgba(0,0,0,.08);
+      }
+
+      .section{ display:none; }
+      .section.active{ display:block; }
+
+      .muted{ color:var(--gris); font-size:13px; }
+
+      dialog {
+        border: none;
+        border-radius: 12px;
+        padding: 20px 24px;
+        text-align: center;
+        font-weight: 500;
+      }
+      .success { background-color: #A7B59E; color: #fff; }
+      .error   { background-color: #B0413E; color: #fff; }
+
+      .spinner{
+        width:16px; height:16px;
+        border:2px solid rgba(255,255,255,.6);
+        border-top-color:#fff;
+        border-radius:50%;
+        animation: spin .7s linear infinite;
+      }
+      @keyframes spin{ to{ transform:rotate(360deg); } }
+
+      @media (max-width: 600px){
+        .wrap{ padding:10px; }
+        .card{ padding:12px; border-radius:14px; }
+        .row{ grid-template-columns:1fr; }
+        .tabs{ grid-template-columns:1fr; }
+        .tabBtn{ font-size:16px; }
+        h2{ font-size:16px; }
+        label{ font-size:13px; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <!-- LOGO -->
+      <div style="text-align:center; margin-top:6px; margin-bottom:2px;">
+        <img src="https://i.postimg.cc/mZF1T2vN/harujagdl-20250601-143504-0000.png"
+             style="width:clamp(110px, 32vw, 150px); border-radius:12px;">
+      </div>
+
+      <h1>Plan de lealtad</h1>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <div id="tabNuevo" class="tabBtn active" onclick="showSection('nuevo')">
+          Registrar cliente nuevo
+        </div>
+        <div id="tabMov" class="tabBtn" onclick="showSection('mov')">
+          Sumar puntos / Canjear
+        </div>
+      </div>
+
+      <!-- Sección NUEVO CLIENTE -->
+      <div id="secNuevo" class="section active">
+        <div class="card">
+          <h2>Registrar cliente nuevo</h2>
+
+          <label>Nombre*</label>
+          <input id="n_nombre" placeholder="Ej. Sofía Ramírez" />
+
+          <div class="row">
+            <div>
+              <label>Teléfono</label>
+              <input id="n_tel" placeholder="33..." inputmode="tel" />
+            </div>
+            <div>
+              <label>Instagram</label>
+              <input id="n_ig" placeholder="harujagdl" />
+            </div>
+          </div>
+
+          <label>Correo</label>
+          <input id="n_correo" type="email" placeholder="cliente@email.com" />
+
+          <button id="btnCrear" type="button">Crear tarjeta</button>
+          <div class="muted" style="margin-top:8px;">
+            Se guardará en la hoja <b>Clientes</b> del sistema de lealtad.
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección MOVIMIENTOS -->
+      <div id="secMov" class="section">
+        <div class="card">
+          <h2>Registrar compra (sumar puntos)</h2>
+
+          <label>ID Cliente*</label>
+          <input id="c_id" placeholder="HCL-0007" />
+
+          <label>Monto de compra*</label>
+          <input id="c_monto" type="number" placeholder="570" inputmode="decimal" />
+
+          <label>Notas (opcional)</label>
+          <input id="c_notas" placeholder="Ej. compra nueva colección" />
+
+          <button id="btnCompra" type="button">Sumar puntos</button>
+        </div>
+
+        <div class="card">
+          <h2>Canjear puntos</h2>
+
+          <label>ID Cliente*</label>
+          <input id="r_id" placeholder="HCL-0007" />
+
+          <label>Premio</label>
+          <select id="r_reward">
+            <option value="150">150 pts → 10% descuento</option>
+            <option value="300">300 pts → $120 descuento</option>
+            <option value="500">500 pts → $250 descuento</option>
+            <option value="800">800 pts → $450 / prenda hasta $499</option>
+          </select>
+
+          <label>Notas (opcional)</label>
+          <input id="r_notas" placeholder="Ej. canje nivel 2" />
+
+          <button id="btnCanje" type="button">Canjear</button>
+        </div>
+
+        <div class="muted" style="margin-top:6px;">
+          Los movimientos se registran en las hojas <b>Clientes</b> y <b>Movimientos</b>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Dialogs -->
+    <dialog id="dlgOk" class="success">✅ Movimiento registrado.</dialog>
+    <dialog id="dlgErr" class="error">❌ Error al guardar.</dialog>
+
+    <script>
+      const ENDPOINT =
+        'https://script.google.com/macros/s/AKfycbxhJEhjk3ISS04cmE9aACiIs5vtlK9-jb1udSRlG8_4tsCS-qPq16AIh4uC0r0Yy2wBTg/exec';
+
+      const dlgOk  = document.getElementById('dlgOk');
+      const dlgErr = document.getElementById('dlgErr');
+
+      function showDialog(dlg, text, timeout = 2200) {
+        dlg.textContent = text;
+        try {
+          dlg.showModal();
+          setTimeout(() => dlg.close(), timeout);
+        } catch (e) {
+          alert(text);
+        }
+      }
+
+      function setLoading(btn, isLoading) {
+        if (!btn) return;
+        btn.disabled = isLoading;
+        if (isLoading) {
+          btn.dataset._text = btn.textContent;
+          btn.innerHTML = '<div class="spinner"></div> Procesando...';
+        } else {
+          btn.textContent = btn.dataset._text || btn.textContent;
+        }
+      }
+
+      function showSection(which){
+        const secNuevo = document.getElementById('secNuevo');
+        const secMov   = document.getElementById('secMov');
+        const tabNuevo = document.getElementById('tabNuevo');
+        const tabMov   = document.getElementById('tabMov');
+
+        if (which === 'nuevo') {
+          secNuevo.classList.add('active');
+          secMov.classList.remove('active');
+          tabNuevo.classList.add('active');
+          tabMov.classList.remove('active');
+        } else {
+          secMov.classList.add('active');
+          secNuevo.classList.remove('active');
+          tabMov.classList.add('active');
+          tabNuevo.classList.remove('active');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Enviar al API genérico (doPost) con action=...
+      async function sendToApi(action, data, btn) {
+        setLoading(btn, true);
+        try {
+          const payload = { action, ...data };
+          const body = new URLSearchParams(payload).toString();
+
+          await fetch(ENDPOINT, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+            },
+            body,
+          });
+
+          setLoading(btn, false);
+          return true;
+        } catch (err) {
+          console.error(err);
+          setLoading(btn, false);
+          showDialog(dlgErr, '❌ Error de red. Intenta de nuevo.');
+          return false;
+        }
+      }
+
+      // Registrar cliente nuevo
+      document.getElementById('btnCrear').addEventListener('click', async () => {
+        const nombre  = document.getElementById('n_nombre').value.trim();
+        const tel     = document.getElementById('n_tel').value.trim();
+        const ig      = document.getElementById('n_ig').value.trim();
+        const correo  = document.getElementById('n_correo').value.trim();
+        const btn     = document.getElementById('btnCrear');
+
+        if (!nombre) {
+          showDialog(dlgErr, 'Pon el nombre del cliente 🙏');
+          return;
+        }
+
+        const ok = await sendToApi('registerClient', {
+          nombre,
+          telefono: tel,
+          instagram: ig,
+          correo,
+        }, btn);
+
+        if (ok) {
+          showDialog(dlgOk, '✅ Cliente registrado en lealtad.');
+          document.getElementById('n_nombre').value = '';
+          document.getElementById('n_tel').value = '';
+          document.getElementById('n_ig').value = '';
+          document.getElementById('n_correo').value = '';
+        }
+      });
+
+      // Registrar compra (sumar puntos)
+      document.getElementById('btnCompra').addEventListener('click', async () => {
+        const id    = document.getElementById('c_id').value.trim();
+        const monto = Number(document.getElementById('c_monto').value || 0);
+        const notas = document.getElementById('c_notas').value.trim();
+        const btn   = document.getElementById('btnCompra');
+
+        if (!id || monto <= 0) {
+          showDialog(dlgErr, 'Revisa ID y monto 🙏');
+          return;
+        }
+
+        const ok = await sendToApi('addPurchase', {
+          id,
+          monto,
+          notas,
+        }, btn);
+
+        if (ok) {
+          showDialog(dlgOk, '✅ Compra registrada y puntos sumados.');
+          document.getElementById('c_monto').value = '';
+          document.getElementById('c_notas').value = '';
+        }
+      });
+
+      // Canjear puntos
+      document.getElementById('btnCanje').addEventListener('click', async () => {
+        const id        = document.getElementById('r_id').value.trim();
+        const rewardPts = Number(document.getElementById('r_reward').value);
+        const notas     = document.getElementById('r_notas').value.trim();
+        const btn       = document.getElementById('btnCanje');
+
+        if (!id) {
+          showDialog(dlgErr, 'Pon el ID del cliente 🙏');
+          return;
+        }
+
+        const ok = await sendToApi('redeem', {
+          id,
+          rewardPts,
+          notas,
+        }, btn);
+
+        if (ok) {
+          showDialog(dlgOk, '✅ Canje registrado en el sistema.');
+          document.getElementById('r_notas').value = '';
+        }
+      });
+
+      // Atajos con Enter
+      document.getElementById('n_correo').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.getElementById('btnCrear').click();
+        }
+      });
+      document.getElementById('c_monto').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.getElementById('btnCompra').click();
+        }
+      });
+      document.getElementById('r_notas').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.getElementById('btnCanje').click();
+        }
+      });
+    </script>
+  </body>
+</html>
