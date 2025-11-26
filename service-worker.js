@@ -1,14 +1,15 @@
-// Service worker básico para que el navegador permita instalar la PWA
+// service-worker.js sencillo para la PWA de HarujaGdl
 
-self.addEventListener("install", (event) => {
+self.addEventListener('install', (event) => {
+  // Tomar control lo antes posible
   self.skipWaiting();
 });
 
-self.addEventListener("activate", (event) => {
-  clients.claim();
+self.addEventListener('activate', (event) => {
+  // Reclamar clientes existentes
+  event.waitUntil(clients.claim());
 });
 
-// De momento no hacemos caché, solo dejamos el SW registrado
-self.addEventListener("fetch", (event) => {
-  // Aquí más adelante podemos meter lógica offline si quieres
-});
+// 👇 IMPORTANTE:
+// No interceptamos ningún fetch.
+// Así no rompemos las peticiones hacia script.google.com ni otros orígenes.
