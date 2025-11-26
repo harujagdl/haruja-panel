@@ -1,217 +1,227 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    />
-    <meta name="theme-color" content="#A7B59E" />
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Venta – HarujaGdl</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Panel HarujaGdl</title>
+  <!-- PWA: usar mismo look que tu panel -->
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background:#fff;
+      color:#383234;
+      margin:0;
+      padding:0 20px;
+    }
+    .container {
+      max-width:600px;
+      margin:auto;
+      padding-bottom:40px;
+    }
+    img.logo {
+      width:250px;
+      display:block;
+      margin:30px auto 20px;
+    }
+    h2 {
+      text-align:center;
+      color:#383234;
+      margin-bottom:20px;
+    }
+    label {
+      display:block;
+      margin-top:15px;
+      font-weight:bold;
+    }
+    input,select,textarea {
+      width:100%;
+      padding:8px;
+      border:1px solid #ccc;
+      border-radius:5px;
+      margin-top:5px;
+      font-family:inherit;
+    }
+    button {
+      margin-top:25px;
+      width:100%;
+      padding:12px;
+      background:#A7B59E;
+      color:#fff;
+      border:0;
+      border-radius:8px;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+    button:disabled {
+      opacity:.7;
+      cursor:default;
+    }
+    .mensaje {
+      margin-top:20px;
+      text-align:center;
+      font-weight:bold;
+    }
+    .muted {
+      color:#6b7280;
+      font-size:.9rem;
+      text-align:center;
+    }
 
-    <!-- Manifest de la PWA -->
-    <link rel="manifest" href="/manifest.webmanifest" />
+    /* Popups */
+    dialog {
+      border:none;
+      border-radius:12px;
+      padding:25px 30px;
+      text-align:center;
+      animation:fadeIn .3s ease;
+      font-weight:500;
+    }
+    @keyframes fadeIn {
+      from { opacity:0; transform:scale(0.9); }
+      to   { opacity:1; transform:scale(1); }
+    }
+    .success { background-color:#A7B59E; color:#fff; }
+    .error   { background-color:#B0413E; color:#fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="https://i.postimg.cc/nMphkZcC/haruja-logo.png" alt="Haruja Logo" class="logo" />
+    <h2>Registro de Venta</h2>
 
-    <!-- Icono para atajos -->
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <form id="ventaForm" autocomplete="off">
+      <label>Fecha de venta*</label>
+      <input type="date" name="fecha" required>
 
-    <style>
-      :root {
-        --fondo: #ffffff;
-        --texto: #383234;
-        --acento: #a7b59e;
-        --beige: #faf6f1;
-      }
+      <label>Vendedora*</label>
+      <select name="vendedora" required>
+        <option value="Sam">Sam</option>
+        <option value="Haru">Haru</option>
+        <option value="harujagdl.com">harujagdl.com</option>
+      </select>
 
-      * {
-        box-sizing: border-box;
-      }
+      <label>Cliente*</label>
+      <input type="text" name="cliente" required>
 
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: var(--fondo);
-        color: var(--texto);
-        text-align: center;
-      }
+      <label>Número de contacto*</label>
+      <input type="tel" name="contacto" required>
 
-      .logo img {
-        max-width: 220px;
-        margin: 30px auto 10px;
-        display: block;
-      }
+      <label>Canal de venta*</label>
+      <select name="canal" required>
+        <option value="Tienda física">Tienda física</option>
+        <option value="Harujagdl.com">Harujagdl.com</option>
+        <option value="Insta">Instagram</option>
+        <option value="Facebook">Facebook</option>
+        <option value="Whatsapp">Whatsapp</option>
+        <option value="Tianguis">Tianguis</option>
+      </select>
 
-      h1 {
-        margin-top: 0;
-        font-size: 22px;
-        color: var(--texto);
-      }
+      <label>Código(s) (separar con ,)*</label>
+      <input type="text" name="articulo" required placeholder="Ej. HA1001, HA1002, HA1003">
 
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 22px;
-        padding: 20px;
-        max-width: 900px;
-        margin: auto;
-      }
+      <label>Total*</label>
+      <input type="number" name="precio" required step="0.01" min="0">
 
-      .card {
-        background: var(--beige);
-        padding: 18px;
-        border-radius: 14px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-      }
+      <label>Método de pago*</label>
+      <select name="pago" required>
+        <option value="Efectivo">Efectivo</option>
+        <option value="Tarjeta">Tarjeta</option>
+        <option value="Transferencia">Transferencia</option>
+        <option value="Link de pago">Link de pago</option>
+      </select>
 
-      .card h3 {
-        margin: 10px 0 4px;
-        font-size: 16px;
-      }
+      <label>Descuento*</label>
+      <select name="descuento" required>
+        <option value="No aplica">No aplica</option>
+        <option value="10%">10%</option>
+      </select>
 
-      .card p {
-        margin: 0 0 8px;
-        font-size: 13px;
-      }
+      <label>Comentario</label>
+      <textarea name="comentario" rows="3"></textarea>
 
-      .btn {
-        display: inline-block;
-        background: var(--acento);
-        padding: 8px 14px;
-        color: #ffffff;
-        text-decoration: none;
-        border-radius: 6px;
-        margin-top: 10px;
-        font-size: 14px;
-      }
-
-      .footer-logo {
-        margin: 30px 0 20px;
-        opacity: 0.8;
-      }
-
-      .footer-logo img {
-        max-width: 160px;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="logo">
-      <img src="/icons/icon-512.png" alt="HarujaGdl" />
-    </div>
-
-    <h1>Panel de Herramientas HarujaGdl</h1>
-
-    <div class="grid">
-      <div class="card">
-        <h3>Registro de Venta</h3>
-        <p>Registra ventas completas.</p>
-        <a
-          class="btn"
-          href="https://script.google.com/macros/s/AKfycbwkty3K4kZlK_83GRoO0GSf2o7B3aHb2VmuhxtcyK4L4FnWSj7yE7MDdUuvdV32WbFh0g/exec"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Ir a app
-        </a>
+      <button id="btnGuardar" type="submit">Guardar venta</button>
+      <div class="mensaje" id="mensaje"></div>
+      <div class="muted" id="aviso">
+        Esta versión se conecta al registro de ventas de Google Sheets.
       </div>
+    </form>
+  </div>
 
-      <div class="card">
-        <h3>Generar Apartados</h3>
-        <p>Crea apartados y anticipo.</p>
-        <a
-          class="btn"
-          href="https://script.google.com/macros/s/AKfycbz4fkeXmAIj-QbyT8IYRvwiortS4b6vSLj66j_Ph5sdfuczU6ATDRWtY9gY717t7r4i/exec"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Ir a app
-        </a>
-      </div>
+  <!-- Pop-ups -->
+  <dialog id="dlgOk"  class="success">✅ Venta registrada correctamente.</dialog>
+  <dialog id="dlgErr" class="error">❌ Error al guardar la venta.</dialog>
 
-      <div class="card">
-        <h3>Tickets</h3>
-        <p>Carpeta con todos los tickets PDF.</p>
-        <a
-          class="btn"
-          href="https://drive.google.com/drive/folders/12yvsXrxUYnfr2o0eMx1uBUllkr7to8RK?usp=drive_link"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Abrir carpeta
-        </a>
-      </div>
+  <script>
+    // URL de tu Apps Script (implementación actual)
+    const API_URL = "https://script.google.com/macros/s/AKfycbwkty3K4kZlK_83GRoO0GSf2o7B3aHb2VmuhxtcyK4L4FnWSj7yE7MDdUuvdV32WbFh0g/exec";
 
-      <div class="card">
-        <h3>Bitácora de Apartados</h3>
-        <p>Status de apartados y seguimiento.</p>
-        <a
-          class="btn"
-          href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?usp=sharing"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Ver bitácora
-        </a>
-      </div>
+    const form    = document.getElementById('ventaForm');
+    const mensaje = document.getElementById('mensaje');
+    const dlgOk   = document.getElementById('dlgOk');
+    const dlgErr  = document.getElementById('dlgErr');
+    const btn     = document.getElementById('btnGuardar');
 
-      <div class="card">
-        <h3>Registro de Nueva Prenda</h3>
-        <p>Crea códigos nuevos para prendas.</p>
-        <a
-          class="btn"
-          href="https://script.google.com/macros/s/AKfycbx6OThWWitX9xEANDZEZlC4mbW1k0iTvI8HzqPTPjHcYRvqKykxG3fsk2bIE33z9vOV9w/exec"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Ir a app
-        </a>
-      </div>
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-      <div class="card">
-        <h3>Asignar Precios</h3>
-        <p>Define precios finales de prendas.</p>
-        <a
-          class="btn"
-          href="https://script.google.com/macros/s/AKfycbwYXC1B8txyWogMKrv4eWo-WqkbVh5I5139b5I-028-6_FPD-DVXCR6lWvbSJkLrYIw4g/exec"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Ir a app
-        </a>
-      </div>
+      const datos = Object.fromEntries(new FormData(form).entries());
 
-      <div class="card">
-        <h3>Plan de Lealtad</h3>
-        <p>Gestiona clientes y puntos de lealtad.</p>
-        <a
-          class="btn"
-          href="https://script.google.com/macros/s/AKfycbxhJEhjk3ISS04cmE9aACiIs5vtlK9-jb1udSRlG8_4tsCS-qPq16AIh4uC0r0Yy2wBTg/exec"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Ir a app
-        </a>
-      </div>
-    </div>
+      // Payload que espera nuestro doPost (action + payload)
+      const body = {
+        action: "registrarVenta",
+        payload: {
+          fechaVenta: datos.fecha,
+          vendedora:  datos.vendedora,
+          cliente:    datos.cliente,
+          telefono:   datos.contacto,
+          canal:      datos.canal,
+          articulo:   datos.articulo,
+          precio:     datos.precio,
+          metodoPago: datos.pago,
+          descuento:  datos.descuento,
+          comentario: datos.comentario
+        }
+      };
 
-    <div class="footer-logo">
-      <img src="/icons/icon-192.png" alt="HarujaGdl" />
-    </div>
+      mensaje.textContent = "Guardando...";
+      btn.disabled = true;
 
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
-          navigator.serviceWorker
-            .register("/service-worker.js")
-            .catch(function (err) {
-              console.log("Error al registrar el service worker:", err);
-            });
+      try {
+        // IMPORTANTE: no-cors porque Apps Script no expone CORS.
+        await fetch(API_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
         });
+
+        // Si no truena el fetch, asumimos éxito
+        mensaje.textContent = "";
+        dlgOk.textContent = "✅ Venta registrada correctamente.";
+        dlgOk.showModal();
+        setTimeout(() => dlgOk.close(), 2200);
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        mensaje.textContent = "";
+        dlgErr.textContent = "❌ Error al guardar la venta. Revisa tu conexión.";
+        dlgErr.showModal();
+        setTimeout(() => dlgErr.close(), 3000);
+      } finally {
+        btn.disabled = false;
       }
-    </script>
-  </body>
+    });
+
+    // Evitar enviar con Enter fuera de textarea
+    form.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' && ev.target.tagName !== 'TEXTAREA') {
+        ev.preventDefault();
+      }
+    });
+  </script>
+</body>
 </html>
-
-
