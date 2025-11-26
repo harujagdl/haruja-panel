@@ -7,19 +7,19 @@
 
   <style>
     :root{
-      --fondo:#ffffff;
+      --fondo:#faf6f1;
       --texto:#383234;
       --acento:#a7b59e;
       --gris:#777;
       --borde:#e9e9e9;
-      --beige:#faf6f1;
+      --blanco:#ffffff;
     }
 
-    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     body{
       font-family: Arial, sans-serif;
-      background: var(--beige);
+      background: var(--fondo);
       color: var(--texto);
       margin:0;
       -webkit-font-smoothing: antialiased;
@@ -29,35 +29,37 @@
     .wrap{
       max-width:760px;
       margin:auto;
-      padding:12px;
+      padding:16px 12px 32px;
     }
 
-    .card{
-      background:#fff;
-      border-radius:16px;
-      padding:14px;
-      box-shadow:0 2px 10px rgba(0,0,0,.06);
-      margin:10px 0;
-      border:1px solid var(--borde);
-      animation: fadeUp .25s ease;
+    .logoBox{
+      text-align:center;
+      margin-bottom:4px;
     }
-
-    @keyframes fadeUp{
-      from{ opacity:0; transform: translateY(6px); }
-      to{ opacity:1; transform: translateY(0); }
+    .logoBox img{
+      width:clamp(120px, 26vw, 150px);
     }
 
     h1{
       text-align:center;
-      margin:6px 0 10px;
+      margin:6px 0 18px;
       color: var(--texto);
       font-weight:800;
       letter-spacing:.3px;
-      font-size: clamp(20px, 4.5vw, 28px);
+      font-size: clamp(22px, 4.5vw, 28px);
+    }
+
+    .card{
+      background:var(--blanco);
+      border-radius:16px;
+      padding:16px;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);
+      margin:10px 0;
+      border:1px solid var(--borde);
     }
 
     h2{
-      margin:0 0 8px;
+      margin:0 0 10px;
       font-size:17px;
       color:var(--texto);
       font-weight:800;
@@ -73,7 +75,7 @@
 
     input,select{
       width:100%;
-      padding:12px;
+      padding:11px;
       border:1px solid #ddd;
       border-radius:12px;
       margin-top:6px;
@@ -118,14 +120,15 @@
 
     .muted{ color:var(--gris); font-size:13px; }
 
+    /* Tabs */
     .tabs{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:10px;
-      margin:6px 0 10px;
+      margin:6px 0 12px;
       position:sticky;
       top:0;
-      background:var(--beige);
+      background:var(--fondo);
       padding:6px 0;
       z-index:50;
     }
@@ -182,7 +185,7 @@
       left: 50%;
       bottom: 22px;
       transform: translateX(-50%);
-      background: var(--texto);
+      background: #c05454;
       color: #fff;
       padding: 12px 16px;
       border-radius: 12px;
@@ -202,8 +205,8 @@
       opacity: 1;
       transform: translateX(-50%) translateY(-6px);
     }
-    #toast.success{ background:var(--acento); color:white; }
-    #toast.error{ background:#B94A48; color:white; }
+    #toast.success{ background:var(--acento); }
+    #toast.error{ background:#c05454; }
 
     .spinner{
       width:16px; height:16px;
@@ -216,7 +219,7 @@
 
     @media (max-width: 600px){
       .wrap{ padding:10px; }
-      .card{ padding:12px; border-radius:14px; }
+      .card{ padding:14px; border-radius:14px; }
       .row{ grid-template-columns:1fr; }
       .tabs{ grid-template-columns:1fr; }
       .tabBtn{ font-size:16px; }
@@ -225,17 +228,13 @@
     }
   </style>
 </head>
-
 <body>
 <div class="wrap">
   <div id="toast"></div>
 
-  <!-- LOGO -->
-  <div style="text-align:center; margin-top:6px; margin-bottom:2px;">
-    <img src="https://i.postimg.cc/mZF1T2vN/harujagdl-20250601-143504-0000.png"
-         style="width:clamp(110px, 32vw, 150px); border-radius:12px;">
+  <div class="logoBox">
+    <img src="/icons/icon-192.png" alt="HarujaGdl" />
   </div>
-
   <h1>Plan de lealtad</h1>
 
   <!-- TABS -->
@@ -248,7 +247,7 @@
     </div>
   </div>
 
-  <!-- SECCIÓN NUEVO -->
+  <!-- NUEVO CLIENTE -->
   <div id="secNuevo" class="section active">
     <div class="card">
       <h2>Registrar cliente nuevo</h2>
@@ -270,22 +269,19 @@
       <label>Correo</label>
       <input id="n_correo" type="email" placeholder="cliente@email.com" />
 
-      <button id="btnCrear" onclick="ui_registerClient()">Crear tarjeta</button>
+      <button id="btnCrear" onclick="registerClient()">Crear tarjeta</button>
       <div id="n_res" class="muted" style="margin-top:8px;"></div>
     </div>
   </div>
 
-  <!-- SECCIÓN CLIENTES -->
+  <!-- CLIENTES / PUNTOS -->
   <div id="secClientes" class="section">
-
-    <!-- BUSCAR -->
     <div class="card">
       <h2>Buscar cliente</h2>
-      <input id="q" placeholder="Busca por nombre, tel, IG, correo o ID" oninput="onSearchChange()" />
+      <input id="q" placeholder="Busca por nombre, tel, IG, correo o ID" oninput="searchClients()" />
       <div id="results"></div>
     </div>
 
-    <!-- REGISTRAR COMPRA -->
     <div class="card" id="cardCompra">
       <h2>Registrar compra (sumar puntos)</h2>
 
@@ -298,11 +294,10 @@
       <label>Notas (opcional)</label>
       <input id="c_notas" placeholder="Ej. compra nueva colección" />
 
-      <button id="btnCompra" onclick="ui_addPurchase()">Sumar puntos</button>
+      <button id="btnCompra" onclick="addPurchase()">Sumar puntos</button>
       <div id="c_res" class="muted" style="margin-top:8px;"></div>
     </div>
 
-    <!-- CANJEAR -->
     <div class="card" id="cardCanje">
       <h2>Canjear puntos</h2>
 
@@ -320,18 +315,17 @@
       <label>Notas (opcional)</label>
       <input id="r_notas" placeholder="Ej. canje nivel 2" />
 
-      <button id="btnCanje" onclick="ui_redeem()">Canjear</button>
+      <button id="btnCanje" onclick="redeem()">Canjear</button>
       <div id="r_res" class="muted" style="margin-top:8px;"></div>
     </div>
   </div>
 </div>
 
 <script>
-  // ===== CONFIG API =====
+  // ======= CONFIG API =======
   const API_URL = "https://script.google.com/macros/s/AKfycbxhJEhjk3ISS04cmE9aACiIs5vtlK9-jb1udSRlG8_4tsCS-qPq16AIh4uC0r0Yy2wBTg/exec";
 
   async function callApi(action, data){
-    // Enviar como x-www-form-urlencoded para evitar preflight CORS
     const payload = JSON.stringify({ action, data });
     const body = "payload=" + encodeURIComponent(payload);
 
@@ -353,25 +347,24 @@
     return json.result;
   }
 
-  // ===== TOAST & UI HELPERS =====
+  // ===== UI HELPERS =====
   let toastTimer = null;
   function showToast(msg, type="success"){
     const t = document.getElementById("toast");
     if (!t) return;
-
     if (toastTimer) clearTimeout(toastTimer);
 
     t.className = "";
     t.classList.add(type);
-    t.style.display = "block";
     t.textContent = msg;
+    t.style.display = "block";
 
     requestAnimationFrame(() => t.classList.add("show"));
 
     toastTimer = setTimeout(() => {
       t.classList.remove("show");
       setTimeout(() => t.style.display="none", 250);
-    }, 2200);
+    }, 2600);
   }
 
   function setLoading(btn, isLoading){
@@ -406,105 +399,99 @@
   }
 
   // ===== REGISTRAR CLIENTE =====
-  async function ui_registerClient(){
+  async function registerClient(){
     const btn = document.getElementById("btnCrear");
-    setLoading(btn, true);
+    const nombre = n_nombre.value.trim();
+    if (!nombre){
+      showToast("Pon el nombre del cliente 🙏", "error");
+      return;
+    }
 
+    setLoading(btn, true);
     const data = {
-      nombre: n_nombre.value.trim(),
+      nombre,
       telefono: n_tel.value.trim(),
       instagram: n_ig.value.trim(),
       correo: n_correo.value.trim()
     };
 
-    if(!data.nombre){
-      setLoading(btn, false);
-      showToast("Pon el nombre del cliente 🙏", "error");
-      return;
-    }
-
-    try {
+    try{
       const res = await callApi("registerClient", data);
-      setLoading(btn,false);
       n_res.innerHTML =
         `✅ Cliente creado: <b>${res.id}</b><br>
          Tarjeta: <a href="${res.qrLink}" target="_blank">${res.qrLink}</a>`;
-      showToast(`✅ Tarjeta creada (${res.id})`);
+      showToast(`✅ Tarjeta creada (${res.id})`,"success");
 
       n_nombre.value=""; n_tel.value=""; n_ig.value=""; n_correo.value="";
       n_nombre.focus();
-    } catch(err){
-      setLoading(btn,false);
-      n_res.innerText = "❌ " + err.message;
-      showToast("❌ Error al crear tarjeta", "error");
+    }catch(err){
       console.error(err);
+      n_res.textContent = "❌ " + (err.message || err);
+      showToast("❌ " + (err.message || "Error al crear tarjeta"), "error");
+    }finally{
+      setLoading(btn,false);
     }
   }
 
-  // ===== BÚSQUEDA DE CLIENTES =====
+  // ===== BUSCAR CLIENTES =====
   let lastSearchList = [];
   let searchTimer = null;
 
-  function onSearchChange(){
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(doSearch, 260);
-  }
-
-  async function doSearch(){
-    const query = document.getElementById("q").value.trim();
-    const resultsDiv = document.getElementById("results");
-
-    if(!query){
-      resultsDiv.innerHTML = "";
-      lastSearchList = [];
+  function renderResults(list){
+    const cont = document.getElementById("results");
+    if (!list.length){
+      cont.innerHTML = '<div class="muted" style="padding:8px 10px;">Sin coincidencias.</div>';
       return;
     }
+    cont.innerHTML = list.map((c,i)=>`
+      <div class="listItem" onclick="fillClientIdx(${i})">
+        <b>${c.nombre || "Sin nombre"}</b> (${c.id})<br>
+        <span class="muted">
+          Tel: ${c.tel || "-"} |
+          IG: @${c.ig || "-"} |
+          ${c.puntos} pts (${c.nivel || ""})
+        </span>
+      </div>
+    `).join("");
+  }
 
-    try{
-      const list = await callApi("searchClients", { query });
-      lastSearchList = list || [];
-
-      if (!lastSearchList.length){
-        resultsDiv.innerHTML = `<div class="muted" style="padding:8px;">Sin resultados</div>`;
+  function searchClients(){
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(async () => {
+      const query = document.getElementById("q").value.trim();
+      if (!query){
+        document.getElementById("results").innerHTML = "";
+        lastSearchList = [];
         return;
       }
 
-      resultsDiv.innerHTML = lastSearchList.map((c,i)=>`
-        <div class="listItem" onclick="selectClient(${i})">
-          <b>${c.nombre || "-"}</b> (${c.id})<br>
-          <span class="muted">
-            Tel: ${c.tel || "-"} |
-            IG: @${c.ig || "-"} |
-            ${c.puntos} pts (${c.nivel || ""})
-          </span>
-        </div>
-      `).join("");
-    }catch(err){
-      showToast("❌ Error al buscar clientes", "error");
-      console.error(err);
-    }
+      try{
+        const list = await callApi("searchClients", { query });
+        lastSearchList = list || [];
+        renderResults(lastSearchList);
+      }catch(err){
+        console.error(err);
+        showToast("❌ Error al buscar clientes: " + (err.message || err), "error");
+      }
+    }, 250);
   }
 
-  function selectClient(i){
+  function fillClientIdx(i){
     const c = lastSearchList[i];
     if(!c) return;
 
     document.getElementById("c_id").value = c.id;
     document.getElementById("r_id").value = c.id;
-
     showToast(`Cliente seleccionado: ${c.id}`, "success");
 
     const compraCard = document.getElementById("cardCompra");
-    if(compraCard){
-      compraCard.scrollIntoView({behavior:"smooth", block:"start"});
-    }
+    compraCard.scrollIntoView({behavior:"smooth", block:"start"});
+    setTimeout(()=> c_monto.focus(), 250);
   }
 
   // ===== SUMAR PUNTOS =====
-  async function ui_addPurchase(){
+  async function addPurchase(){
     const btn = document.getElementById("btnCompra");
-    setLoading(btn, true);
-
     const data = {
       id: c_id.value.trim(),
       monto: Number(c_monto.value || 0),
@@ -512,33 +499,31 @@
     };
 
     if(!data.id || data.monto<=0){
-      setLoading(btn,false);
       showToast("Revisa ID y monto 🙏", "error");
       return;
     }
 
+    setLoading(btn,true);
     try{
       const client = await callApi("addPurchase", data);
-      setLoading(btn,false);
       c_res.innerHTML =
         `✅ Puntos actualizados. Ahora tiene <b>${client.puntos}</b> pts (${client.nivel}).`;
-      showToast(`✅ Compra registrada. Total: ${client.puntos} pts`);
+      showToast(`✅ Compra registrada. Total: ${client.puntos} pts`,"success");
 
       c_monto.value=""; c_notas.value="";
       c_monto.focus();
     }catch(err){
-      setLoading(btn,false);
-      c_res.innerText = "❌ " + err.message;
-      showToast("❌ Error al registrar compra", "error");
       console.error(err);
+      c_res.textContent = "❌ " + (err.message || err);
+      showToast("❌ " + (err.message || "Error al registrar compra"), "error");
+    }finally{
+      setLoading(btn,false);
     }
   }
 
-  // ===== CANJEAR PUNTOS =====
-  async function ui_redeem(){
+  // ===== CANJEAR =====
+  async function redeem(){
     const btn = document.getElementById("btnCanje");
-    setLoading(btn, true);
-
     const data = {
       id: r_id.value.trim(),
       rewardPts: Number(r_reward.value),
@@ -546,37 +531,36 @@
     };
 
     if(!data.id){
-      setLoading(btn,false);
       showToast("Pon el ID del cliente 🙏", "error");
       return;
     }
 
+    setLoading(btn,true);
     try{
       const res = await callApi("redeem", data);
-      setLoading(btn,false);
       r_res.innerHTML =
         `✅ Canje aplicado: <b>${res.reward.label}</b>.
          Puntos restantes: <b>${res.client.puntos}</b>.`;
-      showToast(`✅ Canje exitoso: ${res.reward.label}`);
-
+      showToast(`✅ Canje exitoso: ${res.reward.label}`,"success");
       r_notas.value="";
     }catch(err){
-      setLoading(btn,false);
-      r_res.innerText = "❌ " + err.message;
-      showToast("❌ Error al canjear puntos", "error");
       console.error(err);
+      r_res.textContent = "❌ " + (err.message || err);
+      showToast("❌ " + (err.message || "Error al canjear puntos"), "error");
+    }finally{
+      setLoading(btn,false);
     }
   }
 
-  // Atajos Enter
-  document.getElementById("n_correo").addEventListener("keydown", e=>{
-    if(e.key==="Enter"){ ui_registerClient(); }
+  // ENTER atajos
+  n_correo?.addEventListener("keydown", e=>{
+    if(e.key==="Enter"){ registerClient(); }
   });
-  document.getElementById("c_monto").addEventListener("keydown", e=>{
-    if(e.key==="Enter"){ ui_addPurchase(); }
+  c_monto?.addEventListener("keydown", e=>{
+    if(e.key==="Enter"){ addPurchase(); }
   });
-  document.getElementById("r_notas").addEventListener("keydown", e=>{
-    if(e.key==="Enter"){ ui_redeem(); }
+  r_notas?.addEventListener("keydown", e=>{
+    if(e.key==="Enter"){ redeem(); }
   });
 </script>
 </body>
