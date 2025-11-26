@@ -331,10 +331,16 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbxhJEhjk3ISS04cmE9aACiIs5vtlK9-jb1udSRlG8_4tsCS-qPq16AIh4uC0r0Yy2wBTg/exec";
 
   async function callApi(action, data){
+    // Enviar como x-www-form-urlencoded para evitar preflight CORS
+    const payload = JSON.stringify({ action, data });
+    const body = "payload=" + encodeURIComponent(payload);
+
     const res = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json;charset=utf-8" },
-      body: JSON.stringify({ action, data })
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+      },
+      body
     });
 
     let json = null;
@@ -344,7 +350,6 @@
       const msg = json && json.error ? json.error : "Error en el servidor";
       throw new Error(msg);
     }
-    // nuestro doPost devuelve { ok:true, result:... }
     return json.result;
   }
 
