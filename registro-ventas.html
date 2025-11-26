@@ -209,14 +209,11 @@
 
     try {
       // Enviamos como x-www-form-urlencoded
-      const body = new URLSearchParams(data).toString();
+      const body = new URLSearchParams(data); // NO usamos .toString()
 
       const res = await fetch(ENDPOINT, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-        },
-        body,
+        body,  // el navegador pone solo 'application/x-www-form-urlencoded'
       });
 
       btn.disabled = false;
@@ -256,4 +253,5 @@
 </script>
   </body>
 </html>
+
 
