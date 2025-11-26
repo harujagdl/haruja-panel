@@ -177,81 +177,74 @@
     <dialog id="dlgOk" class="success">✅ Venta registrada correctamente.</dialog>
     <dialog id="dlgErr" class="error">❌ Error al guardar la venta.</dialog>
 
-    <script>
-  // 👉 Endpoint de tu Apps Script (implementación)
-  const ENDPOINT =
-    'https://script.google.com/macros/s/AKfycbwkty3K4kZlK_83GRoO0GSf2o7B3aHb2VmuhxtcyK4L4FnWSj7yE7MDdUuvdV32WbFh0g/exec';
+        <script>
+      // 👉 Endpoint de tu Apps Script (implementación)
+      const ENDPOINT =
+        'https://script.google.com/macros/s/AKfycbwkty3K4kZlK_83GRoO0GSf2o7B3aHb2VmuhxtcyK4L4FnWSj7yE7MDdUuvdV32WbFh0g/exec';
 
-  const form    = document.getElementById('ventaForm');
-  const mensaje = document.getElementById('mensaje');
-  const dlgOk   = document.getElementById('dlgOk');
-  const dlgErr  = document.getElementById('dlgErr');
-  const btn     = document.getElementById('btnGuardar');
+      const form = document.getElementById('ventaForm');
+      const mensaje = document.getElementById('mensaje');
+      const dlgOk = document.getElementById('dlgOk');
+      const dlgErr = document.getElementById('dlgErr');
+      const btn = document.getElementById('btnGuardar');
 
-  function showDialog(dlg, text, timeout = 2500) {
-    dlg.textContent = text;
-    try {
-      dlg.showModal();
-      setTimeout(() => dlg.close(), timeout);
-    } catch (e) {
-      alert(text); // fallback por si dialog no es soportado
-    }
-  }
+      function showDialog(dlg, text, timeout = 2500) {
+        dlg.textContent = text;
+        try {
+          dlg.showModal();
+          setTimeout(() => dlg.close(), timeout);
+        } catch (e) {
+          alert(text); // fallback por si dialog no es soportado
+        }
+      }
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    const fd   = new FormData(form);
-    const data = Object.fromEntries(fd.entries());
+        const fd = new FormData(form);
+        const data = Object.fromEntries(fd.entries());
+        const body = new URLSearchParams(data).toString();
 
-    mensaje.textContent = 'Guardando...';
-    btn.disabled = true;
+        mensaje.textContent = 'Guardando...';
+        btn.disabled = true;
 
-    try {
-      // Enviamos como x-www-form-urlencoded
-      const body = new URLSearchParams(data); // NO usamos .toString()
+        try {
+          // 👇 no-cors para evitar problemas de CORS
+          await fetch(ENDPOINT, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+            },
+            body,
+          });
 
-      const res = await fetch(ENDPOINT, {
-        method: 'POST',
-        body,  // el navegador pone solo 'application/x-www-form-urlencoded'
+          // Si no hubo error en fetch, asumimos OK
+          btn.disabled = false;
+          mensaje.textContent = '';
+          showDialog(dlgOk, '✅ Venta registrada correctamente.', 2000);
+          form.reset();
+        } catch (err) {
+          btn.disabled = false;
+          mensaje.textContent = '';
+          showDialog(
+            dlgErr,
+            '❌ Error de red. Verifica tu conexión e intenta de nuevo.',
+            3000
+          );
+          console.error(err);
+        }
       });
 
-      btn.disabled = false;
-      mensaje.textContent = '';
-
-      // 👇 Ya NO intentamos hacer res.json(), solo vemos si respondió OK
-      if (res.ok) {
-        showDialog(dlgOk, '✅ Venta registrada correctamente.', 2000);
-        form.reset();
-      } else {
-        const text = await res.text().catch(() => '');
-        console.error('Respuesta Apps Script:', text);
-        showDialog(
-          dlgErr,
-          '⚠️ No se pudo guardar la venta. Intenta de nuevo.',
-          3000
-        );
-      }
-    } catch (err) {
-      btn.disabled = false;
-      mensaje.textContent = '';
-      showDialog(
-        dlgErr,
-        '❌ Error de red. Verifica tu conexión e intenta de nuevo.',
-        3000
-      );
-      console.error(err);
-    }
-  });
-
-  // Evitar que Enter mande el form en inputs normales
-  form.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter' && ev.target.tagName !== 'TEXTAREA') {
-      ev.preventDefault();
-    }
-  });
-</script>
+      // Evitar que Enter mande el form en inputs normales
+      form.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' && ev.target.tagName !== 'TEXTAREA') {
+          ev.preventDefault();
+        }
+      });
+    </script>
   </body>
 </html>
+
 
 
