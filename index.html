@@ -42,6 +42,8 @@
         color: var(--texto);
       }
 
+      /* --- TARJETAS DEL PANEL PÚBLICO --- */
+
       .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -58,10 +60,11 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         border: 1px solid #f0f0f0;
         transition: transform 0.15s ease, box-shadow 0.15s ease;
+        text-align: center;
       }
 
-      .card:active,
-      .card:hover {
+      .card:hover,
+      .card:active {
         transform: translateY(-2px);
         box-shadow: 0 8px 18px rgba(0,0,0,0.08);
       }
@@ -75,8 +78,8 @@
         align-items: center;
         justify-content: center;
         box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        margin: 0 auto 12px;
         transition: transform 0.15s ease;
-        margin-bottom: 10px;
       }
 
       .card:hover .icon-circle,
@@ -100,99 +103,78 @@
         font-size: 14px;
       }
 
-      /* ADMIN AREA */
+      /* --- ADMIN --- */
 
       .admin-section {
         max-width: 900px;
-        margin: 0 auto 40px;
+        margin: 20px auto 40px;
         padding: 0 22px;
-        text-align: left;
-      }
-
-      .admin-trigger-wrap {
-        display: flex;
-        justify-content: flex-start;
-        margin-top: 10px;
+        text-align: center;
       }
 
       .admin-trigger {
         background: transparent;
         border: none;
-        padding: 6px 0;
+        padding: 8px 0;
         cursor: pointer;
-        font-size: 14px;
+        font-size: 15px;
         color: var(--texto);
         text-decoration: underline;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
       }
 
       .admin-grid {
-  display: none;
-  margin-top: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 18px;
-  text-align: center; /* CENTRADO */
-}
+        display: none;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 20px;
+        padding: 22px;
+        max-width: 900px;
+        margin: auto;
+        text-align: center;
+      }
 
-.admin-card {
-  background: #ffffff;
-  border-radius: 20px;
-  padding: 22px 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  border: 1px solid #f0f0f0;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  text-align: center; /* CENTRADO */
-}
+      .admin-card {
+        background: #ffffff;
+        padding: 22px 16px;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        border: 1px solid #f0f0f0;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        text-align: center;
+      }
 
-.admin-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
-}
+      .admin-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+      }
 
-.admin-icon-circle {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 12px;  /* CENTRAR */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
+      .admin-icon-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      }
 
-.admin-icon {
-  font-size: 34px;
-}
+      .admin-icon {
+        font-size: 34px;
+      }
 
-.admin-card h4 {
-  margin: 8px 0 6px;
-  font-size: 17px;
-  font-weight: 700;
-  text-align: center; /* CENTRADO */
-}
-
-.admin-card p {
-  margin: 0 0 12px;
-  font-size: 13px;
-  color: var(--gris);
-  text-align: center; /* CENTRADO */
-}
-
-.admin-btn {
-  display: inline-block;
-  width: 100%;
-  background: var(--acento);
-  padding: 10px 0;
-  color: white;
-  text-decoration: none;
-  border-radius: 10px;
-  margin-top: 6px;
-  font-size: 14px;
-  text-align: center;
-}
+      .admin-btn {
+        display: inline-block;
+        width: 100%;
+        background: var(--acento);
+        padding: 10px 0;
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        margin-top: 6px;
+        font-size: 14px;
+        text-align: center;
+      }
     </style>
   </head>
 
@@ -203,7 +185,7 @@
 
     <h1 id="panelTitle">Panel de Herramientas HarujaGdl</h1>
 
-    <!-- GRID PRINCIPAL (PÚBLICO) -->
+    <!-- PANEL PÚBLICO -->
     <div id="publicGrid" class="grid">
       <div class="card">
         <div class="icon-circle"><span class="emoji">💸</span></div>
@@ -216,9 +198,8 @@
         <div class="icon-circle"><span class="emoji">📊</span></div>
         <h3>Base de datos ventas</h3>
         <p>Consulta historial completo.</p>
-        <a class="btn"
-           href="https://docs.google.com/spreadsheets/d/1FvUAsQZr8vqh_OOsHsHjHA7RprV_fmuqikm0U_Ja3_M/edit?gid=1077810078#gid=1077810078"
-           target="_blank">Ir a app</a>
+        <a class="btn" target="_blank"
+           href="https://docs.google.com/spreadsheets/d/1FvUAsQZr8vqh_OOsHsHjHA7RprV_fmuqikm0U_Ja3_M/edit?gid=1077810078#gid=1077810078">Ir a app</a>
       </div>
 
       <div class="card">
@@ -232,185 +213,161 @@
         <div class="icon-circle"><span class="emoji">📦</span></div>
         <h3>Generar Apartados</h3>
         <p>Crea apartados y anticipo.</p>
-        <a class="btn"
-           href="https://script.google.com/macros/s/AKfycbz4fkeXmAIj-QbyT8IYRvwiortS4b6vSLj66j_Ph5sdfuczU6ATDRWtY9gY717t7r4i/exec"
-           target="_blank">Ir a app</a>
+        <a class="btn" target="_blank"
+           href="https://script.google.com/macros/s/AKfycbz4fkeXmAIj-QbyT8IYRvwiortS4b6vSLj66j_Ph5sdfuczU6ATDRWtY9gY717t7r4i/exec">Ir a app</a>
       </div>
 
       <div class="card">
         <div class="icon-circle"><span class="emoji">🗂️</span></div>
         <h3>Bitácora de Apartados</h3>
         <p>Status y seguimiento.</p>
-        <a class="btn"
-           href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?usp=sharing"
-           target="_blank">Ver bitácora</a>
+        <a class="btn" target="_blank"
+           href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?usp=sharing">Ver bitácora</a>
       </div>
 
       <div class="card">
         <div class="icon-circle"><span class="emoji">🎟️</span></div>
         <h3>Tickets PDF</h3>
         <p>Carpeta de tickets.</p>
-        <a class="btn"
-           href="https://drive.google.com/drive/folders/12yvsXrxUYnfr2o0eMx1uBUllkr7to8RK?usp=drive_link"
-           target="_blank">Abrir carpeta</a>
+        <a class="btn" target="_blank"
+           href="https://drive.google.com/drive/folders/12yvsXrxUYnfr2o0eMx1uBUllkr7to8RK?usp=drive_link">Abrir carpeta</a>
       </div>
 
       <div class="card">
         <div class="icon-circle"><span class="emoji">🧵</span></div>
         <h3>Registro de Nueva Prenda</h3>
         <p>Códigos nuevos.</p>
-        <a class="btn"
-           href="https://script.google.com/macros/s/AKfycbx6OThWWitX9xEANDZEZlC4mbW1k0iTvI8HzqPTPjHcYRvqKykxG3fsk2bIE33z9vOV9w/exec"
-           target="_blank">Ir a app</a>
+        <a class="btn" target="_blank"
+           href="https://script.google.com/macros/s/AKfycbx6OThWWitX9xEANDZEZlC4mbW1k0iTvI8HzqPTPjHcYRvqKykxG3fsk2bIE33z9vOV9w/exec">Ir a app</a>
       </div>
 
       <div class="card">
         <div class="icon-circle"><span class="emoji">💲</span></div>
         <h3>Asignar Precios</h3>
         <p>Define precios finales.</p>
-        <a class="btn"
-           href="https://script.google.com/macros/s/AKfycbwYXC1B8txyWogMKrv4eWo-WqkbVh5I5139b5I-028-6_FPD-DVXCR6lWvbSJkLrYIw4g/exec"
-           target="_blank">Ir a app</a>
+        <a class="btn" target="_blank"
+           href="https://script.google.com/macros/s/AKfycbwYXC1B8txyWogMKrv4eWo-WqkbVh5I5139b5I-028-6_FPD-DVXCR6lWvbSJkLrYIw4g/exec">Ir a app</a>
       </div>
 
       <div class="card">
         <div class="icon-circle"><span class="emoji">🧮</span></div>
         <h3>Calculadora sobre pedidos</h3>
         <p>Precios estimados.</p>
-        <a class="btn" href="/calculadora-predidos.html">Ir a app</a>
+        <a class="btn" href="/calculadora-pedidos.html">Ir a app</a>
       </div>
     </div>
 
     <!-- ADMIN -->
     <div class="admin-section">
-      <div class="admin-trigger-wrap">
-        <button id="adminToggle" class="admin-trigger" type="button">
-          🔐 Administrador
-        </button>
+      <button id="adminToggle" class="admin-trigger">🔐 Administrador</button>
+    </div>
+
+    <div id="adminGrid" class="admin-grid">
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">📦</span></div>
+        <h4>Apartados</h4>
+        <p>BD apartados Haruja</p>
+        <a class="admin-btn" target="_blank"
+           href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?gid=784913066#gid=784913066">Ir a app</a>
       </div>
 
-      <div id="adminGrid" class="admin-grid">
-        <div class="admin-card">
-          <div class="admin-icon">📦</div>
-          <h4>Apartados</h4>
-          <p>BD apartados Haruja</p>
-          <a class="admin-btn"
-             href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?gid=784913066#gid=784913066"
-             target="_blank">Ir a app</a>
-        </div>
-
-        <div class="admin-card">
-          <div class="admin-icon">🏷️</div>
-          <h4>Est. Precios</h4>
-          <p>Estimación de precios</p>
-          <a class="admin-btn"
-             href="https://script.google.com/macros/s/AKfycby4NNyRSFmQm-dgXf9dpTqVxBDORBtOnPywiffLNyvotUM66ZKjWCFgyIqAX-kPo_M/exec"
-             target="_blank">Ir a app</a>
-        </div>
-
-        <div class="admin-card">
-          <div class="admin-icon">🧾</div>
-          <h4>Códigos</h4>
-          <p>BD creación de códigos</p>
-          <a class="admin-btn"
-             href="https://docs.google.com/spreadsheets/d/1DFIZc3BvqRSvaPqhBm1Geu4aeZji6zuIAZKpkeplpwU/edit?usp=sharing"
-             target="_blank">Ir a app</a>
-        </div>
-
-        <div class="admin-card">
-          <div class="admin-icon">📱</div>
-          <h4>Calculadora (BD)</h4>
-          <p>BD calculadora Haruja</p>
-          <a class="admin-btn"
-             href="https://docs.google.com/spreadsheets/d/1hLSh3sqKAi_BC3t6sWhP4Bl0-qlaZbMXhs9tGa0HU2Q/edit?usp=sharing"
-             target="_blank">Ir a app</a>
-        </div>
-
-        <div class="admin-card">
-          <div class="admin-icon">📋</div>
-          <h4>Master</h4>
-          <p>BD precios Haruja</p>
-          <a class="admin-btn"
-             href="https://docs.google.com/spreadsheets/d/1S9mZbcQehmyiwaebh0GKlQQF7HDWLTdvJZFkV-vY_ZA/edit?usp=sharing"
-             target="_blank">Ir a app</a>
-        </div>
-
-        <div class="admin-card">
-          <div class="admin-icon">📄</div>
-          <h4>BD Tiendanube</h4>
-          <p>Base de datos precios</p>
-          <a class="admin-btn"
-             href="https://docs.google.com/spreadsheets/d/1GfXUv-Y143yQJFC-6_kLZH3kT5rid2BLTEFHFKoikyQ/edit?usp=sharing"
-             target="_blank">Ir a app</a>
-        </div>
-
-        <div class="admin-card">
-          <div class="admin-icon">💾</div>
-          <h4>CSV SMP</h4>
-          <p>BD tickets Haruja</p>
-          <a class="admin-btn"
-             href="https://docs.google.com/spreadsheets/d/15ofWXeddksQjaUxpHxSlzq6XrqHsl78CHgcorlBabhI/edit?usp=sharing"
-             target="_blank">Ir a app</a>
-        </div>
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">🏷️</span></div>
+        <h4>Est. Precios</h4>
+        <p>Estimación de precios</p>
+        <a class="admin-btn" target="_blank"
+           href="https://script.google.com/macros/s/AKfycby4NNyRSFmQm-dgXf9dpTqVxBDORBtOnPywiffLNyvotUM66ZKjWCFgyIqAX-kPo_M/exec">Ir a app</a>
       </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">🧾</span></div>
+        <h4>Códigos</h4>
+        <p>BD creación de códigos</p>
+        <a class="admin-btn" target="_blank"
+           href="https://docs.google.com/spreadsheets/d/1DFIZc3BvqRSvaPqhBm1Geu4aeZji6zuIAZKpkeplpwU/edit?usp=sharing">Ir a app</a>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">📱</span></div>
+        <h4>Calculadora (BD)</h4>
+        <p>BD calculadora Haruja</p>
+        <a class="admin-btn" target="_blank"
+           href="https://docs.google.com/spreadsheets/d/1hLSh3sqKAi_BC3t6sWhP4Bl0-qlaZbMXhs9tGa0HU2Q/edit?usp=sharing">Ir a app</a>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">📋</span></div>
+        <h4>Master</h4>
+        <p>BD precios Haruja</p>
+        <a class="admin-btn" target="_blank"
+           href="https://docs.google.com/spreadsheets/d/1S9mZbcQehmyiwaebh0GKlQQF7HDWLTdvJZFkV-vY_ZA/edit?usp=sharing">Ir a app</a>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">📄</span></div>
+        <h4>BD Tiendanube</h4>
+        <p>Base de datos precios</p>
+        <a class="admin-btn" target="_blank"
+           href="https://docs.google.com/spreadsheets/d/1GfXUv-Y143yQJFC-6_kLZH3kT5rid2BLTEFHFKoikyQ/edit?usp=sharing">Ir a app</a>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">💾</span></div>
+        <h4>CSV SMP</h4>
+        <p>BD tickets Haruja</p>
+        <a class="admin-btn" target="_blank"
+           href="https://docs.google.com/spreadsheets/d/15ofWXeddksQjaUxpHxSlzq6XrqHsl78CHgcorlBabhI/edit?usp=sharing">Ir a app</a>
+      </div>
+
     </div>
 
     <script>
-  // Contraseña del administrador
-  const ADMIN_PASSWORD = "Harujagdl";
+      const ADMIN_PASSWORD = "Harujagdl";
 
-  const adminToggle = document.getElementById("adminToggle");
-  const adminGrid = document.getElementById("adminGrid");
-  const publicGrid = document.getElementById("publicGrid");
-  const panelTitle = document.getElementById("panelTitle");
+      const adminToggle = document.getElementById("adminToggle");
+      const adminGrid = document.getElementById("adminGrid");
+      const publicGrid = document.getElementById("publicGrid");
+      const panelTitle = document.getElementById("panelTitle");
 
-  // Revisar si ya está desbloqueado en este dispositivo
-  let adminUnlocked = localStorage.getItem("harujaAdmin") === "true";
+      let adminUnlocked = localStorage.getItem("harujaAdmin") === "true";
 
-  function showAdmin() {
-    publicGrid.style.display = "none";
-    adminGrid.style.display = "grid";
-    panelTitle.textContent = "Panel Administrador HarujaGdl";
-    adminToggle.textContent = "⬅️ Volver al panel";
-  }
-
-  function showPublic() {
-    publicGrid.style.display = "grid";
-    adminGrid.style.display = "none";
-    panelTitle.textContent = "Panel de Herramientas HarujaGdl";
-    adminToggle.textContent = "🔐 Administrador";
-  }
-
-  // Si ya está desbloqueado en este dispositivo → entra directo
-  if (adminUnlocked) {
-    showAdmin();
-  } else {
-    showPublic();
-  }
-
-  adminToggle.addEventListener("click", () => {
-    if (!adminUnlocked) {
-      const pass = prompt("Introduce la contraseña de administrador:");
-      if (pass === null) return;
-      if (pass === ADMIN_PASSWORD) {
-        adminUnlocked = true;
-        localStorage.setItem("harujaAdmin", "true"); // Recordar dispositivo
-        showAdmin();
-      } else {
-        alert("Contraseña incorrecta.");
+      function showAdmin() {
+        publicGrid.style.display = "none";
+        adminGrid.style.display = "grid";
+        panelTitle.textContent = "Panel Administrador HarujaGdl";
+        adminToggle.textContent = "⬅️ Volver al panel";
       }
-    } else {
-      // Alternar entre admin y público sin pedir contraseña
-      if (adminGrid.style.display === "grid") {
-        showPublic();
-      } else {
+
+      function showPublic() {
+        publicGrid.style.display = "grid";
+        adminGrid.style.display = "none";
+        panelTitle.textContent = "Panel de Herramientas HarujaGdl";
+        adminToggle.textContent = "🔐 Administrador";
+      }
+
+      if (adminUnlocked) {
         showAdmin();
       }
-    }
-  });
-</script>
+
+      adminToggle.addEventListener("click", () => {
+        if (!adminUnlocked) {
+          const pass = prompt("Introduce la contraseña de administrador:");
+          if (pass === ADMIN_PASSWORD) {
+            adminUnlocked = true;
+            localStorage.setItem("harujaAdmin", "true");
+            showAdmin();
+          } else {
+            alert("Contraseña incorrecta.");
+          }
+        } else {
+          if (adminGrid.style.display === "grid") {
+            showPublic();
+          } else {
+            showAdmin();
+          }
+        }
+      });
+    </script>
   </body>
 </html>
-
-
-
