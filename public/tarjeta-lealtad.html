@@ -2,8 +2,19 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Tarjeta HarujaGdl</title>
+  <title>Tarjeta de Lealtad HarujaGdl</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/icons/icon-192.png" />
+  <meta name="theme-color" content="#A7B59E" />
+
+  <!-- (Opcional) Fuente Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root{
       --fondo:#ffffff;
@@ -12,7 +23,9 @@
       --beige:#faf6f1;
       --gris:#777;
     }
-    *{ box-sizing:border-box; }
+    *{
+      box-sizing:border-box;
+    }
     body{
       margin:0;
       font-family:'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -28,13 +41,14 @@
       max-width:380px;
       background:var(--fondo);
       border-radius:24px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.08);
+      box-shadow:0 14px 40px rgba(0,0,0,0.08);
       padding:20px 22px 24px;
     }
     .logo{
-      width:180px;
+      width:160px;
       display:block;
-      margin:0 auto 12px;
+      margin:0 auto 10px;
+      object-fit:contain;
     }
     .titulo{
       text-align:center;
@@ -43,25 +57,29 @@
       text-transform:uppercase;
       color:var(--gris);
       margin-bottom:4px;
-      letter-spacing:0.08em;
+      letter-spacing:0.12em;
     }
     .nombre{
       text-align:center;
-      font-size:1.1rem;
+      font-size:1.15rem;
       font-weight:700;
-      margin-bottom:12px;
+      margin-bottom:8px;
     }
     .puntos{
-      font-size:1.8rem;
+      font-size:2rem;
       font-weight:700;
       text-align:center;
-      margin:12px 0 2px;
+      margin:10px 0 4px;
+    }
+    .puntos span{
+      font-size:1rem;
+      font-weight:600;
     }
     .subtexto{
       text-align:center;
       font-size:0.8rem;
       color:var(--gris);
-      margin-bottom:10px;
+      margin-bottom:12px;
     }
     .fila{
       display:flex;
@@ -69,26 +87,39 @@
       font-size:0.9rem;
       margin:4px 0;
     }
-    .label{ color:var(--gris); }
-    .valor{ font-weight:600; }
+    .label{
+      color:var(--gris);
+    }
+    .valor{
+      font-weight:600;
+    }
     .boton{
       margin-top:18px;
       width:100%;
-      padding:10px 14px;
+      padding:12px 14px;
       border-radius:999px;
       border:none;
       background:var(--acento);
       color:#fff;
       font-weight:600;
       font-size:0.95rem;
+      box-shadow:0 6px 14px rgba(167,181,158,0.6);
+      transition:transform 0.08s ease, box-shadow 0.08s ease, opacity 0.08s ease;
     }
-    .boton:active{ transform:scale(0.98); }
+    .boton:active{
+      transform:scale(0.97);
+      box-shadow:0 3px 8px rgba(0,0,0,0.25);
+      opacity:0.9;
+    }
     .estado{
       text-align:center;
       font-size:0.8rem;
       margin-top:10px;
+      min-height:16px;
     }
-    .estado.error{ color:#b3261e; }
+    .estado.error{
+      color:#b3261e;
+    }
     .info-pequeña{
       margin-top:8px;
       font-size:0.75rem;
@@ -99,13 +130,13 @@
 </head>
 <body>
   <div class="card">
-    <!-- Cambia el src al logo que tengas subido en Vercel -->
-    <img class="logo" src="/haruja-logo.png" alt="HarujaGdl" />
+    <!-- Logo Haruja -->
+    <img class="logo" src="/icons/icon-192.png" alt="HarujaGdl" />
 
     <div class="titulo">Tarjeta de Lealtad</div>
-    <div class="nombre" id="nombreCliente">Cargando...</div>
+    <div class="nombre" id="nombreCliente">Sin token</div>
 
-    <div class="puntos" id="puntosCliente">-- pts</div>
+    <div class="puntos" id="puntosCliente">-- <span>pts</span></div>
     <div class="subtexto">Presenta esta tarjeta en cada visita 💚</div>
 
     <div class="fila">
@@ -126,7 +157,7 @@
   </div>
 
   <script>
-    // ⬇️ Pega aquí la URL de tu Apps Script (sin parámetros)
+    // ⬇️ URL de tu Apps Script (sin parámetros)
     const API_URL = 'https://script.google.com/macros/s/AKfycbxhJEhjk3ISS04cmE9aACiIs5vtlK9-jb1udSRlG8_4tsCS-qPq16AIh4uC0r0Yy2wBTg/exec';
 
     function getTokenFromURL() {
@@ -140,6 +171,9 @@
 
       if (!token) {
         document.getElementById('nombreCliente').textContent = 'Sin token';
+        document.getElementById('puntosCliente').innerHTML = '-- <span>pts</span>';
+        document.getElementById('visitasCliente').textContent = '--';
+        document.getElementById('codigoCliente').textContent = '---';
         estado.textContent = 'El enlace no tiene token, pide uno nuevo en Haruja 🙏';
         estado.classList.add('error');
         return;
@@ -156,7 +190,7 @@
 
         if (!data.ok || !data.cliente) {
           document.getElementById('nombreCliente').textContent = 'Cliente no encontrado';
-          document.getElementById('puntosCliente').textContent = '-- pts';
+          document.getElementById('puntosCliente').innerHTML = '-- <span>pts</span>';
           document.getElementById('visitasCliente').textContent = '--';
           document.getElementById('codigoCliente').textContent = '---';
           estado.textContent = 'No encontramos tu tarjeta, revisa el link con Haruja.';
@@ -167,7 +201,7 @@
         const c = data.cliente;
 
         document.getElementById('nombreCliente').textContent  = c.nombre || 'Cliente Haruja';
-        document.getElementById('puntosCliente').textContent  = (c.puntos || 0) + ' pts';
+        document.getElementById('puntosCliente').innerHTML   = (c.puntos || 0) + ' <span>pts</span>';
         document.getElementById('visitasCliente').textContent = c.visitas || 0;
         document.getElementById('codigoCliente').textContent  = c.id || '—';
 
@@ -188,8 +222,17 @@
       cargarTarjeta(true);
     });
 
-    // Cargar al entrar
+    // Cargar datos al entrar
     cargarTarjeta(false);
+
+    // Registrar service worker para PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/service-worker.js')
+          .catch((err) => console.error('SW error', err));
+      });
+    }
   </script>
 </body>
 </html>
