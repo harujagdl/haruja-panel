@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tarjeta HarujaGdl</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <style>
+    :root{
+      --fondo:#ffffff;
+      --texto:#383234;
+      --acento:#a7b59e;
+      --beige:#faf6f1;
+      --gris:#777;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background:var(--beige);
+      color:var(--texto);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+    }
+    .card{
+      width:90%;
+      max-width:380px;
+      background:var(--fondo);
+      border-radius:24px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.08);
+      padding:20px 22px 24px;
+    }
+    .logo{
+      width:180px;
+      display:block;
+      margin:0 auto 12px;
+    }
+    .titulo{
+      text-align:center;
+      font-weight:600;
+      font-size:0.8rem;
+      text-transform:uppercase;
+      color:var(--gris);
+      margin-bottom:4px;
+      letter-spacing:0.08em;
+    }
+    .nombre{
+      text-align:center;
+      font-size:1.1rem;
+      font-weight:700;
+      margin-bottom:12px;
+    }
+    .puntos{
+      font-size:1.8rem;
+      font-weight:700;
+      text-align:center;
+      margin:12px 0 2px;
+    }
+    .subtexto{
+      text-align:center;
+      font-size:0.8rem;
+      color:var(--gris);
+      margin-bottom:10px;
+    }
+    .fila{
+      display:flex;
+      justify-content:space-between;
+      font-size:0.9rem;
+      margin:4px 0;
+    }
+    .label{ color:var(--gris); }
+    .valor{ font-weight:600; }
+    .boton{
+      margin-top:18px;
+      width:100%;
+      padding:10px 14px;
+      border-radius:999px;
+      border:none;
+      background:var(--acento);
+      color:#fff;
+      font-weight:600;
+      font-size:0.95rem;
+    }
+    .boton:active{ transform:scale(0.98); }
+    .estado{
+      text-align:center;
+      font-size:0.8rem;
+      margin-top:10px;
+    }
+    .estado.error{ color:#b3261e; }
+    .info-pequeña{
+      margin-top:8px;
+      font-size:0.75rem;
+      text-align:center;
+      color:var(--gris);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <!-- Cambia el src al logo que tengas subido en Vercel -->
+    <img class="logo" src="/haruja-logo.png" alt="HarujaGdl" />
+
+    <div class="titulo">Tarjeta de Lealtad</div>
+    <div class="nombre" id="nombreCliente">Cargando...</div>
+
+    <div class="puntos" id="puntosCliente">-- pts</div>
+    <div class="subtexto">Presenta esta tarjeta en cada visita 💚</div>
+
+    <div class="fila">
+      <span class="label">Visitas</span>
+      <span class="valor" id="visitasCliente">--</span>
+    </div>
+    <div class="fila">
+      <span class="label">Código cliente</span>
+      <span class="valor" id="codigoCliente">---</span>
+    </div>
+
+    <button class="boton" id="btnRefrescar">Actualizar datos</button>
+
+    <div class="estado" id="estado"></div>
+    <div class="info-pequeña">
+      Consejo: agrégala a tu pantalla de inicio para tenerla siempre a la mano ✨
+    </div>
+  </div>
+
+  <script>
+    // ⬇️ Pega aquí la URL de tu Apps Script (sin parámetros)
+    const API_URL = 'https://script.google.com/macros/s/TU_ID/exec';
+
+    function getTokenFromURL() {
+      const url = new URL(window.location.href);
+      return url.searchParams.get('token');
+    }
+
+    async function cargarTarjeta(mostrarMensaje = false) {
+      const token = getTokenFromURL();
+      const estado = document.getElementById('estado');
+
+      if (!token) {
+        document.getElementById('nombreCliente').textContent = 'Sin token';
+        estado.textContent = 'El enlace no tiene token, pide uno nuevo en Haruja 🙏';
+        estado.classList.add('error');
+        return;
+      }
+
+      try {
+        if (mostrarMensaje) {
+          estado.textContent = 'Actualizando datos...';
+          estado.classList.remove('error');
+        }
+
+        const res = await fetch(`${API_URL}?modo=cliente-json&token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+
+        if (!data.ok || !data.cliente) {
+          document.getElementById('nombreCliente').textContent = 'Cliente no encontrado';
+          document.getElementById('puntosCliente').textContent = '-- pts';
+          document.getElementById('visitasCliente').textContent = '--';
+          document.getElementById('codigoCliente').textContent = '---';
+          estado.textContent = 'No encontramos tu tarjeta, revisa el link con Haruja.';
+          estado.classList.add('error');
+          return;
+        }
+
+        const c = data.cliente;
+
+        document.getElementById('nombreCliente').textContent  = c.nombre || 'Cliente Haruja';
+        document.getElementById('puntosCliente').textContent  = (c.puntos || 0) + ' pts';
+        document.getElementById('visitasCliente').textContent = c.visitas || 0;
+        document.getElementById('codigoCliente').textContent  = c.id || '—';
+
+        if (mostrarMensaje) {
+          estado.textContent = 'Datos actualizados ✔';
+          estado.classList.remove('error');
+        } else {
+          estado.textContent = '';
+        }
+      } catch (err) {
+        console.error(err);
+        estado.textContent = 'Hubo un problema al conectar, intenta de nuevo más tarde.';
+        estado.classList.add('error');
+      }
+    }
+
+    document.getElementById('btnRefrescar').addEventListener('click', () => {
+      cargarTarjeta(true);
+    });
+
+    // Cargar al entrar
+    cargarTarjeta(false);
+  </script>
+</body>
+</html>
