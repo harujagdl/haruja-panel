@@ -75,7 +75,7 @@
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-        height: 260px; /* ← misma altura */
+        min-height: 260px; /* ← altura mínima, ya no se salen los botones */
       }
 
       .card:hover,
@@ -166,8 +166,12 @@
         <div class="icon-circle"><span class="emoji">📊</span></div>
         <h3>Base de datos ventas</h3>
         <p>Consulta historial completo.</p>
-        <a class="btn" target="_blank"
-           href="https://docs.google.com/spreadsheets/d/1FvUAsQZr8vqh_OOsHsHjHA7RprV_fmuqikm0U_Ja3_M/edit?gid=1077810078#gid=1077810078">Ir a app</a>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1FvUAsQZr8vqh_OOsHsHjHA7RprV_fmuqikm0U_Ja3_M/edit?gid=1077810078#gid=1077810078"
+          >Ir a app</a
+        >
       </div>
 
       <div class="card">
@@ -177,44 +181,77 @@
         <a class="btn" href="/plan-lealtad.html" target="_blank">Ir a app</a>
       </div>
 
+      <!-- 💚 NUEVA TARJETA: BD sistema de lealtad -->
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">📑</span></div>
+        <h3>BD Sistema de Lealtad</h3>
+        <p>Base de datos del programa de puntos.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1thDRVw0qmCBfQdNT2-Crv6RrMAzo-AcwNL9q21pODpA/edit?gid=0#gid=0"
+          >Ir a app</a
+        >
+      </div>
+
       <div class="card">
         <div class="icon-circle"><span class="emoji">📦</span></div>
         <h3>Generar Apartados</h3>
         <p>Crea apartados y anticipo.</p>
-        <a class="btn" target="_blank"
-           href="https://script.google.com/macros/s/AKfycbz4fkeXmAIj-QbyT8IYRvwiortS4b6vSLj66j_Ph5sdfuczU6ATDRWtY9gY717t7r4i/exec">Ir a app</a>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://script.google.com/macros/s/AKfycbz4fkeXmAIj-QbyT8IYRvwiortS4b6vSLj66j_Ph5sdfuczU6ATDRWtY9gY717t7r4i/exec"
+          >Ir a app</a
+        >
       </div>
 
       <div class="card">
         <div class="icon-circle"><span class="emoji">🗂️</span></div>
         <h3>Bitácora de Apartados</h3>
         <p>Status y seguimiento.</p>
-        <a class="btn" target="_blank"
-           href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?usp=sharing">Ver bitácora</a>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?usp=sharing"
+          >Ver bitácora</a
+        >
       </div>
 
       <div class="card">
         <div class="icon-circle"><span class="emoji">🎟️</span></div>
         <h3>Tickets PDF</h3>
         <p>Carpeta de tickets.</p>
-        <a class="btn" target="_blank"
-           href="https://drive.google.com/drive/folders/12yvsXrxUYnfr2o0eMx1uBUllkr7to8RK?usp=drive_link">Abrir carpeta</a>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://drive.google.com/drive/folders/12yvsXrxUYnfr2o0eMx1uBUllkr7to8RK?usp=drive_link"
+          >Abrir carpeta</a
+        >
       </div>
 
       <div class="card">
         <div class="icon-circle"><span class="emoji">🧵</span></div>
         <h3>Registro de Nueva Prenda</h3>
         <p>Códigos nuevos.</p>
-        <a class="btn" target="_blank"
-           href="https://script.google.com/macros/s/AKfycbx6OThWWitX9xEANDZEZlC4mbW1k0iTvI8HzqPTPjHcYRvqKykxG3fsk2bIE33z9vOV9w/exec">Ir a app</a>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://script.google.com/macros/s/AKfycbx6OThWWitX9xEANDZEZlC4mbW1k0iTvI8HzqPTPjHcYRvqKykxG3fsk2bIE33z9vOV9w/exec"
+          >Ir a app</a
+        >
       </div>
 
       <div class="card">
         <div class="icon-circle"><span class="emoji">💲</span></div>
         <h3>Asignar Precios</h3>
         <p>Define precios finales.</p>
-        <a class="btn" target="_blank"
-           href="https://script.google.com/macros/s/AKfycbwYXC1B8txyWogMKrv4eWo-WqkbVh5I5139b5I-028-6_FPD-DVXCR6lWvbSJkLrYIw4g/exec">Ir a app</a>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://script.google.com/macros/s/AKfycbwYXC1B8txyWogMKrv4eWo-WqkbVh5I5139b5I-028-6_FPD-DVXCR6lWvbSJkLrYIw4g/exec"
+          >Ir a app</a
+        >
       </div>
 
       <div class="card">
@@ -232,63 +269,89 @@
 
     <!-- PANEL ADMIN -->
     <div id="adminGrid" class="admin-grid">
-
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📦</span></div>
         <h4>Apartados</h4>
         <p>BD apartados Haruja</p>
-        <a class="admin-btn" target="_blank"
-           href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?gid=784913066#gid=784913066">Ir a app</a>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?gid=784913066#gid=784913066"
+          >Ir a app</a
+        >
       </div>
 
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">🏷️</span></div>
         <h4>Est. Precios</h4>
         <p>Estimación de precios</p>
-        <a class="admin-btn" target="_blank"
-           href="https://script.google.com/macros/s/AKfycby4NNyRSFmQm-dgXf9dpTqVxBDORBtOnPywiffLNyvotUM66ZKjWCFgyIqAX-kPo_M/exec">Ir a app</a>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://script.google.com/macros/s/AKfycby4NNyRSFmQm-dgXf9dpTqVxBDORBtOnPywiffLNyvotUM66ZKjWCFgyIqAX-kPo_M/exec"
+          >Ir a app</a
+        >
       </div>
 
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">🧾</span></div>
         <h4>Códigos</h4>
         <p>BD creación de códigos</p>
-        <a class="admin-btn" target="_blank"
-           href="https://docs.google.com/spreadsheets/d/1DFIZc3BvqRSvaPqhBm1Geu4aeZji6zuIAZKpkeplpwU/edit?usp=sharing">Ir a app</a>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1DFIZc3BvqRSvaPqhBm1Geu4aeZji6zuIAZKpkeplpwU/edit?usp=sharing"
+          >Ir a app</a
+        >
       </div>
 
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📱</span></div>
         <h4>Calculadora (BD)</h4>
         <p>BD calculadora Haruja</p>
-        <a class="admin-btn" target="_blank"
-           href="https://docs.google.com/spreadsheets/d/1hLSh3sqKAi_BC3t6sWhP4Bl0-qlaZbMXhs9tGa0HU2Q/edit?usp=sharing">Ir a app</a>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1hLSh3sqKAi_BC3t6sWhP4Bl0-qlaZbMXhs9tGa0HU2Q/edit?usp=sharing"
+          >Ir a app</a
+        >
       </div>
 
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📋</span></div>
         <h4>Master</h4>
         <p>BD precios Haruja</p>
-        <a class="admin-btn" target="_blank"
-           href="https://docs.google.com/spreadsheets/d/1S9mZbcQehmyiwaebh0GKlQQF7HDWLTdvJZFkV-vY_ZA/edit?usp=sharing">Ir a app</a>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1S9mZbcQehmyiwaebh0GKlQQF7HDWLTdvJZFkV-vY_ZA/edit?usp=sharing"
+          >Ir a app</a
+        >
       </div>
 
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📄</span></div>
         <h4>BD Tiendanube</h4>
         <p>Base de datos precios</p>
-        <a class="admin-btn" target="_blank"
-           href="https://docs.google.com/spreadsheets/d/1GfXUv-Y143yQJFC-6_kLZH3kT5rid2BLTEFHFKoikyQ/edit?usp=sharing">Ir a app</a>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1GfXUv-Y143yQJFC-6_kLZH3kT5rid2BLTEFHFKoikyQ/edit?usp=sharing"
+          >Ir a app</a
+        >
       </div>
 
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">💾</span></div>
         <h4>CSV SMP</h4>
         <p>BD tickets Haruja</p>
-        <a class="admin-btn" target="_blank"
-           href="https://docs.google.com/spreadsheets/d/15ofWXeddksQjaUxpHxSlzq6XrqHsl78CHgcorlBabhI/edit?usp=sharing">Ir a app</a>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/15ofWXeddksQjaUxpHxSlzq6XrqHsl78CHgcorlBabhI/edit?usp=sharing"
+          >Ir a app</a
+        >
       </div>
-
     </div>
 
     <script>
