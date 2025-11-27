@@ -66,13 +66,6 @@
         box-shadow: 0 8px 18px rgba(0,0,0,0.08);
       }
 
-      .icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 10px;
-      }
-
       .icon-circle {
         width: 64px;
         height: 64px;
@@ -82,8 +75,8 @@
         align-items: center;
         justify-content: center;
         box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        margin-bottom: 4px;
         transition: transform 0.15s ease;
+        margin-bottom: 10px;
       }
 
       .card:hover .icon-circle,
@@ -93,19 +86,6 @@
 
       .emoji {
         font-size: 34px;
-        line-height: 1;
-      }
-
-      .card h3 {
-        margin: 6px 0 4px;
-        font-size: 17px;
-        font-weight: 700;
-      }
-
-      .card p {
-        margin: 0 0 12px;
-        font-size: 13px;
-        color: var(--gris);
       }
 
       .btn {
@@ -118,20 +98,67 @@
         border-radius: 10px;
         margin-top: 6px;
         font-size: 14px;
-        transition: opacity 0.15s ease;
       }
 
-      .card:active .btn,
-      .card:hover .btn {
-        opacity: 0.9;
+      /* ADMIN AREA */
+
+      .admin-section {
+        max-width: 900px;
+        margin: 0 auto 40px;
+        padding: 0 22px;
+        text-align: left;
       }
 
-      .footer-logo {
-        margin: 30px 0 20px;
-        opacity: 0.8;
+      .admin-trigger-wrap {
+        display: flex;
+        justify-content: flex-start;
+        margin-top: 10px;
       }
 
-      .footer-logo img { max-width: 160px; }
+      .admin-trigger {
+        background: transparent;
+        border: none;
+        padding: 6px 0;
+        cursor: pointer;
+        font-size: 14px;
+        color: var(--texto);
+        text-decoration: underline;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .admin-grid {
+        display: none;
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 18px;
+      }
+
+      .admin-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 16px 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid #f1f1f1;
+      }
+
+      .admin-icon {
+        font-size: 30px;
+        margin-bottom: 6px;
+      }
+
+      .admin-btn {
+        font-size: 13px;
+        padding: 8px 0;
+        display: inline-block;
+        width: 100%;
+        background: var(--acento);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+      }
     </style>
   </head>
 
@@ -142,152 +169,181 @@
 
     <h1>Panel de Herramientas HarujaGdl</h1>
 
+    <!-- GRID PRINCIPAL -->
     <div class="grid">
-
-      <!-- 1. Registro de venta -->
       <div class="card">
-        <div class="icon">
-          <div class="icon-circle">
-            <span class="emoji">💸</span>
-          </div>
-        </div>
+        <div class="icon-circle"><span class="emoji">💸</span></div>
         <h3>Registro de Venta</h3>
         <p>Registra ventas completas.</p>
         <a class="btn" href="/registro-ventas.html">Ir a app</a>
       </div>
 
-      <!-- 2. Base de datos -->
       <div class="card">
-        <div class="icon">
-          <div class="icon-circle">
-            <span class="emoji">📊</span>
-          </div>
-        </div>
+        <div class="icon-circle"><span class="emoji">📊</span></div>
         <h3>Base de datos ventas</h3>
-        <p>Consulta el historial completo.</p>
+        <p>Consulta historial completo.</p>
         <a class="btn"
            href="https://docs.google.com/spreadsheets/d/1FvUAsQZr8vqh_OOsHsHjHA7RprV_fmuqikm0U_Ja3_M/edit?gid=1077810078#gid=1077810078"
-           target="_blank">
-          Ir a app
-        </a>
+           target="_blank">Ir a app</a>
       </div>
 
-      <!-- 3. Plan de lealtad -->
       <div class="card">
-        <div class="icon">
-          <div class="icon-circle">
-            <span class="emoji">🎁</span>
-          </div>
-        </div>
+        <div class="icon-circle"><span class="emoji">🎁</span></div>
         <h3>Plan de Lealtad</h3>
-        <p>Clientes y puntos acumulados.</p>
+        <p>Puntos y clientes.</p>
         <a class="btn" href="/plan-lealtad.html" target="_blank">Ir a app</a>
       </div>
 
-      <!-- 4. Apartados -->
       <div class="card">
-        <div class="icon">
-          <div class="icon-circle">
-            <span class="emoji">📦</span>
-          </div>
-        </div>
+        <div class="icon-circle"><span class="emoji">📦</span></div>
         <h3>Generar Apartados</h3>
         <p>Crea apartados y anticipo.</p>
         <a class="btn"
            href="https://script.google.com/macros/s/AKfycbz4fkeXmAIj-QbyT8IYRvwiortS4b6vSLj66j_Ph5sdfuczU6ATDRWtY9gY717t7r4i/exec"
-           target="_blank">
-          Ir a app
-        </a>
+           target="_blank">Ir a app</a>
       </div>
 
-      <!-- 5. Bitácora -->
       <div class="card">
-        <div class="icon">
-          <div class="icon-circle">
-            <span class="emoji">🗂️</span>
-          </div>
-        </div>
+        <div class="icon-circle"><span class="emoji">🗂️</span></div>
         <h3>Bitácora de Apartados</h3>
         <p>Status y seguimiento.</p>
         <a class="btn"
            href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?usp=sharing"
-           target="_blank">
-          Ver bitácora
-        </a>
+           target="_blank">Ver bitácora</a>
       </div>
 
-      <!-- 6. Tickets -->
       <div class="card">
-        <div class="icon">
-          <div class="icon-circle">
-            <span class="emoji">🎟️</span>
-          </div>
-        </div>
+        <div class="icon-circle"><span class="emoji">🎟️</span></div>
         <h3>Tickets PDF</h3>
-        <p>Carpeta con todos los tickets PDF.</p>
+        <p>Carpeta de tickets.</p>
         <a class="btn"
            href="https://drive.google.com/drive/folders/12yvsXrxUYnfr2o0eMx1uBUllkr7to8RK?usp=drive_link"
-           target="_blank">
-          Abrir carpeta
-        </a>
+           target="_blank">Abrir carpeta</a>
       </div>
 
-      <!-- 7. Registro de prenda -->
       <div class="card">
-        <div class="icon">
-          <div class="icon-circle">
-            <span class="emoji">🧵</span>
-          </div>
-        </div>
+        <div class="icon-circle"><span class="emoji">🧵</span></div>
         <h3>Registro de Nueva Prenda</h3>
-        <p>Crea códigos nuevos.</p>
+        <p>Códigos nuevos.</p>
         <a class="btn"
            href="https://script.google.com/macros/s/AKfycbx6OThWWitX9xEANDZEZlC4mbW1k0iTvI8HzqPTPjHcYRvqKykxG3fsk2bIE33z9vOV9w/exec"
-           target="_blank">
-          Ir a app
-        </a>
+           target="_blank">Ir a app</a>
       </div>
 
-      <!-- 8. Asignar precios -->
       <div class="card">
-        <div class="icon">
-          <div class="icon-circle">
-            <span class="emoji">💲</span>
-          </div>
-        </div>
+        <div class="icon-circle"><span class="emoji">💲</span></div>
         <h3>Asignar Precios</h3>
         <p>Define precios finales.</p>
         <a class="btn"
            href="https://script.google.com/macros/s/AKfycbwYXC1B8txyWogMKrv4eWo-WqkbVh5I5139b5I-028-6_FPD-DVXCR6lWvbSJkLrYIw4g/exec"
-           target="_blank">
-          Ir a app
-        </a>
+           target="_blank">Ir a app</a>
       </div>
 
-      <!-- 9. Calculadora sobre pedidos -->
       <div class="card">
-        <div class="icon">
-          <div class="icon-circle">
-            <span class="emoji">🧮</span>
-          </div>
-        </div>
+        <div class="icon-circle"><span class="emoji">🧮</span></div>
         <h3>Calculadora sobre pedidos</h3>
-        <p>Calcula precios estimados de pedidos.</p>
-        <a class="btn" href="/calculadora-pedidos.html">Ir a app</a>
+        <p>Precios estimados.</p>
+        <a class="btn" href="/calculadora-predidos.html">Ir a app</a>
       </div>
-
     </div>
 
-    <div class="footer-logo">
-      <img src="/icons/icon-192.png" alt="HarujaGdl" />
+    <!-- ADMIN -->
+    <div class="admin-section">
+      <div class="admin-trigger-wrap">
+        <button id="adminToggle" class="admin-trigger" type="button">
+          🔐 Administrador
+        </button>
+      </div>
+
+      <div id="adminGrid" class="admin-grid">
+        
+        <div class="admin-card">
+          <div class="admin-icon">📦</div>
+          <h4>Apartados</h4>
+          <p>BD apartados Haruja</p>
+          <a class="admin-btn"
+             href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?gid=784913066#gid=784913066"
+             target="_blank">Ir a app</a>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-icon">🏷️</div>
+          <h4>Est. Precios</h4>
+          <p>Estimación de precios</p>
+          <a class="admin-btn"
+             href="https://script.google.com/macros/s/AKfycby4NNyRSFmQm-dgXf9dpTqVxBDORBtOnPywiffLNyvotUM66ZKjWCFgyIqAX-kPo_M/exec"
+             target="_blank">Ir a app</a>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-icon">🧾</div>
+          <h4>Códigos</h4>
+          <p>BD creación de códigos</p>
+          <a class="admin-btn"
+             href="https://docs.google.com/spreadsheets/d/1DFIZc3BvqRSvaPqhBm1Geu4aeZji6zuIAZKpkeplpwU/edit?usp=sharing"
+             target="_blank">Ir a app</a>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-icon">📱</div>
+          <h4>Calculadora (BD)</h4>
+          <p>BD calculadora Haruja</p>
+          <a class="admin-btn"
+             href="https://docs.google.com/spreadsheets/d/1hLSh3sqKAi_BC3t6sWhP4Bl0-qlaZbMXhs9tGa0HU2Q/edit?usp=sharing"
+             target="_blank">Ir a app</a>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-icon">📋</div>
+          <h4>Master</h4>
+          <p>BD precios Haruja</p>
+          <a class="admin-btn"
+             href="https://docs.google.com/spreadsheets/d/1S9mZbcQehmyiwaebh0GKlQQF7HDWLTdvJZFkV-vY_ZA/edit?usp=sharing"
+             target="_blank">Ir a app</a>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-icon">📄</div>
+          <h4>BD Tiendanube</h4>
+          <p>Base de datos precios</p>
+          <a class="admin-btn"
+             href="https://docs.google.com/spreadsheets/d/1GfXUv-Y143yQJFC-6_kLZH3kT5rid2BLTEFHFKoikyQ/edit?usp=sharing"
+             target="_blank">Ir a app</a>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-icon">💾</div>
+          <h4>CSV SMP</h4>
+          <p>BD tickets Haruja</p>
+          <a class="admin-btn"
+             href="https://docs.google.com/spreadsheets/d/15ofWXeddksQjaUxpHxSlzq6XrqHsl78CHgcorlBabhI/edit?usp=sharing"
+             target="_blank">Ir a app</a>
+        </div>
+      </div>
     </div>
 
     <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
-          navigator.serviceWorker.register("/service-worker.js");
-        });
-      }
+      // Cambia la contraseña si quieres 💚
+      const ADMIN_PASSWORD = "Harujagdl";
+
+      let adminUnlocked = false;
+      const adminToggle = document.getElementById("adminToggle");
+      const adminGrid = document.getElementById("adminGrid");
+
+      adminToggle.addEventListener("click", () => {
+        if (!adminUnlocked) {
+          const pass = prompt("Introduce la contraseña de administrador:");
+          if (pass === ADMIN_PASSWORD) {
+            adminUnlocked = true;
+            adminGrid.style.display = "grid";
+          } else {
+            alert("Contraseña incorrecta.");
+          }
+        } else {
+          adminGrid.style.display =
+            adminGrid.style.display === "grid" ? "none" : "grid";
+        }
+      });
     </script>
   </body>
 </html>
