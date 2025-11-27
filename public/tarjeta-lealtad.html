@@ -10,7 +10,7 @@
   <link rel="icon" href="/icons/icon-192.png" />
   <meta name="theme-color" content="#A7B59E" />
 
-  <!-- (Opcional) Fuente Montserrat -->
+  <!-- Fuente Montserrat -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -93,6 +93,30 @@
     .valor{
       font-weight:600;
     }
+
+    /* QR */
+    .qr-wrapper{
+      margin-top:16px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+    }
+    .qr-img{
+      width:150px;
+      height:150px;
+      border-radius:16px;
+      background:#f3f3f3;
+      padding:6px;
+      object-fit:contain;
+    }
+    .qr-text{
+      font-size:0.75rem;
+      color:var(--gris);
+      text-align:center;
+      max-width:260px;
+    }
+
     .boton{
       margin-top:18px;
       width:100%;
@@ -148,6 +172,14 @@
       <span class="valor" id="codigoCliente">---</span>
     </div>
 
+    <!-- 🔳 QR con el TOKEN del cliente -->
+    <div class="qr-wrapper">
+      <img id="qrToken" class="qr-img" alt="QR de cliente" />
+      <div class="qr-text">
+        Escanéame en caja para buscar tu cuenta rápidamente en el sistema de lealtad 🔎
+      </div>
+    </div>
+
     <button class="boton" id="btnRefrescar">Actualizar datos</button>
 
     <div class="estado" id="estado"></div>
@@ -174,6 +206,7 @@
         document.getElementById('puntosCliente').innerHTML = '-- <span>pts</span>';
         document.getElementById('visitasCliente').textContent = '--';
         document.getElementById('codigoCliente').textContent = '---';
+        document.getElementById('qrToken').style.display = 'none';
         estado.textContent = 'El enlace no tiene token, pide uno nuevo en Haruja 🙏';
         estado.classList.add('error');
         return;
@@ -193,6 +226,7 @@
           document.getElementById('puntosCliente').innerHTML = '-- <span>pts</span>';
           document.getElementById('visitasCliente').textContent = '--';
           document.getElementById('codigoCliente').textContent = '---';
+          document.getElementById('qrToken').style.display = 'none';
           estado.textContent = 'No encontramos tu tarjeta, revisa el link con Haruja.';
           estado.classList.add('error');
           return;
@@ -204,6 +238,16 @@
         document.getElementById('puntosCliente').innerHTML   = (c.puntos || 0) + ' <span>pts</span>';
         document.getElementById('visitasCliente').textContent = c.visitas || 0;
         document.getElementById('codigoCliente').textContent  = c.id || '—';
+
+        // 🔳 Generar QR con el TOKEN (para que al escanear salga el token tal cual)
+        if (c.token) {
+          const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(c.token);
+          const img = document.getElementById('qrToken');
+          img.src = qrUrl;
+          img.style.display = 'block';
+        } else {
+          document.getElementById('qrToken').style.display = 'none';
+        }
 
         if (mostrarMensaje) {
           estado.textContent = 'Datos actualizados ✔';
