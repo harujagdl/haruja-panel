@@ -63,27 +63,31 @@
 
       /* ===== TARJETAS ===== */
 
-      .card,
-      .admin-card {
-        background: #ffffff;
-        padding: 22px 16px;
-        border-radius: 20px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-        border: 1px solid #f0f0f0;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      .card, .admin-card {
+  background: #ffffff;
+  padding: 22px 16px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  border: 1px solid #f0f0f0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        min-height: 260px; /* ← altura mínima, ya no se salen los botones */
-      }
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 260px; /* ← misma altura en TODAS las tarjetas */
+}
 
-      .card:hover,
-      .admin-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
-      }
-
+.btn, .admin-btn {
+  margin-top: auto;      /* ← Baja el botón siempre */
+  display: inline-block;
+  width: 100%;
+  background: var(--acento);
+  padding: 10px 0;
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 14px;
+}
       /* ===== ICONOS REDONDOS ===== */
 
       .icon-circle,
@@ -183,15 +187,11 @@
 
       <!-- 💚 NUEVA TARJETA: BD sistema de lealtad -->
       <div class="card">
-        <div class="icon-circle"><span class="emoji">📑</span></div>
-        <h3>BD Sistema de Lealtad</h3>
-        <p>Base de datos del programa de puntos.</p>
-        <a
-          class="btn"
-          target="_blank"
-          href="https://docs.google.com/spreadsheets/d/1thDRVw0qmCBfQdNT2-Crv6RrMAzo-AcwNL9q21pODpA/edit?gid=0#gid=0"
-          >Ir a app</a
-        >
+        <div class="icon-circle"><span class="emoji">📚</span></div>
+        <h3>Base de datos plan de lealtad</h3>
+        <p>Base de datos plan de lealtad.</p>
+        <a class="btn" target="_blank"
+         href="https://docs.google.com/spreadsheets/d/1thDRVw0qmCBfQdNT2-Crv6RrMAzo-AcwNL9q21pODpA/edit?gid=0#gid=0">Ir a app</a>
       </div>
 
       <div class="card">
@@ -403,3 +403,4 @@
     </script>
   </body>
 </html>
+
