@@ -22,6 +22,7 @@
         --texto: #383234;
         --acento: #a7b59e;
         --beige: #faf6f1;
+        --gris: #6b6b6b;
       }
 
       * {
@@ -30,58 +31,70 @@
 
       body {
         margin: 0;
-        font-family: Arial, sans-serif;
-        background: var(--fondo);
+        font-family: 'Montserrat', sans-serif;
+        background: var(--beige);
         color: var(--texto);
         text-align: center;
       }
 
       .logo img {
         max-width: 220px;
-        margin: 30px auto 10px;
+        margin: 28px auto 5px;
         display: block;
       }
 
       h1 {
         margin-top: 0;
-        font-size: 22px;
+        font-size: 24px;
+        font-weight: 700;
         color: var(--texto);
       }
 
+      /* GRID */
       .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 22px;
-        padding: 20px;
+        padding: 22px;
         max-width: 900px;
         margin: auto;
       }
 
+      /* TARJETAS */
       .card {
-        background: var(--beige);
-        padding: 18px;
-        border-radius: 14px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        background: white;
+        padding: 22px 16px;
+        border-radius: 18px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
+        border: 1px solid #eaeaea;
+      }
+
+      .icon {
+        font-size: 40px;
+        margin-bottom: 10px;
       }
 
       .card h3 {
-        margin: 10px 0 4px;
-        font-size: 16px;
+        margin: 6px 0 4px;
+        font-size: 17px;
+        font-weight: 700;
       }
 
       .card p {
-        margin: 0 0 8px;
+        margin: 0 0 12px;
         font-size: 13px;
+        color: var(--gris);
       }
 
       .btn {
         display: inline-block;
+        width: 100%;
         background: var(--acento);
-        padding: 8px 14px;
+        padding: 10px 0;
         color: #ffffff;
         text-decoration: none;
-        border-radius: 6px;
-        margin-top: 10px;
+        border-radius: 10px;
+        margin-top: 6px;
         font-size: 14px;
       }
 
@@ -104,92 +117,91 @@
     <h1>Panel de Herramientas HarujaGdl</h1>
 
     <div class="grid">
-      <div class="card">
-        <h3>Registro de Venta</h3>
-        <p>Registra ventas completas.</p>
-        <a class="btn"
-            href="/registro-ventas.html">
-           Ir a app
-        </a>
-        </div>
 
       <div class="card">
+        <div class="icon">💸</div>
+        <h3>Registro de Venta</h3>
+        <p>Registra ventas completas.</p>
+        <a class="btn" href="/registro-ventas.html">Ir a app</a>
+      </div>
+
+      <div class="card">
+        <div class="icon">📦</div>
         <h3>Generar Apartados</h3>
         <p>Crea apartados y anticipo.</p>
         <a
           class="btn"
           href="https://script.google.com/macros/s/AKfycbz4fkeXmAIj-QbyT8IYRvwiortS4b6vSLj66j_Ph5sdfuczU6ATDRWtY9gY717t7r4i/exec"
           target="_blank"
-          rel="noopener noreferrer"
         >
           Ir a app
         </a>
       </div>
 
       <div class="card">
+        <div class="icon">🎟️</div>
         <h3>Tickets</h3>
         <p>Carpeta con todos los tickets PDF.</p>
         <a
           class="btn"
           href="https://drive.google.com/drive/folders/12yvsXrxUYnfr2o0eMx1uBUllkr7to8RK?usp=drive_link"
           target="_blank"
-          rel="noopener noreferrer"
         >
           Abrir carpeta
         </a>
       </div>
 
       <div class="card">
+        <div class="icon">🗂️</div>
         <h3>Bitácora de Apartados</h3>
         <p>Status de apartados y seguimiento.</p>
         <a
           class="btn"
           href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?usp=sharing"
           target="_blank"
-          rel="noopener noreferrer"
         >
           Ver bitácora
         </a>
       </div>
 
       <div class="card">
+        <div class="icon">🧵</div>
         <h3>Registro de Nueva Prenda</h3>
         <p>Crea códigos nuevos para prendas.</p>
         <a
           class="btn"
           href="https://script.google.com/macros/s/AKfycbx6OThWWitX9xEANDZEZlC4mbW1k0iTvI8HzqPTPjHcYRvqKykxG3fsk2bIE33z9vOV9w/exec"
           target="_blank"
-          rel="noopener noreferrer"
         >
           Ir a app
         </a>
       </div>
 
       <div class="card">
+        <div class="icon">💲</div>
         <h3>Asignar Precios</h3>
         <p>Define precios finales de prendas.</p>
         <a
           class="btn"
           href="https://script.google.com/macros/s/AKfycbwYXC1B8txyWogMKrv4eWo-WqkbVh5I5139b5I-028-6_FPD-DVXCR6lWvbSJkLrYIw4g/exec"
           target="_blank"
-          rel="noopener noreferrer"
         >
           Ir a app
         </a>
       </div>
 
       <div class="card">
+        <div class="icon">🎁</div>
         <h3>Plan de Lealtad</h3>
         <p>Gestiona clientes y puntos de lealtad.</p>
         <a
           class="btn"
           href="/plan-lealtad.html"
           target="_blank"
-          rel="noopener noreferrer"
         >
           Ir a app
         </a>
-</div>
+      </div>
 
     </div>
 
@@ -210,6 +222,3 @@
     </script>
   </body>
 </html>
-
-
-
