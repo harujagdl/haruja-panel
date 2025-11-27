@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora HarujaGdl</title>
+  <style>
+    :root{ --olivo:#A7B59E; --marron:#383234; --beige:#FAF6F1; --texto:#222; }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:#fff; color:var(--texto);
+      font-family: Arial, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", sans-serif;
+    }
+    .wrap{ max-width:500px; margin:0 auto; padding:20px; }
+    .card{
+      background:#fff; border-radius:12px;
+      box-shadow:0 0 8px rgba(0,0,0,.08); padding:20px;
+    }
+    .logo{ display:block; margin:10px auto 12px; max-width:180px; height:auto; }
+    h2{ text-align:center; margin:0 0 16px; font-size:28px; line-height:1.2; color:#000; }
+
+    label{display:block; margin-top:14px; font-weight:700; color:#333}
+    .hint{font-size:12px; color:#6b6b6b; margin-top:6px}
+    .error{ font-size:12px; color:#b00020; margin-top:6px }
+
+    input, select, textarea{
+      width:100%; padding:12px; margin-top:8px;
+      border:1px solid #aaa; border-radius:8px; font-size:16px;
+      background:#fff; outline:none;
+    }
+    textarea{min-height:72px; resize:vertical}
+
+    .drop{
+      border:2px dashed #ccc; border-radius:8px; padding:14px; text-align:center; cursor:pointer;
+      min-height:120px; display:flex; align-items:center; justify-content:center; flex-direction:column;
+      transition: background .15s ease;
+    }
+    .drop.dragover{background:var(--beige)}
+    .thumb{
+      margin-top:8px; width:100%; max-height:220px;
+      object-fit:contain; border-radius:8px; border:1px solid #ddd
+    }
+
+    .row{display:grid; gap:10px}
+    .grid2{grid-template-columns:1fr}
+    .grid3{grid-template-columns:1fr}
+    @media (min-width:560px){
+      .grid2{grid-template-columns:1fr 1fr}
+      .grid3{grid-template-columns:1fr 1fr 1fr}
+    }
+
+    .pill{
+      display:inline-block; padding:6px 10px; border:1px solid #ccc;
+      border-radius:999px; background:#fafafa; font-size:12px; color:#666; margin-top:8px
+    }
+
+    .actions{display:flex; gap:8px; margin-top:14px}
+    button{
+      padding:12px; width:100%; border:none; border-radius:8px;
+      cursor:pointer; font-weight:700; font-size:16px; transition: opacity .15s ease;
+    }
+    button[disabled]{ opacity:.6; cursor:not-allowed }
+    .primary{background:var(--olivo); color:#fff}
+    .ghost{background:#f1f1f1; color:#222}
+
+    #msg{margin:10px 0; font-weight:700; color:#1a73e8}
+    .ok{color:#0a7a22}
+    .err{color:#b00020}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <img class="logo" src="https://i.postimg.cc/nMphkZcC/haruja-logo.png" alt="HarujaGdl" />
+    <div class="card" role="form" aria-labelledby="title">
+      <h2 id="title">Calculadora de Precios</h2>
+
+      <div class="row grid2">
+        <div>
+          <label for="fecha">Fecha</label>
+          <input id="fecha" type="date" />
+          <div id="err-fecha" class="error" style="display:none"></div>
+        </div>
+        <div>
+          <label for="categoria">Categoría</label>
+          <select id="categoria" required></select>
+          <div id="err-categoria" class="error" style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label for="desc">Descripción breve</label>
+        <textarea id="desc" placeholder="Ej. Blusa satinada cuello V" maxlength="140" required></textarea>
+        <div class="hint" id="desc-count">0/140</div>
+        <div id="err-desc" class="error" style="display:none"></div>
+      </div>
+
+      <div class="row grid2">
+        <div>
+          <label for="costo">Costo (MXN)</label>
+          <input id="costo" type="number" step="0.01" min="0.01" inputmode="decimal" placeholder="0.00" required />
+          <div id="err-costo" class="error" style="display:none"></div>
+        </div>
+        <div>
+          <label>Margen</label>
+          <span class="pill"><span id="margenPill">65%</span> (fijo/por categoría)</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="hint">
+          <input id="chk9" type="checkbox" checked />
+          Aplicar redondeo psicológico a $9
+        </label>
+      </div>
+
+      <div class="row" aria-label="Zona de imagen">
+        <label>Imagen (arrastra y suelta o haz clic)</label>
+        <div id="drop" class="drop" tabindex="0" aria-label="Dropzone de imagen">
+          <input id="file" type="file" accept="image/*" style="display:none" />
+          <div id="dropText" class="hint">
+            Suelta aquí la imagen o haz clic para seleccionar
+          </div>
+          <img id="preview" class="thumb" style="display:none" alt="Vista previa" />
+        </div>
+        <div id="imgMsg" class="hint"></div>
+      </div>
+
+      <div class="row grid3" style="margin-top:8px">
+        <div>
+          <label for="psiniva">Precio sin IVA</label>
+          <input id="psiniva" type="text" disabled />
+        </div>
+        <div>
+          <label for="iva">IVA</label>
+          <input id="iva" type="text" disabled />
+        </div>
+        <div>
+          <label for="pfinal">Precio final (con IVA)</label>
+          <input id="pfinal" type="text" disabled />
+        </div>
+      </div>
+
+      <div id="msg" role="status" aria-live="polite"></div>
+
+      <div class="actions">
+        <button id="btnGuardar" class="primary" onclick="guardar()">Guardar registro</button>
+        <button id="btnLimpiar" class="ghost" onclick="limpiar()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ===== Estado base (estático) =====
+  let IVA = 0.16;      // 16%
+  let MARGEN = 0.65;   // 65%
+  let imageDataUrl = null;
+  let busy = false;
+
+  const $ = sel => document.querySelector(sel);
+
+  // Inicialización al cargar
+  document.addEventListener('DOMContentLoaded', () => {
+    init({
+      iva: IVA,
+      margen: MARGEN,
+      categorias: [
+        'Blusas',
+        'Pantalones',
+        'Vestidos',
+        'Faldas',
+        'Conjuntos',
+        'Chamarras',
+        'Accesorios'
+      ]
+    });
+  });
+
+  function init(d){
+    IVA = Number(d.iva) || 0.16;
+    MARGEN = Number(d.margen) || 0.65;
+
+    $('#margenPill').textContent = (MARGEN*100).toFixed(0)+'%';
+    $('#iva').value = (IVA*100).toFixed(2)+'%';
+
+    // Fecha hoy
+    const today = new Date();
+    if ('valueAsDate' in $('#fecha')) {
+      $('#fecha').valueAsDate = today;
+    } else {
+      $('#fecha').value = isoDate(today);
+    }
+
+    // Categorías
+    const sel = $('#categoria');
+    sel.innerHTML =
+      '<option value="">Selecciona...</option>' +
+      (d.categorias || [])
+        .map(c => `<option>${escapeHtml(String(c))}</option>`)
+        .join('');
+
+    // Listeners
+    $('#costo').addEventListener('input', recalc);
+    $('#chk9').addEventListener('change', recalc);
+    $('#desc').addEventListener('input', e=>{
+      const len = e.target.value.length;
+      document.getElementById('desc-count').textContent = `${len}/140`;
+    });
+
+    // Drag and drop imagen
+    const drop = document.getElementById('drop');
+    const file = document.getElementById('file');
+
+    drop.addEventListener('click', () => file.click());
+    drop.addEventListener('keypress', e=>{
+      if(e.key==='Enter' || e.key===' '){
+        e.preventDefault();
+        file.click();
+      }
+    });
+    drop.addEventListener('dragover', e=>{
+      e.preventDefault();
+      drop.classList.add('dragover');
+    });
+    drop.addEventListener('dragleave', ()=>{
+      drop.classList.remove('dragover');
+    });
+    drop.addEventListener('drop', e=>{
+      e.preventDefault();
+      drop.classList.remove('dragover');
+      handleFile(e.dataTransfer.files?.[0]);
+    });
+    file.addEventListener('change', e=> handleFile(e.target.files?.[0]));
+
+    recalc();
+  }
+
+  // ===== Utils =====
+  function isoDate(d){
+    const pad = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+  function money(n){
+    const x = Number(n);
+    if (!isFinite(x)) return '$0.00';
+    return '$' + x.toLocaleString('es-MX',{
+      minimumFractionDigits:2, maximumFractionDigits:2
+    });
+  }
+  function round2(n){ return Math.round(Number(n)*100)/100; }
+  function nextEnding9(n){
+    let p = Math.ceil(Number(n)||0);
+    const mod = p % 10;
+    return (mod===9) ? p : p + (9 - mod);
+  }
+  function setMsg(html){ document.getElementById('msg').innerHTML = html || ''; }
+  function setImgMsg(t){ document.getElementById('imgMsg').textContent = t || ''; }
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+  }
+  function clearErrors(){
+    ['fecha','categoria','desc','costo'].forEach(id => {
+      const el = document.getElementById('err-'+id);
+      if (el){ el.style.display = 'none'; }
+    });
+  }
+
+  // ===== Lógica de cálculo =====
+  function recalc(){
+    const costo = Number(document.getElementById('costo').value || 0);
+    const aplicar9 = document.getElementById('chk9').checked;
+    const pSinIva = costo * (1+MARGEN);
+    let pFinal = pSinIva * (1+IVA);
+    if (aplicar9) pFinal = nextEnding9(pFinal);
+    document.getElementById('psiniva').value = money(pSinIva);
+    document.getElementById('pfinal').value  = money(round2(pFinal));
+  }
+
+  function handleFile(f){
+    if(!f){ return; }
+    if(String(f.type).indexOf('image/') !== 0){
+      setImgMsg('Formato no válido. Usa una imagen.');
+      return;
+    }
+    if(f.size > 12*1024*1024){
+      setImgMsg('La imagen supera 12 MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(){
+      imageDataUrl = reader.result;
+      const img = document.getElementById('preview');
+      img.src = imageDataUrl;
+      img.style.display='block';
+      setImgMsg('Imagen cargada (solo vista previa, no se sube).');
+    };
+    reader.readAsDataURL(f);
+  }
+
+  function validar(){
+    clearErrors();
+    let ok = true;
+    if (!document.getElementById('categoria').value){
+      const e = document.getElementById('err-categoria');
+      e.textContent = 'Selecciona una categoría.'; e.style.display='block'; ok=false;
+    }
+    const desc = document.getElementById('desc').value.trim();
+    if (!desc){
+      const e = document.getElementById('err-desc');
+      e.textContent = 'Escribe una descripción.'; e.style.display='block'; ok=false;
+    }
+    const costo = Number(document.getElementById('costo').value);
+    if (!isFinite(costo) || costo<=0){
+      const e = document.getElementById('err-costo');
+      e.textContent = 'Ingresa un costo válido (> 0).'; e.style.display='block'; ok=false;
+    }
+    const fecha = document.getElementById('fecha').value;
+    if (!fecha){
+      const e = document.getElementById('err-fecha');
+      e.textContent = 'Selecciona una fecha.'; e.style.display='block'; ok=false;
+    }
+    return ok;
+  }
+
+  function guardar(){
+    if (busy) return;
+    if (!validar()){
+      setMsg('<span class="err">Revisa los campos marcados.</span>');
+      return;
+    }
+
+    recalc();
+
+    const fecha = document.getElementById('fecha').value;
+    const categoria = document.getElementById('categoria').value;
+    const descripcion = document.getElementById('desc').value.trim().replace(/[\r\n]+/g,' ').slice(0,140);
+    const costo = Number(document.getElementById('costo').value);
+    const aplicarRedondeo = document.getElementById('chk9').checked;
+    const precioSinIva = document.getElementById('psiniva').value;
+    const precioFinal = document.getElementById('pfinal').value;
+
+    const resumen = `
+Fecha: ${fecha}
+Categoría: ${categoria}
+Descripción: ${descripcion}
+Costo: ${costo.toFixed(2)}
+Redondeo a $9: ${aplicarRedondeo ? 'Sí' : 'No'}
+Precio sin IVA: ${precioSinIva}
+Precio final: ${precioFinal}
+`.trim();
+
+    console.log(resumen);
+    setMsg('<span class="ok">Cálculo listo ✅ Copia los datos a tu hoja de cálculo.</span>');
+  }
+
+  function limpiar(resetMsgs){
+    if (resetMsgs === undefined) resetMsgs = true;
+    document.getElementById('categoria').value = '';
+    document.getElementById('desc').value = '';
+    document.getElementById('desc-count').textContent = '0/140';
+    document.getElementById('costo').value = '';
+    imageDataUrl = null;
+    document.getElementById('preview').style.display='none';
+    setImgMsg('');
+    recalc();
+    clearErrors();
+    if(resetMsgs) setMsg('');
+  }
+</script>
+</body>
+</html>
