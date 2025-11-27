@@ -1,4 +1,4 @@
-// service-worker.js – Tarjeta HarujaGdl
+// service-worker.js – Tarjeta HarujaGdl PWA
 const CACHE_NAME = "haruja-card-v1";
 
 const URLS_TO_CACHE = [
@@ -8,12 +8,14 @@ const URLS_TO_CACHE = [
   "/icons/icon-512.png"
 ];
 
+// Se instala el SW y se guardan en caché los archivos base
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(URLS_TO_CACHE))
   );
 });
 
+// Limpia versiones viejas del caché cuando se actualiza el SW
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -26,12 +28,12 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Cache-first solo para recursos estáticos del mismo origen.
-// La API de Apps Script se deja pasar directo (no se cachea).
+// Estrategia cache-first SOLO para recursos del mismo dominio (Vercel)
+// La API de Apps Script no se cachea, pasa directo en red.
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // Si no es mismo origen (Apps Script, etc.), no intervenimos
+  // Si es otro dominio (Apps Script, etc.), no intervenimos
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
