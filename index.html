@@ -129,9 +129,8 @@
       }
 
       .admin-grid {
-        display: none;
+        display: none; /* se muestra solo en modo admin */
         margin-top: 16px;
-        display: grid;
         grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
         gap: 18px;
       }
@@ -142,11 +141,23 @@
         padding: 16px 14px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         border: 1px solid #f1f1f1;
+        text-align: left;
       }
 
       .admin-icon {
         font-size: 30px;
         margin-bottom: 6px;
+      }
+
+      .admin-card h4 {
+        margin: 4px 0 4px;
+        font-size: 15px;
+      }
+
+      .admin-card p {
+        margin: 0 0 10px;
+        font-size: 12px;
+        color: var(--gris);
       }
 
       .admin-btn {
@@ -158,6 +169,7 @@
         color: white;
         text-decoration: none;
         border-radius: 10px;
+        text-align: center;
       }
     </style>
   </head>
@@ -167,10 +179,10 @@
       <img src="/icons/icon-512.png" alt="HarujaGdl" />
     </div>
 
-    <h1>Panel de Herramientas HarujaGdl</h1>
+    <h1 id="panelTitle">Panel de Herramientas HarujaGdl</h1>
 
-    <!-- GRID PRINCIPAL -->
-    <div class="grid">
+    <!-- GRID PRINCIPAL (PÚBLICO) -->
+    <div id="publicGrid" class="grid">
       <div class="card">
         <div class="icon-circle"><span class="emoji">💸</span></div>
         <h3>Registro de Venta</h3>
@@ -256,7 +268,6 @@
       </div>
 
       <div id="adminGrid" class="admin-grid">
-        
         <div class="admin-card">
           <div class="admin-icon">📦</div>
           <h4>Apartados</h4>
@@ -323,27 +334,60 @@
     </div>
 
     <script>
-      // Cambia la contraseña si quieres 💚
-      const ADMIN_PASSWORD = "Harujagdl";
+  // Contraseña del administrador
+  const ADMIN_PASSWORD = "Harujagdl";
 
-      let adminUnlocked = false;
-      const adminToggle = document.getElementById("adminToggle");
-      const adminGrid = document.getElementById("adminGrid");
+  const adminToggle = document.getElementById("adminToggle");
+  const adminGrid = document.getElementById("adminGrid");
+  const publicGrid = document.getElementById("publicGrid");
+  const panelTitle = document.getElementById("panelTitle");
 
-      adminToggle.addEventListener("click", () => {
-        if (!adminUnlocked) {
-          const pass = prompt("Introduce la contraseña de administrador:");
-          if (pass === ADMIN_PASSWORD) {
-            adminUnlocked = true;
-            adminGrid.style.display = "grid";
-          } else {
-            alert("Contraseña incorrecta.");
-          }
-        } else {
-          adminGrid.style.display =
-            adminGrid.style.display === "grid" ? "none" : "grid";
-        }
-      });
-    </script>
+  // Revisar si ya está desbloqueado en este dispositivo
+  let adminUnlocked = localStorage.getItem("harujaAdmin") === "true";
+
+  function showAdmin() {
+    publicGrid.style.display = "none";
+    adminGrid.style.display = "grid";
+    panelTitle.textContent = "Panel Administrador HarujaGdl";
+    adminToggle.textContent = "⬅️ Volver al panel";
+  }
+
+  function showPublic() {
+    publicGrid.style.display = "grid";
+    adminGrid.style.display = "none";
+    panelTitle.textContent = "Panel de Herramientas HarujaGdl";
+    adminToggle.textContent = "🔐 Administrador";
+  }
+
+  // Si ya está desbloqueado en este dispositivo → entra directo
+  if (adminUnlocked) {
+    showAdmin();
+  } else {
+    showPublic();
+  }
+
+  adminToggle.addEventListener("click", () => {
+    if (!adminUnlocked) {
+      const pass = prompt("Introduce la contraseña de administrador:");
+      if (pass === null) return;
+      if (pass === ADMIN_PASSWORD) {
+        adminUnlocked = true;
+        localStorage.setItem("harujaAdmin", "true"); // Recordar dispositivo
+        showAdmin();
+      } else {
+        alert("Contraseña incorrecta.");
+      }
+    } else {
+      // Alternar entre admin y público sin pedir contraseña
+      if (adminGrid.style.display === "grid") {
+        showPublic();
+      } else {
+        showAdmin();
+      }
+    }
+  });
+</script>
   </body>
 </html>
+
+
