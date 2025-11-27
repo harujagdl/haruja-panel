@@ -18,12 +18,14 @@
         --gris: #6b6b6b;
       }
 
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
 
       body {
         margin: 0;
-        font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont,
-          'Segoe UI', sans-serif;
+        font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
         background: var(--beige);
         color: var(--texto);
         text-align: center;
@@ -42,34 +44,50 @@
         color: var(--texto);
       }
 
-      /* --- TARJETAS DEL PANEL PÚBLICO --- */
+      /* ===== GRIDS ===== */
 
-      .grid {
+      .grid,
+      .admin-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 22px;
         padding: 22px;
         max-width: 900px;
         margin: auto;
-      }
-
-      .card {
-        background: #ffffff;
-        padding: 22px 16px;
-        border-radius: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-        border: 1px solid #f0f0f0;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
         text-align: center;
       }
 
-      .card:hover,
-      .card:active {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+      .admin-grid {
+        display: none;
       }
 
-      .icon-circle {
+      /* ===== TARJETAS ===== */
+
+      .card,
+      .admin-card {
+        background: #ffffff;
+        padding: 22px 16px;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        border: 1px solid #f0f0f0;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        height: 260px; /* ← misma altura */
+      }
+
+      .card:hover,
+      .admin-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+      }
+
+      /* ===== ICONOS REDONDOS ===== */
+
+      .icon-circle,
+      .admin-icon-circle {
         width: 64px;
         height: 64px;
         border-radius: 50%;
@@ -77,21 +95,26 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
         margin: 0 auto 12px;
         transition: transform 0.15s ease;
       }
 
       .card:hover .icon-circle,
-      .card:active .icon-circle {
+      .admin-card:hover .admin-icon-circle {
         transform: scale(1.05);
       }
 
-      .emoji {
+      .emoji,
+      .admin-icon {
         font-size: 34px;
       }
 
-      .btn {
+      /* ===== BOTONES ===== */
+
+      .btn,
+      .admin-btn {
+        margin-top: auto;
         display: inline-block;
         width: 100%;
         background: var(--acento);
@@ -99,15 +122,14 @@
         color: white;
         text-decoration: none;
         border-radius: 10px;
-        margin-top: 6px;
         font-size: 14px;
       }
 
-      /* --- ADMIN --- */
+      /* ===== ADMIN BUTTON ===== */
 
       .admin-section {
         max-width: 900px;
-        margin: 20px auto 40px;
+        margin: 10px auto 0;
         padding: 0 22px;
         text-align: center;
       }
@@ -120,60 +142,6 @@
         font-size: 15px;
         color: var(--texto);
         text-decoration: underline;
-      }
-
-      .admin-grid {
-        display: none;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 20px;
-        padding: 22px;
-        max-width: 900px;
-        margin: auto;
-        text-align: center;
-      }
-
-      .admin-card {
-        background: #ffffff;
-        padding: 22px 16px;
-        border-radius: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-        border: 1px solid #f0f0f0;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-        text-align: center;
-      }
-
-      .admin-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 18px rgba(0,0,0,0.08);
-      }
-
-      .admin-icon-circle {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        background: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-      }
-
-      .admin-icon {
-        font-size: 34px;
-      }
-
-      .admin-btn {
-        display: inline-block;
-        width: 100%;
-        background: var(--acento);
-        padding: 10px 0;
-        color: white;
-        text-decoration: none;
-        border-radius: 10px;
-        margin-top: 6px;
-        font-size: 14px;
-        text-align: center;
       }
     </style>
   </head>
@@ -257,11 +225,12 @@
       </div>
     </div>
 
-    <!-- ADMIN -->
+    <!-- BOTÓN ADMIN -->
     <div class="admin-section">
       <button id="adminToggle" class="admin-trigger">🔐 Administrador</button>
     </div>
 
+    <!-- PANEL ADMIN -->
     <div id="adminGrid" class="admin-grid">
 
       <div class="admin-card">
