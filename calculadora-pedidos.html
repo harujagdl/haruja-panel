@@ -63,14 +63,14 @@
     .primary{background:var(--olivo); color:#fff}
     .ghost{background:#f1f1f1; color:#222}
 
-    #msg{margin:10px 0; font-weight:700; color:#1a73e8}
-    .ok{color:#0a7a22}
-    .err{color:#b00020}
+    #msg{margin:10px 0; font-weight:700;}
+    #msg.ok{color:#0a7a22}
+    #msg.err{color:#b00020}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <img class="logo" src="https://i.postimg.cc/nMphkZcC/haruja-logo.png" alt="HarujaGdl" />
+    <img class="logo" src="/icons/icon-192.png" alt="HarujaGdl" />
     <div class="card" role="form" aria-labelledby="title">
       <h2 id="title">Calculadora de Precios</h2>
 
@@ -82,7 +82,16 @@
         </div>
         <div>
           <label for="categoria">Categoría</label>
-          <select id="categoria" required></select>
+          <select id="categoria" required>
+            <option value="">Selecciona...</option>
+            <option>Blusas</option>
+            <option>Pantalones</option>
+            <option>Vestidos</option>
+            <option>Faldas</option>
+            <option>Conjuntos</option>
+            <option>Chamarras</option>
+            <option>Accesorios</option>
+          </select>
           <div id="err-categoria" class="error" style="display:none"></div>
         </div>
       </div>
@@ -143,102 +152,75 @@
       <div id="msg" role="status" aria-live="polite"></div>
 
       <div class="actions">
-        <button id="btnGuardar" class="primary" onclick="guardar()">Guardar registro</button>
-        <button id="btnLimpiar" class="ghost" onclick="limpiar()">Limpiar</button>
+        <button id="btnGuardar" class="primary" type="button">Guardar registro</button>
+        <button id="btnLimpiar" class="ghost" type="button">Limpiar</button>
       </div>
     </div>
   </div>
 
 <script>
-  // ===== Estado base (estático) =====
-  let IVA = 0.16;      // 16%
-  let MARGEN = 0.65;   // 65%
+  // URL de tu Web App de Apps Script
+  const API_URL = 'https://script.google.com/macros/s/AKfycby4NNyRSFmQm-dgXf9dpTqVxBDORBtOnPywiffLNyvotUM66ZKjWCFgyIqAX-kPo_M/exec';
+
+  let IVA = 0.16;
+  let MARGEN = 0.65;
   let imageDataUrl = null;
+  let imageFileName = null;
   let busy = false;
 
   const $ = sel => document.querySelector(sel);
 
-  // Inicialización al cargar
   document.addEventListener('DOMContentLoaded', () => {
-    init({
-      iva: IVA,
-      margen: MARGEN,
-      categorias: [
-        'Blusas',
-        'Pantalones',
-        'Vestidos',
-        'Faldas',
-        'Conjuntos',
-        'Chamarras',
-        'Accesorios'
-      ]
-    });
+    initFront();
   });
 
-  function init(d){
-    IVA = Number(d.iva) || 0.16;
-    MARGEN = Number(d.margen) || 0.65;
-
-    $('#margenPill').textContent = (MARGEN*100).toFixed(0)+'%';
-    $('#iva').value = (IVA*100).toFixed(2)+'%';
-
+  function initFront() {
     // Fecha hoy
+    const fecha = $('#fecha');
     const today = new Date();
-    if ('valueAsDate' in $('#fecha')) {
-      $('#fecha').valueAsDate = today;
-    } else {
-      $('#fecha').value = isoDate(today);
-    }
+    const pad = n => String(n).padStart(2,'0');
+    fecha.value = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
 
-    // Categorías
-    const sel = $('#categoria');
-    sel.innerHTML =
-      '<option value="">Selecciona...</option>' +
-      (d.categorias || [])
-        .map(c => `<option>${escapeHtml(String(c))}</option>`)
-        .join('');
+    $('#iva').value = (IVA*100).toFixed(2) + '%';
+    $('#margenPill').textContent = (MARGEN*100).toFixed(0) + '%';
 
-    // Listeners
     $('#costo').addEventListener('input', recalc);
     $('#chk9').addEventListener('change', recalc);
-    $('#desc').addEventListener('input', e=>{
-      const len = e.target.value.length;
-      document.getElementById('desc-count').textContent = `${len}/140`;
+    $('#desc').addEventListener('input', e => {
+      $('#desc-count').textContent = `${e.target.value.length}/140`;
     });
 
-    // Drag and drop imagen
-    const drop = document.getElementById('drop');
-    const file = document.getElementById('file');
+    // Imagen
+    const drop = $('#drop');
+    const file = $('#file');
 
     drop.addEventListener('click', () => file.click());
-    drop.addEventListener('keypress', e=>{
-      if(e.key==='Enter' || e.key===' '){
+    drop.addEventListener('keypress', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         file.click();
       }
     });
-    drop.addEventListener('dragover', e=>{
+    drop.addEventListener('dragover', e => {
       e.preventDefault();
       drop.classList.add('dragover');
     });
-    drop.addEventListener('dragleave', ()=>{
+    drop.addEventListener('dragleave', () => {
       drop.classList.remove('dragover');
     });
-    drop.addEventListener('drop', e=>{
+    drop.addEventListener('drop', e => {
       e.preventDefault();
       drop.classList.remove('dragover');
       handleFile(e.dataTransfer.files?.[0]);
     });
-    file.addEventListener('change', e=> handleFile(e.target.files?.[0]));
+    file.addEventListener('change', e => handleFile(e.target.files?.[0]));
+
+    $('#btnGuardar').addEventListener('click', guardar);
+    $('#btnLimpiar').addEventListener('click', () => limpiar(true));
 
     recalc();
   }
 
-  // ===== Utils =====
-  function isoDate(d){
-    const pad = n => String(n).padStart(2,'0');
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  }
   function money(n){
     const x = Number(n);
     if (!isFinite(x)) return '$0.00';
@@ -252,27 +234,32 @@
     const mod = p % 10;
     return (mod===9) ? p : p + (9 - mod);
   }
-  function setMsg(html){ document.getElementById('msg').innerHTML = html || ''; }
-  function setImgMsg(t){ document.getElementById('imgMsg').textContent = t || ''; }
-  function escapeHtml(s){
-    return s.replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+  function setMsg(text, type){
+    const el = $('#msg');
+    el.textContent = text || '';
+    el.className = type ? type : '';
   }
+  function setImgMsg(t){ $('#imgMsg').textContent = t || ''; }
   function clearErrors(){
     ['fecha','categoria','desc','costo'].forEach(id => {
-      const el = document.getElementById('err-'+id);
-      if (el){ el.style.display = 'none'; }
+      const el = $('#err-'+id);
+      if (el) { el.style.display='none'; el.textContent=''; }
     });
   }
 
-  // ===== Lógica de cálculo =====
   function recalc(){
-    const costo = Number(document.getElementById('costo').value || 0);
-    const aplicar9 = document.getElementById('chk9').checked;
-    const pSinIva = costo * (1+MARGEN);
-    let pFinal = pSinIva * (1+IVA);
+    const costo = Number($('#costo').value || 0);
+    const aplicar9 = $('#chk9').checked;
+    if (!costo || costo <= 0){
+      $('#psiniva').value = '';
+      $('#pfinal').value = '';
+      return;
+    }
+    const pSinIva = costo * (1 + MARGEN);
+    let pFinal = pSinIva * (1 + IVA);
     if (aplicar9) pFinal = nextEnding9(pFinal);
-    document.getElementById('psiniva').value = money(pSinIva);
-    document.getElementById('pfinal').value  = money(round2(pFinal));
+    $('#psiniva').value = money(pSinIva);
+    $('#pfinal').value  = money(round2(pFinal));
   }
 
   function handleFile(f){
@@ -281,17 +268,18 @@
       setImgMsg('Formato no válido. Usa una imagen.');
       return;
     }
-    if(f.size > 12*1024*1024){
-      setImgMsg('La imagen supera 12 MB.');
+    if(f.size > 5*1024*1024){
+      setImgMsg('La imagen supera 5 MB.');
       return;
     }
+    imageFileName = f.name || 'prenda.jpg';
     const reader = new FileReader();
     reader.onload = function(){
       imageDataUrl = reader.result;
-      const img = document.getElementById('preview');
+      const img = $('#preview');
       img.src = imageDataUrl;
       img.style.display='block';
-      setImgMsg('Imagen cargada (solo vista previa, no se sube).');
+      setImgMsg('Imagen cargada (se enviará al guardar).');
     };
     reader.readAsDataURL(f);
   }
@@ -299,23 +287,25 @@
   function validar(){
     clearErrors();
     let ok = true;
-    if (!document.getElementById('categoria').value){
-      const e = document.getElementById('err-categoria');
+    const categoria = $('#categoria').value;
+    const desc = $('#desc').value.trim();
+    const costo = Number($('#costo').value);
+    const fecha = $('#fecha').value;
+
+    if (!categoria){
+      const e = $('#err-categoria');
       e.textContent = 'Selecciona una categoría.'; e.style.display='block'; ok=false;
     }
-    const desc = document.getElementById('desc').value.trim();
     if (!desc){
-      const e = document.getElementById('err-desc');
+      const e = $('#err-desc');
       e.textContent = 'Escribe una descripción.'; e.style.display='block'; ok=false;
     }
-    const costo = Number(document.getElementById('costo').value);
-    if (!isFinite(costo) || costo<=0){
-      const e = document.getElementById('err-costo');
+    if (!isFinite(costo) || costo <= 0){
+      const e = $('#err-costo');
       e.textContent = 'Ingresa un costo válido (> 0).'; e.style.display='block'; ok=false;
     }
-    const fecha = document.getElementById('fecha').value;
     if (!fecha){
-      const e = document.getElementById('err-fecha');
+      const e = $('#err-fecha');
       e.textContent = 'Selecciona una fecha.'; e.style.display='block'; ok=false;
     }
     return ok;
@@ -324,46 +314,82 @@
   function guardar(){
     if (busy) return;
     if (!validar()){
-      setMsg('<span class="err">Revisa los campos marcados.</span>');
+      setMsg('Revisa los campos marcados.', 'err');
       return;
     }
 
-    recalc();
+    const fecha = $('#fecha').value;
+    const categoria = $('#categoria').value;
+    const descripcion = $('#desc').value.trim().replace(/[\r\n]+/g,' ').slice(0,140);
+    const costo = Number($('#costo').value);
+    const aplicarRedondeo = $('#chk9').checked;
 
-    const fecha = document.getElementById('fecha').value;
-    const categoria = document.getElementById('categoria').value;
-    const descripcion = document.getElementById('desc').value.trim().replace(/[\r\n]+/g,' ').slice(0,140);
-    const costo = Number(document.getElementById('costo').value);
-    const aplicarRedondeo = document.getElementById('chk9').checked;
-    const precioSinIva = document.getElementById('psiniva').value;
-    const precioFinal = document.getElementById('pfinal').value;
+    const payload = {
+      fecha,
+      categoria,
+      descripcion,
+      costo,
+      aplicarRedondeo,
+      imageDataUrl,
+      imageFileName
+    };
 
-    const resumen = `
-Fecha: ${fecha}
-Categoría: ${categoria}
-Descripción: ${descripcion}
-Costo: ${costo.toFixed(2)}
-Redondeo a $9: ${aplicarRedondeo ? 'Sí' : 'No'}
-Precio sin IVA: ${precioSinIva}
-Precio final: ${precioFinal}
-`.trim();
+    busy = true;
+    $('#btnGuardar').disabled = true;
+    setMsg('Guardando registro en HarujaGdl…', '');
 
-    console.log(resumen);
-    setMsg('<span class="ok">Cálculo listo ✅ Copia los datos a tu hoja de cálculo.</span>');
+    fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (!res.ok){
+        throw new Error(res.error || 'Error desconocido del servidor.');
+      }
+
+      const calc = res.result && res.result.calculos;
+      if (calc){
+        if (typeof calc.precioSinIva === 'number')
+          $('#psiniva').value = money(calc.precioSinIva);
+        if (typeof calc.precioConIva === 'number')
+          $('#pfinal').value = money(calc.precioConIva);
+        if (typeof calc.iva === 'number')
+          $('#iva').value = (calc.iva*100).toFixed(2)+'%';
+        if (typeof calc.margen === 'number'){
+          MARGEN = calc.margen;
+          $('#margenPill').textContent = (MARGEN*100).toFixed(0)+'%';
+        }
+      }
+
+      setMsg('Registro guardado con éxito ✅', 'ok');
+    })
+    .catch(err => {
+      console.error(err);
+      setMsg('Error al guardar: ' + err.message, 'err');
+    })
+    .finally(() => {
+      busy = false;
+      $('#btnGuardar').disabled = false;
+    });
   }
 
   function limpiar(resetMsgs){
-    if (resetMsgs === undefined) resetMsgs = true;
-    document.getElementById('categoria').value = '';
-    document.getElementById('desc').value = '';
-    document.getElementById('desc-count').textContent = '0/140';
-    document.getElementById('costo').value = '';
+    $('#categoria').value = '';
+    $('#desc').value = '';
+    $('#desc-count').textContent = '0/140';
+    $('#costo').value = '';
     imageDataUrl = null;
-    document.getElementById('preview').style.display='none';
+    imageFileName = null;
+    $('#preview').style.display='none';
     setImgMsg('');
-    recalc();
     clearErrors();
-    if(resetMsgs) setMsg('');
+    $('#psiniva').value = '';
+    $('#pfinal').value  = '';
+    if(resetMsgs) setMsg('', '');
   }
 </script>
 </body>
