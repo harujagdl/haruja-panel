@@ -470,6 +470,47 @@
       </div>
     </div>
 
+          <!-- Resumen del día -->
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">📈</span></div>
+        <h4>Resumen del día</h4>
+        <p>Ventas, tickets y prendas sin precio.</p>
+        <button
+          class="admin-btn"
+          type="button"
+          onclick="verDashboardHoy()"
+        >
+          Ver resumen
+        </button>
+      </div>
+
+      <!-- Buscar producto (Master) -->
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">🔎</span></div>
+        <h4>Buscar producto</h4>
+        <p>Consulta rápida en Master por código o descripción.</p>
+        <button
+          class="admin-btn"
+          type="button"
+          onclick="abrirBuscadorProducto()"
+        >
+          Buscar
+        </button>
+      </div>
+
+      <!-- Escáner (beta, por ahora solo abre otra página) -->
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">📷</span></div>
+        <h4>Escáner de códigos (beta)</h4>
+        <p>Leer códigos con la cámara (en desarrollo).</p>
+        <a
+          class="admin-btn"
+          href="/scanner.html"
+        >
+          Abrir escáner
+        </a>
+      </div>
+
     <!-- Overlay de cargando -->
     <div id="loadingOverlay" class="loading-overlay" style="display: none">
       <div class="loading-box">
@@ -684,7 +725,120 @@
             btn.textContent = textoOriginal || "Generar CSV";
           }
         }
+      } // 👈 ESTA llave cierra la función
+
+      // ============================
+      //  Dashboard del día
+      // ============================
+
+      async function verDashboardHoy() {
+        showLoader("Cargando resumen del día...");
+
+        try {
+          const respuesta = await fetch(PIPELINE_URL + "?action=dashboardHoy");
+          const data = await respuesta.json();
+
+          if (!data.success) {
+            showToast(
+              data.message || "No se pudo obtener el resumen del día.",
+              "error"
+            );
+            return;
+          }
+
+          const d = data.dashboard || {};
+          const ventasHoy = d.ventasHoy || 0;
+          const ticketsHoy = d.ticketsHoy || 0;
+          const ventasSemana = d.ventasSemana || 0;
+          const ventasMes = d.ventasMes || 0;
+          const prendasSinPrecio = d.prendasSinPrecio || 0;
+
+          const msg =
+            "📈 Resumen del día\n\n" +
+            "💸 Ventas hoy: $" + ventasHoy.toLocaleString("es-MX") + "\n" +
+            "🧾 Tickets hoy: " + ticketsHoy + "\n\n" +
+            "📅 Ventas últimos 7 días: $" + ventasSemana.toLocaleString("es-MX") + "\n" +
+            "📆 Ventas del mes: $" + ventasMes.toLocaleString("es-MX") + "\n\n" +
+            "⚠️ Prendas sin precio en Master: " + prendasSinPrecio;
+
+          alert(msg); // luego si quieres lo cambiamos a un modal bonito
+        } catch (error) {
+          console.error(error);
+          showToast(
+            "Error al conectar con el Master para el dashboard.",
+            "error"
+          );
+        } finally {
+          hideLoader();
+        }
+      }
+
+      // ============================
+      //  Buscador de producto
+      // ============================
+
+      async function abrirBuscadorProducto() {
+        const q = prompt(
+          "Buscar producto en Master:\n\n" +
+          "Ingresa código o parte de la descripción."
+        );
+        if (!q) return;
+
+        showLoader("Buscando producto...");
+
+        try {
+          const respuesta = await fetch(
+            PIPELINE_URL +
+              "?action=buscarProducto&q=" +
+              encodeURIComponent(q)
+          );
+          const data = await respuesta.json();
+
+          if (!data.success) {
+            showToast(data.message || "Error en la búsqueda.", "error");
+            return;
+          }
+
+          const resultados = data.resultados || [];
+          if (!resultados.length) {
+            showToast("No se encontraron productos para: " + q, "info");
+            return;
+          }
+
+          let texto = "Resultados de búsqueda (" + resultados.length + "):\n\n";
+          resultados.slice(0, 5).forEach((item, idx) => {
+            texto +=
+              "#" +
+              (idx + 1) +
+              " " +
+              (item.codigo || "") +
+              " | " +
+              (item.descripcion || "") +
+              "\n" +
+              "Tipo: " +
+              (item.tipo || "-") +
+              " | Color: " +
+              (item.color || "-") +
+              " | Talla: " +
+              (item.talla || "-") +
+              "\n" +
+              "Precio: " +
+              (item.precio !== "" ? "$" + item.precio : "N/D") +
+              "\n\n";
+          });
+
+          alert(texto);
+        } catch (error) {
+          console.error(error);
+          showToast(
+            "Error al conectar con el Master para la búsqueda.",
+            "error"
+          );
+        } finally {
+          hideLoader();
+        }
       }
     </script>
   </body>
 </html>
+
