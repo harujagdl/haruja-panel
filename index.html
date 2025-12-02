@@ -329,7 +329,21 @@
           >Ir a app</a
         >
       </div>
-
+      <!-- NUEVA CARD: Ejecutar pipeline Master -->
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">⚙️</span></div>
+        <h4>Actualizar Master</h4>
+        <p>Corre: códigos nuevos, precios y CSV + IVA.</p>
+        <button
+          id="btnPipelineMaster"
+          class="admin-btn"
+          type="button"
+          onclick="ejecutarPipelineMaster()"
+        >
+          Ejecutar actualización
+        </button>
+      </div>
+      
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📄</span></div>
         <h4>BD Tiendanube</h4>
@@ -355,54 +369,102 @@
       </div>
     </div>
 
-    <script>
-      const ADMIN_PASSWORD = "Harujagdl";
+  <script>
+    const ADMIN_PASSWORD = "Harujagdl";
 
-      const adminToggle = document.getElementById("adminToggle");
-      const adminGrid = document.getElementById("adminGrid");
-      const publicGrid = document.getElementById("publicGrid");
-      const panelTitle = document.getElementById("panelTitle");
+    const adminToggle = document.getElementById("adminToggle");
+    const adminGrid = document.getElementById("adminGrid");
+    const publicGrid = document.getElementById("publicGrid");
+    const panelTitle = document.getElementById("panelTitle");
 
-      let adminUnlocked = localStorage.getItem("harujaAdmin") === "true";
+    let adminUnlocked = localStorage.getItem("harujaAdmin") === "true";
 
-      function showAdmin() {
-        publicGrid.style.display = "none";
-        adminGrid.style.display = "grid";
-        panelTitle.textContent = "Panel Administrador HarujaGdl";
-        adminToggle.textContent = "⬅️ Volver al panel";
-      }
+    function showAdmin() {
+      publicGrid.style.display = "none";
+      adminGrid.style.display = "grid";
+      panelTitle.textContent = "Panel Administrador HarujaGdl";
+      adminToggle.textContent = "⬅️ Volver al panel";
+    }
 
-      function showPublic() {
-        publicGrid.style.display = "grid";
-        adminGrid.style.display = "none";
-        panelTitle.textContent = "Panel de Herramientas HarujaGdl";
-        adminToggle.textContent = "🔐 Administrador";
-      }
+    function showPublic() {
+      publicGrid.style.display = "grid";
+      adminGrid.style.display = "none";
+      panelTitle.textContent = "Panel de Herramientas HarujaGdl";
+      adminToggle.textContent = "🔐 Administrador";
+    }
 
-      if (adminUnlocked) {
-        showAdmin();
-      }
+    if (adminUnlocked) {
+      showAdmin();
+    }
 
-      adminToggle.addEventListener("click", () => {
-        if (!adminUnlocked) {
-          const pass = prompt("Introduce la contraseña de administrador:");
-          if (pass === ADMIN_PASSWORD) {
-            adminUnlocked = true;
-            localStorage.setItem("harujaAdmin", "true");
-            showAdmin();
-          } else {
-            alert("Contraseña incorrecta.");
-          }
+    adminToggle.addEventListener("click", () => {
+      if (!adminUnlocked) {
+        const pass = prompt("Introduce la contraseña de administrador:");
+        if (pass === ADMIN_PASSWORD) {
+          adminUnlocked = true;
+          localStorage.setItem("harujaAdmin", "true");
+          showAdmin();
         } else {
-          if (adminGrid.style.display === "grid") {
-            showPublic();
-          } else {
-            showAdmin();
-          }
+          alert("Contraseña incorrecta.");
         }
-      });
-    </script>
-  </body>
+      } else {
+        if (adminGrid.style.display === "grid") {
+          showPublic();
+        } else {
+          showAdmin();
+        }
+      }
+    });
+
+    // ============================
+    //  Pipeline Master desde PWA
+    // ============================
+
+    // URL del endpoint del Master (Apps Script)
+    const PIPELINE_URL =
+      "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
+
+    async function ejecutarPipelineMaster() {
+      const btn = document.getElementById("btnPipelineMaster");
+      const textoOriginal = btn ? btn.textContent : "";
+
+      const confirmar = confirm(
+        "¿Quieres ejecutar la actualización completa del Master?\n\n" +
+          "Esto correrá: códigos nuevos, precios desde Calculadora y CSV con IVA."
+      );
+      if (!confirmar) return;
+
+      try {
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Ejecutando...";
+        }
+
+        const respuesta = await fetch(PIPELINE_URL + "?action=ejecutarPipeline");
+        const data = await respuesta.json();
+
+        if (data.success) {
+          alert(
+            "✅ " +
+              (data.message ||
+                "Pipeline ejecutado correctamente. Revisa el Master.")
+          );
+        } else {
+          alert(
+            "⚠️ " +
+              (data.message || "Hubo un problema al ejecutar el pipeline.")
+          );
+        }
+      } catch (error) {
+        console.error(error);
+        alert("❌ Error al conectar con el Master. Intenta de nuevo.");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = textoOriginal || "Ejecutar actualización";
+        }
+      }
+    }
+  </script>
+</body>
 </html>
-
-
