@@ -329,11 +329,12 @@
           >Ir a app</a
         >
       </div>
-      <!-- NUEVA CARD: Ejecutar pipeline Master -->
+      
+      <!-- Actualizar Master (solo códigos + precios) -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">⚙️</span></div>
         <h4>Actualizar Master</h4>
-        <p>Corre: códigos nuevos, precios y CSV + IVA.</p>
+        <p>Corre: códigos nuevos y precios desde Calculadora.</p>
         <button
           id="btnPipelineMaster"
           class="admin-btn"
@@ -343,7 +344,7 @@
           Ejecutar actualización
         </button>
       </div>
-      
+
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📄</span></div>
         <h4>BD Tiendanube</h4>
@@ -367,7 +368,22 @@
           >Ir a app</a
         >
       </div>
+
     </div>
+          <!-- Generar CSV + IVA -->
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">💾</span></div>
+        <h4>Generar CSV + IVA</h4>
+        <p>Actualiza la base de datos para SMP / etiquetas.</p>
+        <button
+          id="btnCSVConIVA"
+          class="admin-btn"
+          type="button"
+          onclick="ejecutarCSVConIVA()"
+        >
+          Generar CSV
+        </button>
+      </div>
 
   <script>
     const ADMIN_PASSWORD = "Harujagdl";
@@ -429,9 +445,10 @@
       const textoOriginal = btn ? btn.textContent : "";
 
       const confirmar = confirm(
-        "¿Quieres ejecutar la actualización completa del Master?\n\n" +
-          "Esto correrá: códigos nuevos, precios desde Calculadora y CSV con IVA."
-      );
+        "¿Quieres ejecutar la actualización del Master?\n\n" +
+        "Esto correrá: códigos nuevos y precios desde Calculadora."
+        );
+
       if (!confirmar) return;
 
       try {
@@ -465,6 +482,49 @@
         }
       }
     }
+      async function ejecutarCSVConIVA() {
+      const btn = document.getElementById("btnCSVConIVA");
+      const textoOriginal = btn ? btn.textContent : "";
+
+      const confirmar = confirm(
+        "¿Generar el CSV con IVA?\n\n" +
+          "Esto actualizará la base que usas para SMP / etiquetas."
+      );
+      if (!confirmar) return;
+
+      try {
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Generando...";
+        }
+
+        const respuesta = await fetch(PIPELINE_URL + "?action=generarCSVConIVA");
+        const data = await respuesta.json();
+
+        if (data.success) {
+          alert(
+            "✅ " +
+              (data.message ||
+                "CSV con IVA generado correctamente. Revisa el archivo SMP.")
+          );
+        } else {
+          alert(
+            "⚠️ " +
+              (data.message ||
+                "Hubo un problema al generar el CSV con IVA.")
+          );
+        }
+      } catch (error) {
+        console.error(error);
+        alert("❌ Error al conectar con el Master. Intenta de nuevo.");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = textoOriginal || "Generar CSV";
+        }
+      }
+    }
   </script>
 </body>
 </html>
+
