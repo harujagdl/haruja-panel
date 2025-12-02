@@ -353,8 +353,9 @@
       <button id="adminToggle" class="admin-trigger">🔐 Administrador</button>
     </div>
 
-    <!-- PANEL ADMIN -->
+        <!-- PANEL ADMIN -->
     <div id="adminGrid" class="admin-grid">
+      <!-- Apartados -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📦</span></div>
         <h4>Apartados</h4>
@@ -363,10 +364,12 @@
           class="admin-btn"
           target="_blank"
           href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?gid=784913066#gid=784913066"
-          >Ir a app</a
         >
+          Ir a app
+        </a>
       </div>
 
+      <!-- Est. Precios -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">🏷️</span></div>
         <h4>Est. Precios</h4>
@@ -375,10 +378,12 @@
           class="admin-btn"
           target="_blank"
           href="https://script.google.com/macros/s/AKfycby4NNyRSFmQm-dgXf9dpTqVxBDORBtOnPywiffLNyvotUM66ZKjWCFgyIqAX-kPo_M/exec"
-          >Ir a app</a
         >
+          Ir a app
+        </a>
       </div>
 
+      <!-- Códigos -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">🧾</span></div>
         <h4>Códigos</h4>
@@ -387,10 +392,12 @@
           class="admin-btn"
           target="_blank"
           href="https://docs.google.com/spreadsheets/d/1DFIZc3BvqRSvaPqhBm1Geu4aeZji6zuIAZKpkeplpwU/edit?usp=sharing"
-          >Ir a app</a
         >
+          Ir a app
+        </a>
       </div>
 
+      <!-- Calculadora (BD) -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📱</span></div>
         <h4>Calculadora (BD)</h4>
@@ -399,10 +406,12 @@
           class="admin-btn"
           target="_blank"
           href="https://docs.google.com/spreadsheets/d/1hLSh3sqKAi_BC3t6sWhP4Bl0-qlaZbMXhs9tGa0HU2Q/edit?usp=sharing"
-          >Ir a app</a
         >
+          Ir a app
+        </a>
       </div>
 
+      <!-- Master -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📋</span></div>
         <h4>Master</h4>
@@ -411,11 +420,12 @@
           class="admin-btn"
           target="_blank"
           href="https://docs.google.com/spreadsheets/d/1S9mZbcQehmyiwaebh0GKlQQF7HDWLTdvJZFkV-vY_ZA/edit?usp=sharing"
-          >Ir a app</a
         >
+          Ir a app
+        </a>
       </div>
 
-      <!-- Actualizar Master (solo códigos + precios) -->
+      <!-- Actualizar Master (pipeline códigos + precios) -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">⚙️</span></div>
         <h4>Actualizar Master</h4>
@@ -430,6 +440,7 @@
         </button>
       </div>
 
+      <!-- BD Tiendanube -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📄</span></div>
         <h4>BD Tiendanube</h4>
@@ -438,10 +449,12 @@
           class="admin-btn"
           target="_blank"
           href="https://docs.google.com/spreadsheets/d/1GfXUv-Y143yQJFC-6_kLZH3kT5rid2BLTEFHFKoikyQ/edit?usp=sharing"
-          >Ir a app</a
         >
+          Ir a app
+        </a>
       </div>
 
+      <!-- CSV SMP -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">💾</span></div>
         <h4>CSV SMP</h4>
@@ -450,15 +463,16 @@
           class="admin-btn"
           target="_blank"
           href="https://docs.google.com/spreadsheets/d/15ofWXeddksQjaUxpHxSlzq6XrqHsl78CHgcorlBabhI/edit?usp=sharing"
-          >Ir a app</a
         >
+          Ir a app
+        </a>
       </div>
 
       <!-- Generar CSV + IVA -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">💾</span></div>
         <h4>Generar CSV + IVA</h4>
-        <p>Actualiza la base de datos para SMP / etiquetas.</p>
+        <p>Actualiza la base que usas para SMP / etiquetas.</p>
         <button
           id="btnCSVConIVA"
           class="admin-btn"
@@ -468,9 +482,8 @@
           Generar CSV
         </button>
       </div>
-    </div>
 
-          <!-- Resumen del día -->
+      <!-- Resumen del día -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📈</span></div>
         <h4>Resumen del día</h4>
@@ -484,7 +497,7 @@
         </button>
       </div>
 
-      <!-- Buscar producto (Master) -->
+      <!-- Buscar producto -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">🔎</span></div>
         <h4>Buscar producto</h4>
@@ -498,7 +511,7 @@
         </button>
       </div>
 
-      <!-- Escáner (beta, por ahora solo abre otra página) -->
+      <!-- Escáner de códigos (beta) -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📷</span></div>
         <h4>Escáner de códigos (beta)</h4>
@@ -509,13 +522,6 @@
         >
           Abrir escáner
         </a>
-      </div>
-
-    <!-- Overlay de cargando -->
-    <div id="loadingOverlay" class="loading-overlay" style="display: none">
-      <div class="loading-box">
-        <div class="loading-spinner"></div>
-        <p id="loadingMessage">Procesando...</p>
       </div>
     </div>
 
@@ -841,4 +847,5 @@
     </script>
   </body>
 </html>
+
 
