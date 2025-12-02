@@ -1,5 +1,5 @@
 // Nombre del caché estático
-const CACHE_NAME = "haruja-static-v2";
+const CACHE_NAME = "haruja-static-v3";
 
 // Archivos estáticos que queremos cachear (no HTML dinámico)
 const STATIC_ASSETS = [
@@ -77,4 +77,5 @@ async function cacheFirst(request) {
   cache.put(request, networkResponse.clone());
   return networkResponse;
 }
+
 
