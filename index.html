@@ -2,7 +2,10 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <meta name="theme-color" content="#A7B59E" />
     <title>Panel HarujaGdl</title>
 
@@ -61,34 +64,28 @@
         display: none;
       }
 
-/* ===== TARJETAS ===== */
+      /* ===== TARJETAS ===== */
 
-.card,
-.admin-card {
-  background: #ffffff;
-  padding: 22px 16px 18px;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid #f0f0f0;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+      .card,
+      .admin-card {
+        background: #ffffff;
+        padding: 22px 16px 18px;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        border: 1px solid #f0f0f0;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        height: 300px;
+      }
 
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  height: 300px; /* <- súbelo de 270px a 300px */
-}
+      .card:hover,
+      .admin-card:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+      }
 
-.btn, .admin-btn {
-  margin-top: auto;      /* ← Baja el botón siempre */
-  display: inline-block;
-  width: 100%;
-  background: var(--acento);
-  padding: 10px 0;
-  color: white;
-  text-decoration: none;
-  border-radius: 10px;
-  font-size: 14px;
-}
       /* ===== ICONOS REDONDOS ===== */
 
       .icon-circle,
@@ -128,9 +125,17 @@
         text-decoration: none;
         border-radius: 10px;
         font-size: 14px;
+        border: none;
+        cursor: pointer;
       }
 
-      /* ===== ADMIN BUTTON ===== */
+      .btn:disabled,
+      .admin-btn:disabled {
+        opacity: 0.7;
+        cursor: default;
+      }
+
+      /* ===== ADMIN BUTTON / SECCIÓN ===== */
 
       .admin-section {
         max-width: 900px;
@@ -147,6 +152,82 @@
         font-size: 15px;
         color: var(--texto);
         text-decoration: underline;
+      }
+
+      /* ===== OVERLAY CARGANDO ===== */
+
+      .loading-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(56, 50, 52, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+
+      .loading-box {
+        background: var(--beige, #faf6f1);
+        padding: 16px 20px;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        min-width: 220px;
+      }
+
+      .loading-spinner {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 3px solid rgba(167, 181, 158, 0.4);
+        border-top-color: var(--acento, #a7b59e);
+        margin: 0 auto 10px;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ===== TOAST ===== */
+
+      .toast {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        background: #383234;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        max-width: 90%;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        z-index: 10000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+      }
+
+      .toast--visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+      }
+
+      .toast--success {
+        background: #3a7f4a;
+      }
+
+      .toast--error {
+        background: #b53737;
+      }
+
+      .toast--info {
+        background: #383234;
       }
     </style>
   </head>
@@ -186,13 +267,17 @@
         <a class="btn" href="/plan-lealtad.html" target="_blank">Ir a app</a>
       </div>
 
-      <!-- 💚 NUEVA TARJETA: BD sistema de lealtad -->
+      <!-- BD sistema de lealtad -->
       <div class="card">
         <div class="icon-circle"><span class="emoji">📚</span></div>
         <h3>Base de datos plan de lealtad</h3>
         <p>Base de datos plan de lealtad.</p>
-        <a class="btn" target="_blank"
-         href="https://docs.google.com/spreadsheets/d/1thDRVw0qmCBfQdNT2-Crv6RrMAzo-AcwNL9q21pODpA/edit?gid=0#gid=0">Ir a app</a>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1thDRVw0qmCBfQdNT2-Crv6RrMAzo-AcwNL9q21pODpA/edit?gid=0#gid=0"
+          >Ir a app</a
+        >
       </div>
 
       <div class="card">
@@ -329,7 +414,7 @@
           >Ir a app</a
         >
       </div>
-      
+
       <!-- Actualizar Master (solo códigos + precios) -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">⚙️</span></div>
@@ -369,8 +454,7 @@
         >
       </div>
 
-    </div>
-          <!-- Generar CSV + IVA -->
+      <!-- Generar CSV + IVA -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">💾</span></div>
         <h4>Generar CSV + IVA</h4>
@@ -384,147 +468,223 @@
           Generar CSV
         </button>
       </div>
+    </div>
 
-  <script>
-    const ADMIN_PASSWORD = "Harujagdl";
+    <!-- Overlay de cargando -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none">
+      <div class="loading-box">
+        <div class="loading-spinner"></div>
+        <p id="loadingMessage">Procesando...</p>
+      </div>
+    </div>
 
-    const adminToggle = document.getElementById("adminToggle");
-    const adminGrid = document.getElementById("adminGrid");
-    const publicGrid = document.getElementById("publicGrid");
-    const panelTitle = document.getElementById("panelTitle");
+    <!-- Toast de notificaciones -->
+    <div id="toast" class="toast" style="display: none"></div>
 
-    let adminUnlocked = localStorage.getItem("harujaAdmin") === "true";
+    <script>
+      const ADMIN_PASSWORD = "Harujagdl";
 
-    function showAdmin() {
-      publicGrid.style.display = "none";
-      adminGrid.style.display = "grid";
-      panelTitle.textContent = "Panel Administrador HarujaGdl";
-      adminToggle.textContent = "⬅️ Volver al panel";
-    }
+      const adminToggle = document.getElementById("adminToggle");
+      const adminGrid = document.getElementById("adminGrid");
+      const publicGrid = document.getElementById("publicGrid");
+      const panelTitle = document.getElementById("panelTitle");
 
-    function showPublic() {
-      publicGrid.style.display = "grid";
-      adminGrid.style.display = "none";
-      panelTitle.textContent = "Panel de Herramientas HarujaGdl";
-      adminToggle.textContent = "🔐 Administrador";
-    }
+      let adminUnlocked = localStorage.getItem("harujaAdmin") === "true";
 
-    if (adminUnlocked) {
-      showAdmin();
-    }
-
-    adminToggle.addEventListener("click", () => {
-      if (!adminUnlocked) {
-        const pass = prompt("Introduce la contraseña de administrador:");
-        if (pass === ADMIN_PASSWORD) {
-          adminUnlocked = true;
-          localStorage.setItem("harujaAdmin", "true");
-          showAdmin();
-        } else {
-          alert("Contraseña incorrecta.");
-        }
-      } else {
-        if (adminGrid.style.display === "grid") {
-          showPublic();
-        } else {
-          showAdmin();
-        }
+      function showAdmin() {
+        publicGrid.style.display = "none";
+        adminGrid.style.display = "grid";
+        panelTitle.textContent = "Panel Administrador HarujaGdl";
+        adminToggle.textContent = "⬅️ Volver al panel";
       }
-    });
 
-    // ============================
-    //  Pipeline Master desde PWA
-    // ============================
+      function showPublic() {
+        publicGrid.style.display = "grid";
+        adminGrid.style.display = "none";
+        panelTitle.textContent = "Panel de Herramientas HarujaGdl";
+        adminToggle.textContent = "🔐 Administrador";
+      }
 
-    // URL del endpoint del Master (Apps Script)
-    const PIPELINE_URL =
-      "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
+      if (adminUnlocked) {
+        showAdmin();
+      }
 
-    async function ejecutarPipelineMaster() {
-      const btn = document.getElementById("btnPipelineMaster");
-      const textoOriginal = btn ? btn.textContent : "";
+      adminToggle.addEventListener("click", () => {
+        if (!adminUnlocked) {
+          const pass = prompt("Introduce la contraseña de administrador:");
+          if (pass === ADMIN_PASSWORD) {
+            adminUnlocked = true;
+            localStorage.setItem("harujaAdmin", "true");
+            showAdmin();
+          } else {
+            showToast("Contraseña incorrecta.", "error");
+          }
+        } else {
+          if (adminGrid.style.display === "grid") {
+            showPublic();
+          } else {
+            showAdmin();
+          }
+        }
+      });
 
-      const confirmar = confirm(
-        "¿Quieres ejecutar la actualización del Master?\n\n" +
-        "Esto correrá: códigos nuevos y precios desde Calculadora."
+      // ============================
+      //  Loader + Toast helpers
+      // ============================
+
+      const loadingOverlay = document.getElementById("loadingOverlay");
+      const loadingMessage = document.getElementById("loadingMessage");
+      const toastEl = document.getElementById("toast");
+      let toastTimeoutId = null;
+
+      function showLoader(message) {
+        if (loadingMessage)
+          loadingMessage.textContent = message || "Procesando...";
+        if (loadingOverlay) loadingOverlay.style.display = "flex";
+      }
+
+      function hideLoader() {
+        if (loadingOverlay) loadingOverlay.style.display = "none";
+      }
+
+      function showToast(message, type = "info") {
+        if (!toastEl) return;
+
+        toastEl.textContent = message || "";
+        toastEl.classList.remove(
+          "toast--success",
+          "toast--error",
+          "toast--info",
+          "toast--visible"
         );
 
-      if (!confirmar) return;
+        if (type === "success") toastEl.classList.add("toast--success");
+        else if (type === "error") toastEl.classList.add("toast--error");
+        else toastEl.classList.add("toast--info");
 
-      try {
-        if (btn) {
-          btn.disabled = true;
-          btn.textContent = "Ejecutando...";
-        }
+        toastEl.style.display = "block";
+        requestAnimationFrame(() => {
+          toastEl.classList.add("toast--visible");
+        });
 
-        const respuesta = await fetch(PIPELINE_URL + "?action=ejecutarPipeline");
-        const data = await respuesta.json();
+        if (toastTimeoutId) clearTimeout(toastTimeoutId);
+        toastTimeoutId = setTimeout(() => {
+          toastEl.classList.remove("toast--visible");
+          setTimeout(() => {
+            toastEl.style.display = "none";
+          }, 250);
+        }, 3500);
+      }
 
-        if (data.success) {
-          alert(
-            "✅ " +
-              (data.message ||
-                "Pipeline ejecutado correctamente. Revisa el Master.")
+      // ============================
+      //  Pipeline Master desde PWA
+      // ============================
+
+      // URL del endpoint del Master (Apps Script)
+      const PIPELINE_URL =
+        "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
+
+      async function ejecutarPipelineMaster() {
+        const btn = document.getElementById("btnPipelineMaster");
+        const textoOriginal = btn ? btn.textContent : "";
+
+        const confirmar = confirm(
+          "¿Quieres ejecutar la actualización del Master?\n\n" +
+            "Esto correrá: códigos nuevos y precios desde Calculadora."
+        );
+        if (!confirmar) return;
+
+        try {
+          if (btn) {
+            btn.disabled = true;
+            btn.textContent = "Ejecutando...";
+          }
+
+          showLoader("Actualizando Master (códigos + precios)...");
+
+          const respuesta = await fetch(
+            PIPELINE_URL + "?action=ejecutarPipeline"
           );
-        } else {
-          alert(
-            "⚠️ " +
-              (data.message || "Hubo un problema al ejecutar el pipeline.")
+          const data = await respuesta.json();
+
+          if (data.success) {
+            showToast(
+              data.message ||
+                "Pipeline ejecutado correctamente. Revisa el Master.",
+              "success"
+            );
+          } else {
+            showToast(
+              data.message || "Hubo un problema al ejecutar el pipeline.",
+              "error"
+            );
+          }
+        } catch (error) {
+          console.error(error);
+          showToast(
+            "Error al conectar con el Master. Intenta de nuevo.",
+            "error"
           );
-        }
-      } catch (error) {
-        console.error(error);
-        alert("❌ Error al conectar con el Master. Intenta de nuevo.");
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = textoOriginal || "Ejecutar actualización";
+        } finally {
+          hideLoader();
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent =
+              textoOriginal || "Ejecutar actualización";
+          }
         }
       }
-    }
+
       async function ejecutarCSVConIVA() {
-      const btn = document.getElementById("btnCSVConIVA");
-      const textoOriginal = btn ? btn.textContent : "";
+        const btn = document.getElementById("btnCSVConIVA");
+        const textoOriginal = btn ? btn.textContent : "";
 
-      const confirmar = confirm(
-        "¿Generar el CSV con IVA?\n\n" +
-          "Esto actualizará la base que usas para SMP / etiquetas."
-      );
-      if (!confirmar) return;
+        const confirmar = confirm(
+          "¿Generar el CSV con IVA?\n\n" +
+            "Esto actualizará la base que usas para SMP / etiquetas."
+        );
+        if (!confirmar) return;
 
-      try {
-        if (btn) {
-          btn.disabled = true;
-          btn.textContent = "Generando...";
-        }
+        try {
+          if (btn) {
+            btn.disabled = true;
+            btn.textContent = "Generando...";
+          }
 
-        const respuesta = await fetch(PIPELINE_URL + "?action=generarCSVConIVA");
-        const data = await respuesta.json();
+          showLoader("Generando CSV con IVA...");
 
-        if (data.success) {
-          alert(
-            "✅ " +
-              (data.message ||
-                "CSV con IVA generado correctamente. Revisa el archivo SMP.")
+          const respuesta = await fetch(
+            PIPELINE_URL + "?action=generarCSVConIVA"
           );
-        } else {
-          alert(
-            "⚠️ " +
-              (data.message ||
-                "Hubo un problema al generar el CSV con IVA.")
+          const data = await respuesta.json();
+
+          if (data.success) {
+            showToast(
+              data.message ||
+                "CSV con IVA generado correctamente. Revisa el archivo SMP.",
+              "success"
+            );
+          } else {
+            showToast(
+              data.message ||
+                "Hubo un problema al generar el CSV con IVA.",
+              "error"
+            );
+          }
+        } catch (error) {
+          console.error(error);
+          showToast(
+            "Error al conectar con el Master. Intenta de nuevo.",
+            "error"
           );
-        }
-      } catch (error) {
-        console.error(error);
-        alert("❌ Error al conectar con el Master. Intenta de nuevo.");
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = textoOriginal || "Generar CSV";
+        } finally {
+          hideLoader();
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = textoOriginal || "Generar CSV";
+          }
         }
       }
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>
-
