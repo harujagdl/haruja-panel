@@ -7,70 +7,320 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
+
+    <!-- Librería para leer QR desde la cámara -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
     <style>
+      :root {
+        --fondo: #faf6f1;
+        --tarjeta: #ffffff;
+        --texto: #383234;
+        --acento: #a7b59e;
+        --gris: #6b6b6b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
         font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont,
           "Segoe UI", sans-serif;
-        background: #faf6f1;
-        color: #383234;
+        background: var(--fondo);
+        color: var(--texto);
         text-align: center;
-        padding: 24px;
+        padding: 20px 16px 32px;
       }
+
       h1 {
         font-size: 22px;
-        margin-bottom: 8px;
+        margin-bottom: 4px;
       }
+
       p {
         margin-top: 0;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
+        font-size: 14px;
+        color: var(--gris);
       }
-      video {
+
+      .logo {
+        margin-bottom: 10px;
+      }
+
+      .logo img {
+        max-width: 180px;
+      }
+
+      .card {
+        max-width: 480px;
+        margin: 0 auto 16px;
+        background: var(--tarjeta);
+        border-radius: 20px;
+        padding: 18px 16px 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        border: 1px solid #f0f0f0;
+      }
+
+      #reader {
         width: 100%;
-        max-width: 420px;
-        border-radius: 16px;
-        background: #000;
+        max-width: 380px;
+        margin: 0 auto;
       }
-      a.volver {
+
+      .btn {
         display: inline-block;
-        margin-top: 20px;
         padding: 10px 18px;
         border-radius: 999px;
-        text-decoration: none;
-        background: #a7b59e;
+        border: none;
+        background: var(--acento);
         color: #fff;
         font-size: 14px;
+        cursor: pointer;
+      }
+
+      .btn.outline {
+        background: transparent;
+        color: var(--texto);
+        border: 1px solid var(--acento);
+      }
+
+      .btn-row {
+        margin-top: 14px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .status {
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--gris);
+      }
+
+      .result-card {
+        text-align: left;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .result-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .result-line strong {
+        font-weight: 600;
+      }
+
+      .pill {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #eef0ea;
+        font-size: 12px;
+        margin-right: 6px;
+        margin-top: 4px;
+      }
+
+      .empty {
+        font-size: 13px;
+        color: var(--gris);
+        font-style: italic;
       }
     </style>
   </head>
+
   <body>
+    <div class="logo">
+      <img src="/icons/icon-512.png" alt="HarujaGdl" />
+    </div>
+
     <h1>Escáner de códigos (beta)</h1>
-    <p>Próximamente lectura automática de códigos. Por ahora, solo vista de cámara.</p>
+    <p>Apunta la cámara al QR de la prenda para ver su información en el Master.</p>
 
-    <video id="preview" autoplay playsinline></video>
+    <!-- Tarjeta del lector -->
+    <div class="card">
+      <div id="reader"></div>
+      <div class="status" id="scanStatus">Preparando cámara…</div>
 
-    <a class="volver" href="/">⬅ Volver al panel</a>
+      <div class="btn-row">
+        <button id="btnRestart" class="btn" type="button">
+          🔄 Reiniciar escáner
+        </button>
+        <a class="btn outline" href="/">
+          ⬅ Volver al panel
+        </a>
+      </div>
+    </div>
+
+    <!-- Tarjeta de resultado -->
+    <div class="card">
+      <div class="result-card" id="resultContainer">
+        <div class="empty">
+          Aún no se ha leído ningún código. Escanea un QR para ver detalles.
+        </div>
+      </div>
+    </div>
 
     <script>
-      async function initCamera() {
-        const video = document.getElementById("preview");
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          alert("Tu navegador no permite usar la cámara.");
-          return;
-        }
+      // URL de tu API del Master (misma que usas en la PWA)
+      const PIPELINE_URL =
+        "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
+
+      let html5QrCode = null;
+      const readerId = "reader";
+      const statusEl = document.getElementById("scanStatus");
+      const resultEl = document.getElementById("resultContainer");
+      const btnRestart = document.getElementById("btnRestart");
+
+      // Inicializar el escáner
+      async function startScanner() {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" }
-          });
-          video.srcObject = stream;
+          statusEl.textContent = "Iniciando cámara…";
+
+          if (html5QrCode) {
+            try {
+              await html5QrCode.stop();
+            } catch (e) {
+              console.warn("Error al detener escáner previo", e);
+            }
+          }
+
+          html5QrCode = new Html5Qrcode(readerId);
+
+          const config = {
+            fps: 10,
+            qrbox: { width: 250, height: 250 }
+          };
+
+          await html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            onScanSuccess,
+            onScanFailure
+          );
+
+          statusEl.textContent = "Escaneando… apunta al código QR.";
         } catch (err) {
           console.error(err);
-          alert(
-            "No se pudo acceder a la cámara. Revisa permisos o usa otro navegador."
-          );
+          statusEl.textContent =
+            "No se pudo iniciar la cámara. Revisa permisos o intenta en otro navegador.";
         }
       }
-      initCamera();
+
+      function onScanFailure(error) {
+        // errores de lectura se ignoran, no mostramos nada para no saturar
+      }
+
+      // Cuando se detecta un QR válido
+      async function onScanSuccess(decodedText, decodedResult) {
+        const codigoBruto = (decodedText || "").trim();
+        if (!codigoBruto) return;
+
+        // Vibración cortita para feedback
+        if (navigator.vibrate) {
+          navigator.vibrate(80);
+        }
+
+        statusEl.textContent = `Código detectado: ${codigoBruto}. Consultando Master…`;
+
+        try {
+          const url =
+            PIPELINE_URL +
+            "?action=buscarProducto&q=" +
+            encodeURIComponent(codigoBruto);
+
+          const resp = await fetch(url);
+          const data = await resp.json();
+
+          if (!data.success) {
+            statusEl.textContent =
+              data.message || "Error en la búsqueda de producto.";
+            resultEl.innerHTML =
+              '<div class="empty">No se pudo obtener información del producto.</div>';
+            return;
+          }
+
+          const resultados = data.resultados || [];
+
+          if (!resultados.length) {
+            statusEl.textContent =
+              "No se encontraron productos para el código escaneado.";
+            resultEl.innerHTML =
+              '<div class="empty">No se encontraron coincidencias en el Master para "<strong>' +
+              codigoBruto +
+              '</strong>".</div>';
+            return;
+          }
+
+          // Intentar primero coincidencia EXACTA por código
+          let item =
+            resultados.find(
+              (r) =>
+                r.codigo &&
+                r.codigo.toString().trim().toLowerCase() ===
+                  codigoBruto.toLowerCase()
+            ) || resultados[0];
+
+          statusEl.textContent = "Producto encontrado en el Master.";
+
+          const precioTexto =
+            item.precio !== "" && item.precio != null
+              ? "$" + item.precio
+              : "N/D";
+
+          resultEl.innerHTML =
+            '<div class="result-title">Código: ' +
+            (item.codigo || "-") +
+            "</div>" +
+            '<div class="result-line"><strong>Descripción:</strong> ' +
+            (item.descripcion || "-") +
+            "</div>" +
+            '<div class="result-line"><strong>Tipo:</strong> ' +
+            (item.tipo || "-") +
+            "</div>" +
+            '<div class="result-line"><strong>Color:</strong> ' +
+            (item.color || "-") +
+            "</div>" +
+            '<div class="result-line"><strong>Talla:</strong> ' +
+            (item.talla || "-") +
+            "</div>" +
+            '<div class="result-line"><strong>Precio:</strong> ' +
+            precioTexto +
+            "</div>" +
+            '<div style="margin-top:8px;">' +
+            '<span class="pill">Escaneado: ' +
+            codigoBruto +
+            "</span>" +
+            "</div>";
+        } catch (err) {
+          console.error(err);
+          statusEl.textContent =
+            "Error al conectar con el Master para la búsqueda.";
+          resultEl.innerHTML =
+            '<div class="empty">Hubo un problema al consultar el producto. Intenta de nuevo.</div>';
+        }
+      }
+
+      btnRestart.addEventListener("click", () => {
+        startScanner();
+      });
+
+      // Iniciar al cargar la página
+      startScanner();
+
+      // Detener cámara al salir de la página
+      window.addEventListener("beforeunload", async () => {
+        if (html5QrCode) {
+          try {
+            await html5QrCode.stop();
+          } catch (e) {}
+        }
+      });
     </script>
   </body>
 </html>
