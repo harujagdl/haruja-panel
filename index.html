@@ -86,7 +86,6 @@
         transform: translateY(-2px);
       }
 
-      /* card altura auto para módulos especiales */
       .card--auto {
         height: auto;
       }
@@ -242,6 +241,7 @@
         margin: 0 auto 24px;
         padding: 0 22px 22px;
         text-align: left;
+        display: none; /* 👈 Oculta al inicio, se muestra con el botón */
       }
 
       .mov-section h2 {
@@ -455,9 +455,23 @@
         <p>Precios estimados.</p>
         <a class="btn" href="/calculadora-pedidos.html">Ir a app</a>
       </div>
+
+      <!-- Movimientos de ropa (botón) -->
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🚚</span></div>
+        <h3>Movimientos de ropa</h3>
+        <p>Salidas y entradas con escáner.</p>
+        <button
+          class="btn"
+          type="button"
+          onclick="abrirMovimientosRopa()"
+        >
+          Ir a app
+        </button>
+      </div>
     </div>
 
-    <!-- SECCIÓN MOVIMIENTOS DE ROPA -->
+    <!-- SECCIÓN MOVIMIENTOS DE ROPA (OCULTA HASTA DAR CLIC EN EL BOTÓN) -->
     <section id="movimientos-ropa" class="mov-section">
       <div class="card card--auto">
         <h2>Movimientos de ropa (salidas / entradas)</h2>
@@ -937,7 +951,7 @@
             btn.textContent = textoOriginal || "Generar CSV";
           }
         }
-      } // 👈 ESTA llave cierra la función
+      }
 
       // ============================
       //  Dashboard del día
@@ -973,7 +987,7 @@
             "📆 Ventas del mes: $" + ventasMes.toLocaleString("es-MX") + "\n\n" +
             "⚠️ Prendas sin precio en Master: " + prendasSinPrecio;
 
-          alert(msg); // luego si quieres lo cambiamos a un modal bonito
+          alert(msg);
         } catch (error) {
           console.error(error);
           showToast(
@@ -1052,6 +1066,18 @@
       }
 
       // ============================
+      //  Abrir módulo de movimientos
+      // ============================
+
+      function abrirMovimientosRopa() {
+        const seccion = document.getElementById("movimientos-ropa");
+        if (!seccion) return;
+
+        seccion.style.display = "block";
+        seccion.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // ============================
       //  MÓDULO MOVIMIENTOS DE ROPA
       // ============================
 
@@ -1066,14 +1092,13 @@
         const msg = document.getElementById("mov-mensaje");
 
         if (!video || !canvas || !ctx || !tbody || !btnIniciar) {
-          return; // por si se carga este HTML parcial en otro lado
+          return;
         }
 
         let stream = null;
         let scanning = false;
         let items = [];
 
-        // Fecha por defecto hoy
         const hoy = new Date().toISOString().slice(0, 10);
         const inputFecha = document.getElementById("mov-fecha");
         if (inputFecha && !inputFecha.value) inputFecha.value = hoy;
@@ -1086,7 +1111,8 @@
           if (scanning) return;
 
           if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            msg.textContent = "Tu dispositivo no permite usar la cámara desde el navegador.";
+            msg.textContent =
+              "Tu dispositivo no permite usar la cámara desde el navegador.";
             return;
           }
 
@@ -1132,10 +1158,8 @@
 
             if (code && code.data) {
               const codigo = code.data.trim();
-              // Evitar duplicados
               if (!items.find((it) => it.codigo === codigo)) {
                 agregarItemPorCodigo(codigo);
-                // Pausa para no leer mil veces el mismo código
                 scanning = false;
                 setTimeout(() => {
                   scanning = true;
@@ -1148,30 +1172,26 @@
           requestAnimationFrame(tick);
         }
 
-        async function agregarItemPorCodigo(codigo) {
+        function agregarItemPorCodigo(codigo) {
           msg.textContent = "Buscando info del código " + codigo + "...";
 
-          try {
-            const respuesta = await fetch(
-              PIPELINE_URL +
-                "?action=obtenerInfoCodigo&codigo=" +
-                encodeURIComponent(codigo)
-            );
-            const data = await respuesta.json();
-
-            if (!data.success || !data.producto) {
+          google.script.run
+            .withSuccessHandler(function (info) {
+              if (!info) {
+                msg.textContent =
+                  "Código " + codigo + " no encontrado en el Master.";
+                return;
+              }
+              items.push(info);
+              renderTabla();
+              msg.textContent = "Producto agregado: " + info.codigo;
+            })
+            .withFailureHandler(function (err) {
+              console.error(err);
               msg.textContent =
-                data.message || "Código " + codigo + " no encontrado en Master.";
-              return;
-            }
-
-            items.push(data.producto);
-            renderTabla();
-            msg.textContent = "Producto agregado: " + data.producto.codigo;
-          } catch (error) {
-            console.error(error);
-            msg.textContent = "Error al buscar la información del código.";
-          }
+                "Error al buscar la información del código. Revisa la consola.";
+            })
+            .obtenerInfoCodigoDesdeMaster(codigo);
         }
 
         function renderTabla() {
@@ -1185,7 +1205,9 @@
               <td>${item.talla || ""}</td>
               <td>${item.tipo || ""}</td>
               <td>${
-                item.precio !== undefined && item.precio !== null && item.precio !== ""
+                item.precio !== undefined &&
+                item.precio !== null &&
+                item.precio !== ""
                   ? "$" + Number(item.precio).toFixed(2)
                   : ""
               }</td>
@@ -1203,7 +1225,7 @@
           });
         }
 
-        async function guardarMovimiento() {
+        function guardarMovimiento() {
           if (!items.length) {
             msg.textContent = "Agrega al menos una prenda antes de guardar.";
             return;
@@ -1219,36 +1241,20 @@
 
           msg.textContent = "Guardando movimiento...";
 
-          try {
-            const respuesta = await fetch(
-              PIPELINE_URL + "?action=guardarMovimientoRopa",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-              }
-            );
-
-            const res = await respuesta.json();
-
-            if (!res.success) {
-              msg.textContent =
-                res.message || "Ocurrió un error al guardar el movimiento.";
-              return;
-            }
-
-            msg.innerHTML =
-              'Movimiento guardado con folio: <strong>' +
-              (res.folio || "") +
-              "</strong>";
-            items = [];
-            renderTabla();
-          } catch (error) {
-            console.error(error);
-            msg.textContent = "Error al guardar el movimiento.";
-          }
+          google.script.run
+            .withSuccessHandler(function (res) {
+              msg.innerHTML =
+                'Movimiento guardado con folio: <strong>' +
+                (res.folio || "") +
+                "</strong>";
+              items = [];
+              renderTabla();
+            })
+            .withFailureHandler(function (err) {
+              console.error(err);
+              msg.textContent = "Error al guardar el movimiento.";
+            })
+            .guardarMovimientoRopa(data);
         }
       })();
     </script>
