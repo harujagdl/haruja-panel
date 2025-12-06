@@ -234,14 +234,14 @@
         background: #383234;
       }
 
-      /* ===== SECCIÓN MOVIMIENTOS ===== */
+      /* ===== SECCIÓN MOVIMIENTOS / HISTORIAL ===== */
 
       .mov-section {
         max-width: 900px;
         margin: 0 auto 24px;
         padding: 0 22px 22px;
         text-align: left;
-        display: none; /* 👈 Oculta al inicio, se muestra con el botón */
+        display: none; /* oculta al inicio */
       }
 
       .mov-section h2 {
@@ -469,9 +469,23 @@
           Ir a app
         </button>
       </div>
+
+      <!-- Historial de Movimientos -->
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">📚</span></div>
+        <h3>Historial de movimientos</h3>
+        <p>Consulta salidas y entradas.</p>
+        <button
+          class="btn"
+          type="button"
+          onclick="abrirHistorialMovimientos()"
+        >
+          Ver historial
+        </button>
+      </div>
     </div>
 
-    <!-- SECCIÓN MOVIMIENTOS DE ROPA (OCULTA HASTA DAR CLIC EN EL BOTÓN) -->
+    <!-- SECCIÓN MOVIMIENTOS DE ROPA -->
     <section id="movimientos-ropa" class="mov-section">
       <div class="card card--auto">
         <h2>Movimientos de ropa (salidas / entradas)</h2>
@@ -562,6 +576,40 @@
         </button>
 
         <p id="mov-mensaje"></p>
+      </div>
+    </section>
+
+    <!-- HISTORIAL DE MOVIMIENTOS -->
+    <section id="historial-movimientos" class="mov-section" style="display:none;">
+      <div class="card card--auto">
+        <h2>Historial de movimientos</h2>
+
+        <button
+          class="btn"
+          type="button"
+          style="margin-top: 0; margin-bottom: 10px;"
+          onclick="cargarHistorialMovimientos()"
+        >
+          Actualizar lista
+        </button>
+
+        <div style="max-height: 260px; overflow:auto; margin-top:8px;">
+          <table id="tabla-historial-mov" style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+            <thead>
+              <tr>
+                <th>Folio</th>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Responsable</th>
+                <th>Cantidad</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Se llena por JS -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -847,7 +895,6 @@
       //  Pipeline Master desde PWA
       // ============================
 
-      // URL del endpoint del Master (Apps Script)
       const PIPELINE_URL =
         "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
 
@@ -1096,7 +1143,7 @@
         }
 
         let stream = null;
-        let scanning = false;
+               let scanning = false;
         let items = [];
 
         const hoy = new Date().toISOString().slice(0, 10);
@@ -1243,10 +1290,17 @@
 
           google.script.run
             .withSuccessHandler(function (res) {
-              msg.innerHTML =
+              let html =
                 'Movimiento guardado con folio: <strong>' +
                 (res.folio || "") +
                 "</strong>";
+              if (res.pdfUrl) {
+                html +=
+                  '<br><a href="' +
+                  res.pdfUrl +
+                  '" target="_blank">Ver PDF</a>';
+              }
+              msg.innerHTML = html;
               items = [];
               renderTabla();
             })
@@ -1257,6 +1311,128 @@
             .guardarMovimientoRopa(data);
         }
       })();
+
+      // ============================
+      //  HISTORIAL DE MOVIMIENTOS
+      // ============================
+
+      function abrirHistorialMovimientos() {
+        const seccion = document.getElementById("historial-movimientos");
+        if (!seccion) return;
+        seccion.style.display = "block";
+        seccion.scrollIntoView({ behavior: "smooth", block: "start" });
+        cargarHistorialMovimientos();
+      }
+
+      function cargarHistorialMovimientos() {
+        const tbody = document.querySelector("#tabla-historial-mov tbody");
+        if (!tbody) return;
+
+        tbody.innerHTML =
+          '<tr><td colspan="6">Cargando movimientos...</td></tr>';
+
+        google.script.run
+          .withSuccessHandler(function (lista) {
+            tbody.innerHTML = "";
+
+            if (!lista || !lista.length) {
+              tbody.innerHTML =
+                '<tr><td colspan="6">No hay movimientos registrados.</td></tr>';
+              return;
+            }
+
+            lista.forEach(function (mov) {
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+                <td>${mov.folio || ""}</td>
+                <td>${mov.fecha || ""}</td>
+                <td>${mov.tipo || ""}</td>
+                <td>${mov.responsable || ""}</td>
+                <td>${mov.cantidad || 0}</td>
+                <td>
+                  ${
+                    mov.pdf
+                      ? `<button type="button" onclick="abrirPDFMovimiento('${mov.pdf}')">PDF</button>`
+                      : ""
+                  }
+                  <button type="button" onclick="verDetalleMovimiento('${mov.folio}')">Detalle</button>
+                  <button type="button" onclick="confirmarDevolucionMovimiento('${mov.folio}')">Devolver</button>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            });
+          })
+          .withFailureHandler(function (err) {
+            console.error(err);
+            tbody.innerHTML =
+              '<tr><td colspan="6">Error al cargar movimientos.</td></tr>';
+          })
+          .obtenerMovimientosResumen(50);
+      }
+
+      function abrirPDFMovimiento(url) {
+        if (!url) return;
+        window.open(url, "_blank");
+      }
+
+      function verDetalleMovimiento(folio) {
+        google.script.run
+          .withSuccessHandler(function (items) {
+            if (!items || !items.length) {
+              alert("No hay detalle para el folio " + folio);
+              return;
+            }
+
+            let texto = "Folio " + folio + "\n\n";
+            items.forEach(function (it) {
+              texto +=
+                (it.codigo || "") +
+                " | " +
+                (it.descripcion || "") +
+                " | " +
+                (it.color || "") +
+                " | " +
+                (it.talla || "") +
+                " | " +
+                (it.tipo || "") +
+                " | " +
+                (it.precio || "") +
+                "\n";
+            });
+
+            alert(texto);
+          })
+          .withFailureHandler(function (err) {
+            console.error(err);
+            alert("Error al cargar detalle del movimiento.");
+          })
+          .obtenerMovimientoDetalle(folio);
+      }
+
+      function confirmarDevolucionMovimiento(folio) {
+        if (
+          !confirm(
+            "¿Registrar devolución del movimiento " +
+              folio +
+              " como ENTRADA?"
+          )
+        )
+          return;
+
+        google.script.run
+          .withSuccessHandler(function (res) {
+            alert(
+              "Devolución registrada con folio: " +
+                (res.folioDevolucion || "")
+            );
+            cargarHistorialMovimientos();
+          })
+          .withFailureHandler(function (err) {
+            console.error(err);
+            alert("Error al registrar devolución.");
+          })
+          .devolverMovimiento(folio);
+      }
     </script>
   </body>
 </html>
