@@ -241,7 +241,7 @@
         margin: 0 auto 24px;
         padding: 0 22px 22px;
         text-align: left;
-        display: none; /* 👈 Oculta al inicio, se muestra con el botón */
+        display: none; /* Se muestra al dar clic en el botón */
       }
 
       .mov-section h2 {
@@ -289,6 +289,36 @@
 
       #mov-scanner-container {
         margin-top: 10px;
+        position: relative;
+      }
+
+      #mov-video {
+        width: 100%;
+        max-height: 260px;
+        border-radius: 12px;
+        background: #000;
+        object-fit: cover;
+      }
+
+      #mov-canvas {
+        display: none;
+      }
+
+      /* Marco de escaneo */
+      .scan-frame {
+        position: absolute;
+        inset: 10%;
+        border-radius: 12px;
+        border: 4px solid rgba(255, 255, 255, 0.9);
+        box-sizing: border-box;
+        pointer-events: none;
+      }
+
+      #mov-help {
+        font-size: 0.85rem;
+        color: var(--gris);
+        margin-top: 6px;
+        text-align: center;
       }
 
       #mov-tabla-items {
@@ -450,17 +480,13 @@
         <div class="icon-circle"><span class="emoji">🚚</span></div>
         <h3>Movimientos de ropa</h3>
         <p>Salidas y entradas con escáner.</p>
-        <button
-          class="btn"
-          type="button"
-          onclick="abrirMovimientosRopa()"
-        >
+        <button class="btn" type="button" onclick="abrirMovimientosRopa()">
           Ir a app
         </button>
       </div>
     </div>
 
-    <!-- SECCIÓN MOVIMIENTOS DE ROPA (OCULTA HASTA DAR CLIC EN EL BOTÓN) -->
+    <!-- SECCIÓN MOVIMIENTOS DE ROPA -->
     <section id="movimientos-ropa" class="mov-section">
       <div class="card card--auto">
         <h2>Movimientos de ropa (salidas / entradas)</h2>
@@ -500,17 +526,29 @@
 
         <hr style="margin: 12px 0" />
 
-        <h3 style="margin: 0 0 8px;">Escanear prendas</h3>
+        <h3 style="margin: 0 0 8px">Escanear prendas</h3>
 
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
-          <button id="mov-btn-iniciar-scan" class="btn" type="button" style="margin-top:0; flex:1;">
+        <div
+          style="
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+          "
+        >
+          <button
+            id="mov-btn-iniciar-scan"
+            class="btn"
+            type="button"
+            style="margin-top: 0; flex: 1"
+          >
             Iniciar escáner
           </button>
           <button
             id="mov-btn-detener-scan"
             class="btn"
             type="button"
-            style="margin-top:0; flex:1; background:#bbb;"
+            style="margin-top: 0; flex: 1; background: #bbb"
             disabled
           >
             Detener
@@ -518,18 +556,17 @@
         </div>
 
         <div id="mov-scanner-container">
-          <div
-            id="mov-scanner"
-            style="width: 100%; max-width: 360px; margin: 0 auto; border-radius: 12px; overflow: hidden;"
-          ></div>
-          <p style="font-size: 0.8rem; color: #6b6b6b; margin-top: 6px; text-align:center;">
-            Apunta el código al recuadro como en la app de escáner 📷
-          </p>
+          <video id="mov-video"></video>
+          <canvas id="mov-canvas"></canvas>
+          <div class="scan-frame"></div>
         </div>
+        <p id="mov-help">
+          Apunta el código al recuadro como en la app de escáner 📷
+        </p>
 
-        <h3 style="margin: 14px 0 6px;">Prendas escaneadas</h3>
+        <h3 style="margin: 14px 0 6px">Prendas escaneadas</h3>
 
-        <div style="max-height: 220px; overflow:auto; margin-bottom:8px;">
+        <div style="max-height: 220px; overflow: auto; margin-bottom: 8px">
           <table id="mov-tabla-items">
             <thead>
               <tr>
@@ -550,7 +587,7 @@
           id="mov-btn-guardar"
           class="btn"
           type="button"
-          style="margin-top: 4px;"
+          style="margin-top: 4px"
         >
           Guardar movimiento
         </button>
@@ -636,7 +673,7 @@
         </a>
       </div>
 
-      <!-- Actualizar Master (pipeline códigos + precios) -->
+      <!-- Actualizar Master -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">⚙️</span></div>
         <h4>Actualizar Master</h4>
@@ -699,11 +736,7 @@
         <div class="admin-icon-circle"><span class="admin-icon">📈</span></div>
         <h4>Resumen del día</h4>
         <p>Ventas, tickets y prendas sin precio.</p>
-        <button
-          class="admin-btn"
-          type="button"
-          onclick="verDashboardHoy()"
-        >
+        <button class="admin-btn" type="button" onclick="verDashboardHoy()">
           Ver resumen
         </button>
       </div>
@@ -727,22 +760,14 @@
         <div class="admin-icon-circle"><span class="admin-icon">📷</span></div>
         <h4>Escáner de códigos (beta)</h4>
         <p>Leer códigos con la cámara (en desarrollo).</p>
-        <a
-          class="admin-btn"
-          href="/scanner.html"
-        >
-          Abrir escáner
-        </a>
+        <a class="admin-btn" href="/scanner.html">Abrir escáner</a>
       </div>
     </div>
 
-    <!-- Toast de notificaciones -->
+    <!-- Toast -->
     <div id="toast" class="toast" style="display: none"></div>
 
-    <!-- Librería para leer QR (escáner tipo app) -->
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-
-    <!-- (Opcional) Librería jsQR si la sigues usando en otros lados -->
+    <!-- Librería jsQR -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
     <script>
@@ -841,12 +866,17 @@
       }
 
       // ============================
-      //  Pipeline Master desde PWA
+      //  Endpoints Apps Script
       // ============================
 
-      // URL del endpoint del Master (Apps Script)
       const PIPELINE_URL =
         "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
+
+      // Usamos el mismo script para info de código (action=infoCodigo)
+      const API_MASTER_URL = PIPELINE_URL;
+
+      // Cuando tengamos la URL del backend de movimientos, la ponemos aquí:
+      // const MOVIMIENTOS_URL = "https://script.google.com/macros/s/XXXXX/exec";
 
       async function ejecutarPipelineMaster() {
         const btn = document.getElementById("btnPipelineMaster");
@@ -893,8 +923,7 @@
           hideLoader();
           if (btn) {
             btn.disabled = false;
-            btn.textContent =
-              textoOriginal || "Ejecutar actualización";
+            btn.textContent = textoOriginal || "Ejecutar actualización";
           }
         }
       }
@@ -930,8 +959,7 @@
             );
           } else {
             showToast(
-              data.message ||
-                "Hubo un problema al generar el CSV con IVA.",
+              data.message || "Hubo un problema al generar el CSV con IVA.",
               "error"
             );
           }
@@ -978,11 +1006,20 @@
 
           const msg =
             "📈 Resumen del día\n\n" +
-            "💸 Ventas hoy: $" + ventasHoy.toLocaleString("es-MX") + "\n" +
-            "🧾 Tickets hoy: " + ticketsHoy + "\n\n" +
-            "📅 Ventas últimos 7 días: $" + ventasSemana.toLocaleString("es-MX") + "\n" +
-            "📆 Ventas del mes: $" + ventasMes.toLocaleString("es-MX") + "\n\n" +
-            "⚠️ Prendas sin precio en Master: " + prendasSinPrecio;
+            "💸 Ventas hoy: $" +
+            ventasHoy.toLocaleString("es-MX") +
+            "\n" +
+            "🧾 Tickets hoy: " +
+            ticketsHoy +
+            "\n\n" +
+            "📅 Ventas últimos 7 días: $" +
+            ventasSemana.toLocaleString("es-MX") +
+            "\n" +
+            "📆 Ventas del mes: $" +
+            ventasMes.toLocaleString("es-MX") +
+            "\n\n" +
+            "⚠️ Prendas sin precio en Master: " +
+            prendasSinPrecio;
 
           alert(msg);
         } catch (error) {
@@ -1003,7 +1040,7 @@
       async function abrirBuscadorProducto() {
         const q = prompt(
           "Buscar producto en Master:\n\n" +
-          "Ingresa código o parte de la descripción."
+            "Ingresa código o parte de la descripción."
         );
         if (!q) return;
 
@@ -1077,22 +1114,25 @@
       // ============================
       //  MÓDULO MOVIMIENTOS DE ROPA
       // ============================
+
       (function () {
+        const video = document.getElementById("mov-video");
+        const canvas = document.getElementById("mov-canvas");
+        const ctx = canvas ? canvas.getContext("2d") : null;
         const btnIniciar = document.getElementById("mov-btn-iniciar-scan");
         const btnDetener = document.getElementById("mov-btn-detener-scan");
         const btnGuardar = document.getElementById("mov-btn-guardar");
         const tbody = document.querySelector("#mov-tabla-items tbody");
         const msg = document.getElementById("mov-mensaje");
 
-        if (!btnIniciar || !btnDetener || !btnGuardar || !tbody || !msg) {
+        if (!video || !canvas || !ctx || !tbody || !btnIniciar) {
           return;
         }
 
-        let scanner = null;       // instancia de Html5Qrcode
-        let scanning = false;     // bandera de estado
-        let items = [];           // prendas del movimiento
+        let stream = null;
+        let scanning = false;
+        let items = [];
 
-        // Fecha por defecto = hoy
         const hoy = new Date().toISOString().slice(0, 10);
         const inputFecha = document.getElementById("mov-fecha");
         if (inputFecha && !inputFecha.value) inputFecha.value = hoy;
@@ -1101,121 +1141,122 @@
         btnDetener.addEventListener("click", detenerScanner);
         btnGuardar.addEventListener("click", guardarMovimiento);
 
-        // ----------------------------
-        // Escáner tipo app
-        // ----------------------------
         function iniciarScanner() {
           if (scanning) return;
 
-          if (!window.Html5Qrcode) {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             msg.textContent =
-              "No se cargó correctamente la librería de escáner (html5-qrcode).";
+              "Tu dispositivo no permite usar la cámara desde el navegador.";
             return;
           }
 
-          try {
-            const config = {
-              fps: 10,
-              qrbox: { width: 250, height: 250 },
-              aspectRatio: 1.0
-            };
-
-            scanner = new Html5Qrcode("mov-scanner");
-
-            scanner
-              .start(
-                { facingMode: "environment" }, // cámara trasera
-                config,
-                onScanSuccess,
-                onScanFailure
-              )
-              .then(() => {
-                scanning = true;
-                btnIniciar.disabled = true;
-                btnDetener.disabled = false;
-                msg.textContent = "Escaneando... apunta el código al recuadro.";
-              })
-              .catch((err) => {
-                console.error(err);
-                msg.textContent = "No se pudo acceder a la cámara: " + err;
-              });
-          } catch (e) {
-            console.error(e);
-            msg.textContent = "Error al iniciar el escáner: " + e.message;
-          }
-        }
-
-        function detenerScanner() {
-          if (!scanner || !scanning) return;
-
-          scanner
-            .stop()
-            .then(() => {
-              scanner.clear();
-              scanning = false;
-              btnIniciar.disabled = false;
-              btnDetener.disabled = true;
-              msg.textContent = "Escáner detenido.";
+          navigator.mediaDevices
+            .getUserMedia({ video: { facingMode: "environment" } })
+            .then(function (s) {
+              stream = s;
+              video.srcObject = s;
+              video.setAttribute("playsinline", true);
+              video.play();
+              scanning = true;
+              btnIniciar.disabled = true;
+              btnDetener.disabled = false;
+              requestAnimationFrame(tick);
             })
-            .catch((err) => {
+            .catch(function (err) {
               console.error(err);
-              msg.textContent = "No se pudo detener el escáner: " + err;
+              msg.textContent = "No se pudo acceder a la cámara: " + err.message;
             });
         }
 
-        // Se ejecuta cuando se detecta un código
-        function onScanSuccess(decodedText, decodedResult) {
-          const codigo = (decodedText || "").trim();
-
-          if (!codigo) {
-            msg.textContent = "No se leyó un código válido.";
-            return;
+        function detenerScanner() {
+          scanning = false;
+          btnIniciar.disabled = false;
+          btnDetener.disabled = true;
+          if (stream) {
+            stream.getTracks().forEach((t) => t.stop());
           }
-
-          // Evita duplicados
-          if (items.find((it) => it.codigo === codigo)) {
-            msg.textContent = "El código " + codigo + " ya está en la lista.";
-            return;
-          }
-
-          msg.textContent = "Buscando info del código " + codigo + "...";
-          agregarItemPorCodigo(codigo);
         }
 
-        // Se ejecuta cuando falla una lectura (lo ignoramos silenciosamente)
-        function onScanFailure(error) {
-          // Intencionalmente vacío para no spamear
+        function tick() {
+          if (!scanning) return;
+
+          if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+            const code = jsQR(imageData.data, canvas.width, canvas.height, {
+              inversionAttempts: "dontInvert",
+            });
+
+            if (code && code.data) {
+              const codigo = code.data.trim();
+
+              if (!items.find((it) => it.codigo === codigo)) {
+                agregarItemPorCodigo(codigo);
+                scanning = false;
+                setTimeout(() => {
+                  scanning = true;
+                  requestAnimationFrame(tick);
+                }, 800);
+                return;
+              }
+            }
+          }
+          requestAnimationFrame(tick);
         }
 
-        // ----------------------------
-        // Buscar info del código en el Master
-        // ----------------------------
+        // 🚚 Consultar info del código en el Master vía API (fetch)
         function agregarItemPorCodigo(codigo) {
-          google.script.run
-            .withSuccessHandler(function (info) {
-              if (!info) {
+          msg.textContent = "Buscando info del código " + codigo + "...";
+
+          fetch(
+            API_MASTER_URL +
+              "?action=infoCodigo&codigo=" +
+              encodeURIComponent(codigo)
+          )
+            .then((resp) => resp.json())
+            .then((data) => {
+              if (!data || !data.success || !data.info) {
                 msg.textContent =
-                  "Código " +
-                  codigo +
-                  " no encontrado en el Master. Verifica que exista y esté igualito.";
+                  (data && data.message) ||
+                  "Código " + codigo + " no encontrado en el Master.";
                 return;
               }
 
-              items.push(info);
+              const info = data.info || {};
+
+              const item = {
+                codigo: info.codigo || codigo,
+                descripcion: info.descripcion || "",
+                color: info.color || "",
+                talla: info.talla || "",
+                tipo: info.tipo || "",
+                precio:
+                  info.precio !== undefined &&
+                  info.precio !== null &&
+                  info.precio !== ""
+                    ? Number(info.precio)
+                    : "",
+              };
+
+              if (items.find((it) => it.codigo === item.codigo)) {
+                msg.textContent = "El código ya estaba agregado.";
+                return;
+              }
+
+              items.push(item);
               renderTabla();
-              msg.textContent = "Producto agregado: " + info.codigo;
+              msg.textContent = "Producto agregado: " + item.codigo;
             })
-            .withFailureHandler(function (err) {
+            .catch((err) => {
               console.error(err);
               msg.textContent =
-                "Error al buscar la información del código en Master. Revisa consola.";
-            })
-            .obtenerInfoCodigoDesdeMaster(codigo);
+                "Error al buscar la información del código en el Master.";
+            });
         }
 
-        // ----------------------------
-        // Render tabla de prendas
-        // ----------------------------
         function renderTabla() {
           tbody.innerHTML = "";
           items.forEach((item, index) => {
@@ -1227,9 +1268,7 @@
               <td>${item.talla || ""}</td>
               <td>${item.tipo || ""}</td>
               <td>${
-                item.precio !== undefined &&
-                item.precio !== null &&
-                item.precio !== ""
+                item.precio !== "" && item.precio !== undefined
                   ? "$" + Number(item.precio).toFixed(2)
                   : ""
               }</td>
@@ -1247,9 +1286,8 @@
           });
         }
 
-        // ----------------------------
-        // Guardar movimiento en tu hoja
-        // ----------------------------
+        // 🚩 OJO: esta parte sigue usando google.script.run.
+        // Aquí luego lo cambiaremos a fetch cuando definamos el endpoint de movimientos.
         function guardarMovimiento() {
           if (!items.length) {
             msg.textContent = "Agrega al menos una prenda antes de guardar.";
@@ -1261,32 +1299,14 @@
             tipo: document.getElementById("mov-tipo").value,
             responsable: document.getElementById("mov-responsable").value,
             comentarios: document.getElementById("mov-comentarios").value,
-            items: items
+            items: items,
           };
 
-          msg.textContent = "Guardando movimiento...";
+          msg.textContent =
+            "Guardando movimiento (esta parte se termina cuando definamos el endpoint en Apps Script)…";
 
-          google.script.run
-            .withSuccessHandler(function (res) {
-              let html =
-                'Movimiento guardado con folio: <strong>' +
-                (res.folio || "") +
-                "</strong>";
-              if (res.pdfUrl) {
-                html +=
-                  '<br><a href="' +
-                  res.pdfUrl +
-                  '" target="_blank">Ver PDF</a>';
-              }
-              msg.innerHTML = html;
-              items = [];
-              renderTabla();
-            })
-            .withFailureHandler(function (err) {
-              console.error(err);
-              msg.textContent = "Error al guardar el movimiento.";
-            })
-            .guardarMovimientoRopa(data);
+          // Aquí después haremos el fetch al backend de movimientos
+          // usando MOVIMIENTOS_URL. Por ahora solo mostramos mensaje.
         }
       })();
     </script>
