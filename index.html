@@ -764,6 +764,19 @@
       </div>
     </div>
 
+    <!-- Overlay de carga -->
+    <div
+      id="loadingOverlay"
+      class="loading-overlay"
+      style="display: none"
+      aria-hidden="true"
+    >
+      <div class="loading-box">
+        <div class="loading-spinner"></div>
+        <div id="loadingMessage">Procesando...</div>
+      </div>
+    </div>
+
     <!-- Toast -->
     <div id="toast" class="toast" style="display: none"></div>
 
@@ -874,9 +887,6 @@
 
       // Usamos el mismo script para info de código (action=infoCodigo)
       const API_MASTER_URL = PIPELINE_URL;
-
-      // Cuando tengamos la URL del backend de movimientos, la ponemos aquí:
-      // const MOVIMIENTOS_URL = "https://script.google.com/macros/s/XXXXX/exec";
 
       async function ejecutarPipelineMaster() {
         const btn = document.getElementById("btnPipelineMaster");
@@ -1286,8 +1296,7 @@
           });
         }
 
-        // 🚩 OJO: esta parte sigue usando google.script.run.
-        // Aquí luego lo cambiaremos a fetch cuando definamos el endpoint de movimientos.
+        // 🚩 Guardar movimiento (pendiente de backend)
         function guardarMovimiento() {
           if (!items.length) {
             msg.textContent = "Agrega al menos una prenda antes de guardar.";
@@ -1302,11 +1311,10 @@
             items: items,
           };
 
+          console.log("Datos a guardar (pendiente backend):", data);
+
           msg.textContent =
             "Guardando movimiento (esta parte se termina cuando definamos el endpoint en Apps Script)…";
-
-          // Aquí después haremos el fetch al backend de movimientos
-          // usando MOVIMIENTOS_URL. Por ahora solo mostramos mensaje.
         }
       })();
     </script>
