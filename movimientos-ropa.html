@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#A7B59E" />
+    <title>Movimientos de ropa · HarujaGdl</title>
+
+    <style>
+      :root {
+        --fondo: #ffffff;
+        --texto: #383234;
+        --acento: #a7b59e;
+        --beige: #faf6f1;
+        --gris: #6b6b6b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        background: var(--beige);
+        color: var(--texto);
+      }
+
+      .page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px;
+      }
+
+      .logo img {
+        max-width: 180px;
+        margin: 12px auto 4px;
+        display: block;
+      }
+
+      h1 {
+        margin: 4px 0 16px;
+        font-size: 22px;
+        text-align: center;
+      }
+
+      .back-link {
+        margin-bottom: 10px;
+        align-self: flex-start;
+        text-decoration: none;
+        color: var(--texto);
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 900px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        padding: 18px 16px 20px;
+      }
+
+      .card h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+
+      /* Formulario */
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 12px;
+        width: 100%;
+        text-align: left;
+        margin-bottom: 10px;
+      }
+
+      .form-grid label {
+        font-size: 0.85rem;
+        color: var(--gris);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      .form-grid input,
+      .form-grid select,
+      .form-grid textarea {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        padding: 6px 8px;
+        font-family: inherit;
+        font-size: 0.9rem;
+      }
+
+      .form-grid textarea {
+        resize: vertical;
+      }
+
+      .form-grid .full {
+        grid-column: 1 / -1;
+      }
+
+      /* Botones */
+      .btn {
+        display: inline-block;
+        width: 100%;
+        background: var(--acento);
+        padding: 10px 0;
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+        text-align: center;
+      }
+
+      .btn:disabled {
+        opacity: 0.7;
+        cursor: default;
+      }
+
+      /* Escáner */
+      #mov-scanner-container {
+        margin-top: 10px;
+        position: relative;
+      }
+
+      #mov-video {
+        width: 100%;
+        max-height: 260px;
+        border-radius: 12px;
+        background: #000;
+        object-fit: cover;
+      }
+
+      #mov-canvas {
+        display: none;
+      }
+
+      .scan-frame {
+        position: absolute;
+        inset: 10%;
+        border-radius: 12px;
+        border: 4px solid rgba(255, 255, 255, 0.9);
+        box-sizing: border-box;
+        pointer-events: none;
+      }
+
+      #mov-help {
+        font-size: 0.85rem;
+        color: var(--gris);
+        margin-top: 6px;
+        text-align: center;
+      }
+
+      /* Tabla */
+      #mov-tabla-items {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+      }
+
+      #mov-tabla-items th,
+      #mov-tabla-items td {
+        border-bottom: 1px solid #eee;
+        padding: 4px 6px;
+        text-align: left;
+      }
+
+      #mov-tabla-items th {
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--gris);
+      }
+
+      #mov-tabla-items td:last-child {
+        text-align: center;
+      }
+
+      #mov-tabla-items button {
+        border: none;
+        border-radius: 8px;
+        padding: 3px 8px;
+        font-size: 0.8rem;
+        background: #eee;
+        cursor: pointer;
+      }
+
+      #mov-mensaje {
+        font-size: 0.85rem;
+        color: var(--gris);
+        margin-top: 6px;
+      }
+
+      /* Overlay carga */
+      .loading-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(56, 50, 52, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+
+      .loading-box {
+        background: var(--beige, #faf6f1);
+        padding: 16px 20px;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        min-width: 220px;
+      }
+
+      .loading-spinner {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 3px solid rgba(167, 181, 158, 0.4);
+        border-top-color: var(--acento, #a7b59e);
+        margin: 0 auto 10px;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Toast */
+      .toast {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        background: #383234;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        max-width: 90%;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        z-index: 10000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+      }
+
+      .toast--visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+      }
+
+      .toast--success {
+        background: #3a7f4a;
+      }
+
+      .toast--error {
+        background: #b53737;
+      }
+
+      .toast--info {
+        background: #383234;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="page">
+      <a href="/index.html" class="back-link">⬅ Volver al panel</a>
+
+      <div class="logo">
+        <img src="/icons/icon-512.png" alt="HarujaGdl" />
+      </div>
+
+      <h1>Movimientos de ropa</h1>
+
+      <div class="card">
+        <h2>Salidas / entradas con escáner</h2>
+
+        <!-- FORMULARIO -->
+        <div class="form-grid">
+          <label>
+            Fecha
+            <input type="date" id="mov-fecha" />
+          </label>
+
+          <label>
+            Tipo de movimiento
+            <select id="mov-tipo">
+              <option value="Salida">Salida</option>
+              <option value="Entrada">Entrada</option>
+            </select>
+          </label>
+
+          <label>
+            Responsable
+            <input
+              type="text"
+              id="mov-responsable"
+              placeholder="Haru, Yair, Sam..."
+            />
+          </label>
+
+          <label class="full">
+            Comentarios
+            <textarea
+              id="mov-comentarios"
+              rows="2"
+              placeholder="Ej. activación, sesión de fotos, etc."
+            ></textarea>
+          </label>
+        </div>
+
+        <hr style="margin: 12px 0" />
+
+        <!-- ESCÁNER -->
+        <h3 style="margin: 0 0 8px">Escanear prendas</h3>
+
+        <div
+          style="
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+          "
+        >
+          <button
+            id="mov-btn-iniciar-scan"
+            class="btn"
+            type="button"
+            style="margin-top: 0; flex: 1"
+          >
+            Iniciar escáner
+          </button>
+          <button
+            id="mov-btn-detener-scan"
+            class="btn"
+            type="button"
+            style="margin-top: 0; flex: 1; background: #bbb"
+            disabled
+          >
+            Detener
+          </button>
+        </div>
+
+        <div id="mov-scanner-container">
+          <video id="mov-video"></video>
+          <canvas id="mov-canvas"></canvas>
+          <div class="scan-frame"></div>
+        </div>
+        <p id="mov-help">
+          Apunta el código al recuadro como en la app de escáner 📷
+        </p>
+
+        <!-- TABLA -->
+        <h3 style="margin: 14px 0 6px">Prendas escaneadas</h3>
+
+        <div style="max-height: 220px; overflow: auto; margin-bottom: 8px">
+          <table id="mov-tabla-items">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>Color</th>
+                <th>Talla</th>
+                <th>Tipo</th>
+                <th>Precio</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <button
+          id="mov-btn-guardar"
+          class="btn"
+          type="button"
+          style="margin-top: 4px"
+        >
+          Guardar movimiento
+        </button>
+
+        <p id="mov-mensaje"></p>
+      </div>
+    </div>
+
+    <!-- OVERLAY CARGA -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none">
+      <div class="loading-box">
+        <div class="loading-spinner"></div>
+        <div id="loadingMessage">Procesando...</div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast" style="display: none"></div>
+
+    <!-- Librería jsQR -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+    <script>
+      // ===== utilidades loader + toast =====
+      const loadingOverlay = document.getElementById("loadingOverlay");
+      const loadingMessage = document.getElementById("loadingMessage");
+      const toastEl = document.getElementById("toast");
+      let toastTimeoutId = null;
+
+      function showLoader(message) {
+        if (loadingMessage)
+          loadingMessage.textContent = message || "Procesando...";
+        if (loadingOverlay) loadingOverlay.style.display = "flex";
+      }
+
+      function hideLoader() {
+        if (loadingOverlay) loadingOverlay.style.display = "none";
+      }
+
+      function showToast(message, type = "info") {
+        if (!toastEl) return;
+
+        toastEl.textContent = message || "";
+        toastEl.classList.remove(
+          "toast--success",
+          "toast--error",
+          "toast--info",
+          "toast--visible"
+        );
+
+        if (type === "success") toastEl.classList.add("toast--success");
+        else if (type === "error") toastEl.classList.add("toast--error");
+        else toastEl.classList.add("toast--info");
+
+        toastEl.style.display = "block";
+        requestAnimationFrame(() => {
+          toastEl.classList.add("toast--visible");
+        });
+
+        if (toastTimeoutId) clearTimeout(toastTimeoutId);
+        toastTimeoutId = setTimeout(() => {
+          toastEl.classList.remove("toast--visible");
+          setTimeout(() => {
+            toastEl.style.display = "none";
+          }, 250);
+        }, 3500);
+      }
+
+      // ===== Endpoint Apps Script (mismo que el panel) =====
+      const PIPELINE_URL =
+        "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
+
+      const API_MASTER_URL = PIPELINE_URL;
+      const MOVIMIENTOS_URL = PIPELINE_URL;
+
+      // ===== Módulo Movimientos de ropa =====
+      (function () {
+        const video = document.getElementById("mov-video");
+        const canvas = document.getElementById("mov-canvas");
+        const ctx = canvas ? canvas.getContext("2d") : null;
+        const btnIniciar = document.getElementById("mov-btn-iniciar-scan");
+        const btnDetener = document.getElementById("mov-btn-detener-scan");
+        const btnGuardar = document.getElementById("mov-btn-guardar");
+        const tbody = document.querySelector("#mov-tabla-items tbody");
+        const msg = document.getElementById("mov-mensaje");
+
+        if (!video || !canvas || !ctx || !tbody || !btnIniciar) {
+          return;
+        }
+
+        let stream = null;
+        let scanning = false;
+        let items = [];
+
+        // Fecha por defecto = hoy
+        const hoy = new Date().toISOString().slice(0, 10);
+        const inputFecha = document.getElementById("mov-fecha");
+        if (inputFecha && !inputFecha.value) inputFecha.value = hoy;
+
+        btnIniciar.addEventListener("click", iniciarScanner);
+        btnDetener.addEventListener("click", detenerScanner);
+        btnGuardar.addEventListener("click", guardarMovimiento);
+
+        function iniciarScanner() {
+          if (scanning) return;
+
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            msg.textContent =
+              "Tu dispositivo no permite usar la cámara desde el navegador.";
+            return;
+          }
+
+          navigator.mediaDevices
+            .getUserMedia({ video: { facingMode: "environment" } })
+            .then(function (s) {
+              stream = s;
+              video.srcObject = s;
+              video.setAttribute("playsinline", true);
+              video.play();
+              scanning = true;
+              btnIniciar.disabled = true;
+              btnDetener.disabled = false;
+              requestAnimationFrame(tick);
+            })
+            .catch(function (err) {
+              console.error(err);
+              msg.textContent = "No se pudo acceder a la cámara: " + err.message;
+            });
+        }
+
+        function detenerScanner() {
+          scanning = false;
+          btnIniciar.disabled = false;
+          btnDetener.disabled = true;
+          if (stream) {
+            stream.getTracks().forEach((t) => t.stop());
+            stream = null;
+          }
+        }
+
+        function tick() {
+          if (!scanning) return;
+
+          if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+            const code = jsQR(imageData.data, canvas.width, canvas.height, {
+              inversionAttempts: "dontInvert",
+            });
+
+            if (code && code.data) {
+              const codigo = code.data.trim();
+
+              if (!items.find((it) => it.codigo === codigo)) {
+                agregarItemPorCodigo(codigo);
+
+                // Pausa corta para permitir cambiar de etiqueta
+                scanning = false;
+                setTimeout(() => {
+                  if (stream) {
+                    scanning = true;
+                    requestAnimationFrame(tick);
+                  }
+                }, 800);
+                return;
+              }
+            }
+          }
+
+          requestAnimationFrame(tick);
+        }
+
+        function agregarItemPorCodigo(codigo) {
+          msg.textContent = "Buscando info del código " + codigo + "...";
+
+          fetch(
+            API_MASTER_URL +
+              "?action=infoCodigo&codigo=" +
+              encodeURIComponent(codigo)
+          )
+            .then((resp) => resp.json())
+            .then((data) => {
+              if (!data || !data.success || !data.info) {
+                msg.textContent =
+                  (data && data.message) ||
+                  "Código " + codigo + " no encontrado en el Master.";
+                showToast(
+                  (data && data.message) ||
+                    "Código " + codigo + " no encontrado en el Master.",
+                  "error"
+                );
+                return;
+              }
+
+              const info = data.info || {};
+
+              const item = {
+                codigo: info.codigo || codigo,
+                descripcion: info.descripcion || "",
+                color: info.color || "",
+                talla: info.talla || "",
+                tipo: info.tipo || "",
+                precio:
+                  info.precio !== undefined &&
+                  info.precio !== null &&
+                  info.precio !== ""
+                    ? Number(info.precio)
+                    : "",
+              };
+
+              if (items.find((it) => it.codigo === item.codigo)) {
+                msg.textContent = "El código ya estaba agregado.";
+                return;
+              }
+
+              items.push(item);
+              renderTabla();
+              msg.textContent = "Producto agregado: " + item.codigo;
+            })
+            .catch((err) => {
+              console.error(err);
+              msg.textContent =
+                "Error al buscar la información del código en el Master.";
+              showToast(
+                "Error al buscar la información del código en el Master.",
+                "error"
+              );
+            });
+        }
+
+        function renderTabla() {
+          tbody.innerHTML = "";
+          items.forEach((item, index) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${item.codigo || ""}</td>
+              <td>${item.descripcion || ""}</td>
+              <td>${item.color || ""}</td>
+              <td>${item.talla || ""}</td>
+              <td>${item.tipo || ""}</td>
+              <td>${
+                item.precio !== "" && item.precio !== undefined
+                  ? "$" + Number(item.precio).toFixed(2)
+                  : ""
+              }</td>
+              <td><button type="button" data-index="${index}">Quitar</button></td>
+            `;
+            tbody.appendChild(tr);
+          });
+
+          tbody.querySelectorAll("button[data-index]").forEach((btn) => {
+            btn.addEventListener("click", function () {
+              const i = parseInt(this.getAttribute("data-index"), 10);
+              items.splice(i, 1);
+              renderTabla();
+            });
+          });
+        }
+
+        async function guardarMovimiento() {
+          if (!items.length) {
+            msg.textContent = "Agrega al menos una prenda antes de guardar.";
+            showToast("Agrega al menos una prenda antes de guardar.", "info");
+            return;
+          }
+
+          const data = {
+            fecha: document.getElementById("mov-fecha").value,
+            tipo: document.getElementById("mov-tipo").value,
+            responsable: document.getElementById("mov-responsable").value,
+            comentarios: document.getElementById("mov-comentarios").value,
+            items: items,
+          };
+
+          if (!data.fecha) {
+            msg.textContent = "Selecciona una fecha para el movimiento.";
+            showToast("Selecciona una fecha para el movimiento.", "info");
+            return;
+          }
+
+          try {
+            btnGuardar.disabled = true;
+            showLoader("Guardando movimiento...");
+            msg.textContent = "Guardando movimiento...";
+
+            const resp = await fetch(
+              MOVIMIENTOS_URL + "?action=guardarMovimiento",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+              }
+            );
+
+            const result = await resp.json();
+
+            if (!result.success) {
+              console.error(result);
+              const textoError =
+                (result.message || "Error al guardar el movimiento.") +
+                (result.error ? " Detalle: " + result.error : "");
+              msg.textContent = textoError;
+              showToast(textoError, "error");
+              return;
+            }
+
+            msg.textContent =
+              "Movimiento guardado correctamente. Folio: " +
+              (result.folio || "");
+            showToast(
+              "Movimiento guardado. Folio: " + (result.folio || ""),
+              "success"
+            );
+
+            // Limpiar items y tabla
+            items = [];
+            renderTabla();
+            document.getElementById("mov-comentarios").value = "";
+          } catch (err) {
+            console.error(err);
+            msg.textContent =
+              "Error de conexión al guardar el movimiento en Sheets.";
+            showToast(
+              "Error de conexión al guardar el movimiento.",
+              "error"
+            );
+          } finally {
+            hideLoader();
+            btnGuardar.disabled = false;
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
