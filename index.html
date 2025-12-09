@@ -779,7 +779,6 @@
 
     <!-- Toast -->
     <div id="toast" class="toast" style="display: none"></div>
-
     <!-- Librería jsQR -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
@@ -1143,6 +1142,11 @@
         let scanning = false;
         let items = [];
 
+        // anti-rebote: evitar leer el mismo código mil veces seguidas
+        let ultimoCodigoLeido = null;
+        let ultimoScanMs = 0;
+        const SCAN_COOLDOWN_MS = 1500;
+
         const hoy = new Date().toISOString().slice(0, 10);
         const inputFecha = document.getElementById("mov-fecha");
         if (inputFecha && !inputFecha.value) inputFecha.value = hoy;
@@ -1196,21 +1200,26 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-            const code = jsQR(imageData.data, canvas.width, canvas.height, {
+            const result = jsQR(imageData.data, canvas.width, canvas.height, {
               inversionAttempts: "dontInvert",
             });
 
-            if (code && code.data) {
-              const codigo = code.data.trim();
+            if (result && result.data) {
+              const codigo = result.data.trim();
+              const ahora = Date.now();
 
-              if (!items.find((it) => it.codigo === codigo)) {
-                agregarItemPorCodigo(codigo);
-                scanning = false;
-                setTimeout(() => {
-                  scanning = true;
-                  requestAnimationFrame(tick);
-                }, 800);
-                return;
+              const esMismoCodigo =
+                codigo === ultimoCodigoLeido &&
+                ahora - ultimoScanMs < SCAN_COOLDOWN_MS;
+
+              if (!esMismoCodigo) {
+                ultimoCodigoLeido = codigo;
+                ultimoScanMs = ahora;
+                if (!items.find((it) => it.codigo === codigo)) {
+                  agregarItemPorCodigo(codigo);
+                } else {
+                  msg.textContent = "El código ya está en la lista.";
+                }
               }
             }
           }
@@ -1296,7 +1305,7 @@
           });
         }
 
-        // 🚩 Guardar movimiento (pendiente de backend)
+        // Versión demo de guardado (aún sin backend):
         function guardarMovimiento() {
           if (!items.length) {
             msg.textContent = "Agrega al menos una prenda antes de guardar.";
@@ -1311,12 +1320,15 @@
             items: items,
           };
 
-          console.log("Datos a guardar (pendiente backend):", data);
+          console.log("Movimiento (demo, aún sin backend):", data);
+          msg.textContent = "Movimiento guardado (demo, aún sin Apps Script).";
 
-          msg.textContent =
-            "Guardando movimiento (esta parte se termina cuando definamos el endpoint en Apps Script)…";
+          // Limpiamos la tabla para que se note que se “guardó”
+          items = [];
+          renderTabla();
         }
       })();
     </script>
   </body>
 </html>
+
