@@ -241,7 +241,7 @@
         margin: 0 auto 24px;
         padding: 0 22px 22px;
         text-align: left;
-        display: none; /* Se muestra al dar clic en el botón */
+        display: none;
       }
 
       .mov-section h2 {
@@ -304,7 +304,6 @@
         display: none;
       }
 
-      /* Marco de escaneo */
       .scan-frame {
         position: absolute;
         inset: 10%;
@@ -395,7 +394,6 @@
         <a class="btn" href="/plan-lealtad.html" target="_blank">Ir a app</a>
       </div>
 
-      <!-- BD sistema de lealtad -->
       <div class="card">
         <div class="icon-circle"><span class="emoji">📚</span></div>
         <h3>Base de datos plan de lealtad</h3>
@@ -475,7 +473,6 @@
         <a class="btn" href="/calculadora-pedidos.html">Ir a app</a>
       </div>
 
-      <!-- Movimientos de ropa (botón) -->
       <div class="card">
         <div class="icon-circle"><span class="emoji">🚚</span></div>
         <h3>Movimientos de ropa</h3>
@@ -603,7 +600,6 @@
 
     <!-- PANEL ADMIN -->
     <div id="adminGrid" class="admin-grid">
-      <!-- Apartados -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📦</span></div>
         <h4>Apartados</h4>
@@ -617,7 +613,6 @@
         </a>
       </div>
 
-      <!-- Est. Precios -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">🏷️</span></div>
         <h4>Est. Precios</h4>
@@ -631,7 +626,6 @@
         </a>
       </div>
 
-      <!-- Códigos -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">🧾</span></div>
         <h4>Códigos</h4>
@@ -645,7 +639,6 @@
         </a>
       </div>
 
-      <!-- Calculadora (BD) -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📱</span></div>
         <h4>Calculadora (BD)</h4>
@@ -659,7 +652,6 @@
         </a>
       </div>
 
-      <!-- Master -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📋</span></div>
         <h4>Master</h4>
@@ -673,7 +665,6 @@
         </a>
       </div>
 
-      <!-- Actualizar Master -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">⚙️</span></div>
         <h4>Actualizar Master</h4>
@@ -688,7 +679,6 @@
         </button>
       </div>
 
-      <!-- BD Tiendanube -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📄</span></div>
         <h4>BD Tiendanube</h4>
@@ -702,7 +692,6 @@
         </a>
       </div>
 
-      <!-- CSV SMP -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">💾</span></div>
         <h4>CSV SMP</h4>
@@ -716,7 +705,6 @@
         </a>
       </div>
 
-      <!-- Generar CSV + IVA -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">💾</span></div>
         <h4>Generar CSV + IVA</h4>
@@ -731,7 +719,6 @@
         </button>
       </div>
 
-      <!-- Resumen del día -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📈</span></div>
         <h4>Resumen del día</h4>
@@ -741,7 +728,6 @@
         </button>
       </div>
 
-      <!-- Buscar producto -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">🔎</span></div>
         <h4>Buscar producto</h4>
@@ -755,7 +741,6 @@
         </button>
       </div>
 
-      <!-- Escáner de códigos (beta) -->
       <div class="admin-card">
         <div class="admin-icon-circle"><span class="admin-icon">📷</span></div>
         <h4>Escáner de códigos (beta)</h4>
@@ -764,12 +749,11 @@
       </div>
     </div>
 
-    <!-- Overlay de carga -->
+    <!-- OVERLAY CARGA -->
     <div
       id="loadingOverlay"
       class="loading-overlay"
       style="display: none"
-      aria-hidden="true"
     >
       <div class="loading-box">
         <div class="loading-spinner"></div>
@@ -779,6 +763,7 @@
 
     <!-- Toast -->
     <div id="toast" class="toast" style="display: none"></div>
+
     <!-- Librería jsQR -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
@@ -829,10 +814,7 @@
         }
       });
 
-      // ============================
-      //  Loader + Toast helpers
-      // ============================
-
+      // Loader + Toast
       const loadingOverlay = document.getElementById("loadingOverlay");
       const loadingMessage = document.getElementById("loadingMessage");
       const toastEl = document.getElementById("toast");
@@ -877,15 +859,12 @@
         }, 3500);
       }
 
-      // ============================
-      //  Endpoints Apps Script
-      // ============================
-
+      // Endpoints Apps Script
       const PIPELINE_URL =
         "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
 
-      // Usamos el mismo script para info de código (action=infoCodigo)
       const API_MASTER_URL = PIPELINE_URL;
+      const MOVIMIENTOS_URL = PIPELINE_URL;
 
       async function ejecutarPipelineMaster() {
         const btn = document.getElementById("btnPipelineMaster");
@@ -987,10 +966,6 @@
         }
       }
 
-      // ============================
-      //  Dashboard del día
-      // ============================
-
       async function verDashboardHoy() {
         showLoader("Cargando resumen del día...");
 
@@ -1041,10 +1016,6 @@
           hideLoader();
         }
       }
-
-      // ============================
-      //  Buscador de producto
-      // ============================
 
       async function abrirBuscadorProducto() {
         const q = prompt(
@@ -1108,10 +1079,6 @@
         }
       }
 
-      // ============================
-      //  Abrir módulo de movimientos
-      // ============================
-
       function abrirMovimientosRopa() {
         const seccion = document.getElementById("movimientos-ropa");
         if (!seccion) return;
@@ -1120,10 +1087,7 @@
         seccion.scrollIntoView({ behavior: "smooth", block: "start" });
       }
 
-      // ============================
-      //  MÓDULO MOVIMIENTOS DE ROPA
-      // ============================
-
+      // Módulo Movimientos de ropa
       (function () {
         const video = document.getElementById("mov-video");
         const canvas = document.getElementById("mov-canvas");
@@ -1141,11 +1105,6 @@
         let stream = null;
         let scanning = false;
         let items = [];
-
-        // anti-rebote: evitar leer el mismo código mil veces seguidas
-        let ultimoCodigoLeido = null;
-        let ultimoScanMs = 0;
-        const SCAN_COOLDOWN_MS = 1500;
 
         const hoy = new Date().toISOString().slice(0, 10);
         const inputFecha = document.getElementById("mov-fecha");
@@ -1200,33 +1159,29 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-            const result = jsQR(imageData.data, canvas.width, canvas.height, {
+            const code = jsQR(imageData.data, canvas.width, canvas.height, {
               inversionAttempts: "dontInvert",
             });
 
-            if (result && result.data) {
-              const codigo = result.data.trim();
-              const ahora = Date.now();
+            if (code && code.data) {
+              const codigo = code.data.trim();
 
-              const esMismoCodigo =
-                codigo === ultimoCodigoLeido &&
-                ahora - ultimoScanMs < SCAN_COOLDOWN_MS;
-
-              if (!esMismoCodigo) {
-                ultimoCodigoLeido = codigo;
-                ultimoScanMs = ahora;
-                if (!items.find((it) => it.codigo === codigo)) {
-                  agregarItemPorCodigo(codigo);
-                } else {
-                  msg.textContent = "El código ya está en la lista.";
-                }
+              if (!items.find((it) => it.codigo === codigo)) {
+                agregarItemPorCodigo(codigo);
+                scanning = false;
+                setTimeout(() => {
+                  if (stream) {
+                    scanning = true;
+                    requestAnimationFrame(tick);
+                  }
+                }, 800);
+                return;
               }
             }
           }
           requestAnimationFrame(tick);
         }
 
-        // 🚚 Consultar info del código en el Master vía API (fetch)
         function agregarItemPorCodigo(codigo) {
           msg.textContent = "Buscando info del código " + codigo + "...";
 
@@ -1305,8 +1260,7 @@
           });
         }
 
-        // Versión demo de guardado (aún sin backend):
-        function guardarMovimiento() {
+        async function guardarMovimiento() {
           if (!items.length) {
             msg.textContent = "Agrega al menos una prenda antes de guardar.";
             return;
@@ -1320,15 +1274,66 @@
             items: items,
           };
 
-          console.log("Movimiento (demo, aún sin backend):", data);
-          msg.textContent = "Movimiento guardado (demo, aún sin Apps Script).";
+          if (!data.fecha) {
+            msg.textContent = "Selecciona una fecha para el movimiento.";
+            return;
+          }
 
-          // Limpiamos la tabla para que se note que se “guardó”
-          items = [];
-          renderTabla();
+          try {
+            btnGuardar.disabled = true;
+            showLoader("Guardando movimiento...");
+            msg.textContent = "Guardando movimiento...";
+
+            const resp = await fetch(
+              MOVIMIENTOS_URL + "?action=guardarMovimiento",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+              }
+            );
+
+            const result = await resp.json();
+
+            if (!result.success) {
+              console.error(result);
+              msg.textContent =
+                result.message || "Error al guardar el movimiento.";
+              showToast(
+                result.message || "Error al guardar el movimiento.",
+                "error"
+              );
+              return;
+            }
+
+            msg.textContent =
+              "Movimiento guardado correctamente. Folio: " +
+              (result.folio || "");
+            showToast(
+              "Movimiento guardado. Folio: " + (result.folio || ""),
+              "success"
+            );
+
+            // Limpiar items y tabla
+            items = [];
+            renderTabla();
+            document.getElementById("mov-comentarios").value = "";
+          } catch (err) {
+            console.error(err);
+            msg.textContent =
+              "Error de conexión al guardar el movimiento en Sheets.";
+            showToast(
+              "Error de conexión al guardar el movimiento.",
+              "error"
+            );
+          } finally {
+            hideLoader();
+            btnGuardar.disabled = false;
+          }
         }
       })();
     </script>
   </body>
 </html>
-
