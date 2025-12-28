@@ -17,7 +17,6 @@
       --shadow: 0 10px 30px rgba(56,50,52,.10);
       --shadowSoft: 0 6px 18px rgba(56,50,52,.06);
       --radius: 16px;
-      --radiusSm: 12px;
     }
     *{box-sizing:border-box}
     body{
@@ -28,15 +27,11 @@
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
     }
-
     .wrap{max-width:980px;margin:0 auto;padding:18px 14px 72px;}
-    header{
-      display:flex;flex-direction:column;align-items:center;gap:10px;
-      padding:8px 0 14px;
-    }
+    header{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0 14px}
     header img{height:40px;object-fit:contain}
     h1{font-size:20px;margin:0;text-align:center}
-    .sub{color:var(--gris);font-size:13px;text-align:center;max-width:680px;line-height:1.35}
+    .sub{color:var(--gris);font-size:13px;text-align:center;max-width:720px;line-height:1.35}
 
     .card{
       background:var(--fondo);
@@ -47,11 +42,8 @@
       margin-bottom:12px;
     }
 
-    /* Sticky control en móvil */
     .controls{
-      position:sticky;
-      top:0;
-      z-index:50;
+      position:sticky; top:0; z-index:50;
       background:linear-gradient(to bottom, rgba(250,246,241,.98), rgba(250,246,241,.86));
       backdrop-filter:saturate(140%) blur(6px);
       padding:10px 0;
@@ -74,11 +66,10 @@
       background:#fff;
       color:var(--texto);
       outline:none;
-      transition: border-color .15s ease, transform .08s ease;
+      transition:border-color .15s ease, transform .08s ease;
     }
     input:focus, select:focus, textarea:focus{border-color:var(--acento)}
     button:active{transform:scale(.99)}
-
     .btn{
       background:var(--acento);
       border:1px solid var(--acento);
@@ -86,165 +77,135 @@
       cursor:pointer;
       padding:11px 14px;
       border-radius:12px;
-      font-weight:700;
+      font-weight:800;
       white-space:nowrap;
     }
     .btn.secondary{
       background:#fff;color:var(--texto);border:1px solid var(--borde);
-      font-weight:700;
+      font-weight:800;
     }
-    .btn:disabled{
-      opacity:.55;
-      cursor:not-allowed;
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+
+    @media (min-width: 760px){
+      .toolbar{grid-template-columns: 240px 1fr auto auto;}
     }
 
     .rowInfo{
       display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
-      align-items:center;
-      padding-top:2px;
+      align-items:center;padding-top:2px;
     }
-
+    .hint{color:var(--gris);font-size:12px}
     .pill{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 10px;border-radius:999px;
+      background:var(--beige);border:1px solid var(--borde);
+      font-size:12px;color:var(--gris);line-height:1;
+    }
+    .pill strong{color:var(--texto);font-weight:800}
+
+    /* Chips */
+    .chips{
+      display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+      margin-top:10px;
+    }
+    .chip{
+      border:1px solid var(--borde);
+      background:#fff;
+      color:var(--texto);
+      border-radius:999px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-size:13px;
       display:inline-flex;
       align-items:center;
-      gap:6px;
-      padding:6px 10px;
-      border-radius:999px;
-      background:var(--beige);
-      border:1px solid var(--borde);
-      font-size:12px;
-      color:var(--gris);
-      line-height:1;
-    }
-    .pill strong{color:var(--texto);font-weight:700}
-    .hint{color:var(--gris);font-size:12px}
-
-    /* Lista */
-    #list{display:grid;grid-template-columns:1fr;gap:12px}
-
-    .order{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-    }
-
-    .order h3{margin:0;font-size:16px}
-    .meta{color:var(--gris);font-size:13px;margin-top:6px;line-height:1.35}
-    .items{
-      margin-top:10px;
-      color:var(--texto);
-      font-size:13px;
-      line-height:1.35;
-      word-break:break-word;
-    }
-
-    .rightCol{
-      display:flex;
-      flex-direction:column;
       gap:8px;
-      align-items:flex-end;
-      min-width:140px;
     }
-
-    /* “Card compact” en móvil */
-    @media (max-width: 480px){
-      .rightCol{min-width:auto}
-      .order{flex-direction:column}
-      .rightCol{align-items:flex-start}
-      .btn{width:100%}
+    .chip small{
+      color:var(--gris);
+      font-weight:700;
     }
-
-    /* Layout PC */
-    @media (min-width: 760px){
-      .toolbar{
-        grid-template-columns: 240px 1fr auto auto;
-      }
+    .chip.active{
+      border-color:var(--acento);
+      box-shadow:0 0 0 3px rgba(167,181,158,.25);
     }
 
     /* Toggle */
-    .toggleRow{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .toggle{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      user-select:none;
-      cursor:pointer;
-      font-size:13px;
-      color:var(--gris);
-    }
+    .toggleRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .toggle{display:inline-flex;align-items:center;gap:8px;user-select:none;cursor:pointer;font-size:13px;color:var(--gris)}
     .toggle input{width:18px;height:18px}
 
-    /* Skeleton / loading */
+    /* Lista */
+    #list{display:grid;grid-template-columns:1fr;gap:12px}
+    .order{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .order h3{margin:0;font-size:16px}
+    .meta{color:var(--gris);font-size:13px;margin-top:6px;line-height:1.35}
+    .items{margin-top:10px;color:var(--texto);font-size:13px;line-height:1.35;word-break:break-word}
+    .rightCol{display:flex;flex-direction:column;gap:8px;align-items:flex-end;min-width:160px}
+
+    .miniActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .miniBtn{
+      border:1px solid var(--borde);
+      background:#fff;
+      padding:8px 10px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:13px;
+    }
+
+    details{margin-top:10px}
+    details summary{
+      cursor:pointer;
+      color:var(--gris);
+      font-size:13px;
+      user-select:none;
+    }
+
+    @media (max-width: 480px){
+      .rightCol{min-width:auto;align-items:flex-start}
+      .order{flex-direction:column}
+      .btn{width:100%}
+    }
+
+    /* Skeleton */
     .skeleton{
       animation:pulse 1.15s ease-in-out infinite;
       background:linear-gradient(90deg, #f5f1ea, #fff, #f5f1ea);
-      background-size: 200% 100%;
+      background-size:200% 100%;
       border:1px solid var(--borde);
       border-radius:var(--radius);
-      height:132px;
+      height:140px;
     }
-    @keyframes pulse{
-      0%{background-position: 0% 0%}
-      100%{background-position: -200% 0%}
-    }
+    @keyframes pulse{0%{background-position:0% 0%}100%{background-position:-200% 0%}}
 
     /* Modal */
     .modalBack{
       position:fixed; inset:0;
       background:rgba(0,0,0,.35);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-      z-index:100;
+      display:none;align-items:center;justify-content:center;
+      padding:18px;z-index:100;
     }
     .modal{
-      width:min(560px, 100%);
+      width:min(560px,100%);
       background:#fff;
       border-radius:18px;
       border:1px solid var(--borde);
       box-shadow:0 20px 50px rgba(0,0,0,.20);
       padding:14px;
     }
-    .modal h2{margin:0 0 10px 0; font-size:18px}
+    .modal h2{margin:0 0 10px 0;font-size:18px}
     .grid{display:grid;grid-template-columns:1fr;gap:10px}
     @media(min-width:560px){ .grid{grid-template-columns:1fr 1fr} }
     .full{grid-column:1/-1}
 
     .toast{
-      position:fixed;
-      left:50%;
-      transform:translateX(-50%);
-      bottom:16px;
-      background:#fff;
-      border:1px solid var(--borde);
-      border-radius:999px;
-      padding:10px 14px;
-      box-shadow:var(--shadow);
-      display:none;
-      font-size:13px;
-      z-index:200;
-      max-width:min(92vw, 560px);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      position:fixed;left:50%;transform:translateX(-50%);
+      bottom:16px;background:#fff;border:1px solid var(--borde);
+      border-radius:999px;padding:10px 14px;box-shadow:var(--shadow);
+      display:none;font-size:13px;z-index:200;
+      max-width:min(92vw,560px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     }
 
-    /* Footer nav */
-    .pager{
-      display:flex;
-      gap:10px;
-      justify-content:space-between;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-top:2px;
-    }
     .pagerBtns{display:flex;gap:8px;flex-wrap:wrap}
   </style>
 </head>
@@ -274,11 +235,18 @@
             <button class="btn" id="btnRefrescar">Refrescar</button>
           </div>
 
+          <div class="chips" id="chips"></div>
+
           <div class="rowInfo" style="margin-top:10px">
             <div class="toggleRow">
               <label class="toggle" title="Por default no se muestran pedidos cancelados">
                 <input type="checkbox" id="includeCancelled" />
                 Incluir canceladas
+              </label>
+
+              <label class="toggle" title="En vista Todos, muestra solo los que ya se asignaron hoy (según marca en TN_Resumen)">
+                <input type="checkbox" id="onlyAssignedToday" />
+                Asignados hoy
               </label>
 
               <span class="pill">
@@ -377,7 +345,6 @@
         script.src = url.toString();
         document.body.appendChild(script);
 
-        // timeout
         setTimeout(() => {
           if (window[cb]) { cleanup(); reject(new Error("Timeout de la API")); }
         }, 15000);
@@ -391,7 +358,8 @@
       nextOffset: null,
       currentCards: [],
       selected: null,
-      lastTotal: 0
+      chip: "all",
+      lastRawCards: []
     };
 
     const elList = document.getElementById("list");
@@ -402,7 +370,9 @@
     const elView = document.getElementById("view");
     const elQ = document.getElementById("q");
     const elIncludeCancelled = document.getElementById("includeCancelled");
+    const elOnlyAssignedToday = document.getElementById("onlyAssignedToday");
     const elHintStatus = document.getElementById("hintStatus");
+    const elChips = document.getElementById("chips");
     const toast = document.getElementById("toast");
 
     function showToast(msg) {
@@ -410,7 +380,6 @@
       toast.style.display = "block";
       setTimeout(()=>toast.style.display="none", 2600);
     }
-
     function setHint(msg){ elHintStatus.textContent = msg; }
 
     function money(v) {
@@ -418,10 +387,76 @@
       if (isNaN(n)) return String(v ?? "");
       return n.toLocaleString("es-MX", { style:"currency", currency:"MXN" });
     }
-
     function esc(s){
       return String(s ?? "")
         .replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function statusKey(s){
+      return String(s || "").trim().toLowerCase() || "sin_status";
+    }
+
+    function isAssignedToday(card){
+      // Nota: Esto es “best effort” sin backend extra.
+      // Si tu TN_Resumen tiene una columna tipo inv_updated_at / updated_at y quieres usarla, se puede.
+      // Por ahora: usa el hecho de que "convertido" sea true y que el usuario esté viendo "Todos".
+      // (Mejoramos luego con endpoint de "asignados_hoy" real)
+      const conv = String(card.convertido || "").toLowerCase();
+      return (conv === "true" || conv === "1");
+    }
+
+    function applyFrontFilters(raw){
+      let out = raw.slice();
+
+      // chip por status
+      if (state.chip !== "all") {
+        out = out.filter(c => statusKey(c.status) === state.chip);
+      }
+
+      // asignados hoy (solo en vista Todos; es un filtro útil)
+      if (elView.value === "todos" && elOnlyAssignedToday.checked) {
+        out = out.filter(c => isAssignedToday(c));
+      }
+
+      return out;
+    }
+
+    function renderChips(rawCards){
+      const counts = {};
+      rawCards.forEach(c => {
+        const k = statusKey(c.status);
+        counts[k] = (counts[k] || 0) + 1;
+      });
+
+      const defs = [
+        { key:"all", label:"Todos", count: rawCards.length },
+        { key:"paid", label:"Paid", count: counts["paid"] || 0 },
+        { key:"open", label:"Open", count: counts["open"] || 0 },
+        { key:"delivered", label:"Delivered", count: counts["delivered"] || 0 },
+        { key:"pending", label:"Pending", count: counts["pending"] || 0 },
+      ];
+
+      // Solo mostrar cancelled si el toggle está activo
+      if (elIncludeCancelled.checked) {
+        defs.push({ key:"cancelled", label:"Cancelled", count: counts["cancelled"] || 0 });
+      }
+
+      elChips.innerHTML = defs.map(d => `
+        <button class="chip ${state.chip===d.key ? "active":""}" data-chip="${d.key}">
+          ${d.label} <small>${d.count}</small>
+        </button>
+      `).join("");
+
+      elChips.querySelectorAll("[data-chip]").forEach(b => {
+        b.addEventListener("click", () => {
+          state.chip = b.getAttribute("data-chip");
+          const filtered = applyFrontFilters(state.lastRawCards);
+          render(filtered);
+          // count/total aquí son visuales (de página), no global
+          elCount.textContent = String(filtered.length);
+          setHint(`Filtro: ${state.chip === "all" ? "Todos" : state.chip}`);
+        });
+      });
     }
 
     function showLoading() {
@@ -435,7 +470,6 @@
 
     function render(cards=[]) {
       elList.innerHTML = "";
-
       if (!cards.length) {
         elList.innerHTML = `<div class="card"><div class="hint">Sin resultados. 🎈</div></div>`;
         return;
@@ -466,6 +500,11 @@
                 <div class="meta">
                   <div><b>${customer}</b>${phone ? ` • ${phone}` : ""}${email ? ` • ${email}` : ""}</div>
                   <div>Total: <b>${total}</b></div>
+
+                  <div class="miniActions">
+                    ${phone ? `<button class="miniBtn" data-copy="${esc(phone)}">Copiar tel</button>` : ""}
+                    ${email ? `<button class="miniBtn" data-copy="${esc(email)}">Copiar email</button>` : ""}
+                  </div>
                 </div>
               </div>
 
@@ -477,17 +516,45 @@
             </div>
 
             <div class="items">${esc(itemsPreview)}${itemsFull.length>180 ? "…" : ""}</div>
+
+            ${itemsFull.length > 180 ? `
+              <details>
+                <summary>Ver detalle de items</summary>
+                <div class="items" style="margin-top:8px">${esc(itemsFull)}</div>
+              </details>
+            ` : ""}
+
           </div>
         `;
         elList.insertAdjacentHTML("beforeend", html);
       });
 
-      // bind botones
+      // bind Asignar
       document.querySelectorAll("[data-assign]").forEach(btn => {
         btn.addEventListener("click", () => {
           const id = btn.getAttribute("data-assign");
           const found = state.currentCards.find(x => String(x.order_id) === String(id));
           if (found) openModal(found);
+        });
+      });
+
+      // bind copiar
+      document.querySelectorAll("[data-copy]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const val = btn.getAttribute("data-copy") || "";
+          try {
+            await navigator.clipboard.writeText(val);
+            showToast("📋 Copiado");
+          } catch(e){
+            // fallback simple
+            const ta = document.createElement("textarea");
+            ta.value = val;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            ta.remove();
+            showToast("📋 Copiado");
+          }
         });
       });
     }
@@ -521,31 +588,36 @@
         if (!res || !res.ok) {
           setHint("Error al cargar.");
           showToast(res?.error || "Error al cargar.");
-          render([]);
           state.currentCards = [];
-          state.nextOffset = null;
+          state.lastRawCards = [];
+          render([]);
           updatePager();
           return;
         }
 
         state.currentCards = res.cards || [];
+        state.lastRawCards = res.cards || [];
         state.nextOffset = res.nextOffset;
-        state.lastTotal = Number(res.total || 0);
 
-        elCount.textContent = String(res.count || 0);
+        // render chips + aplicar filtros front
+        renderChips(state.lastRawCards);
+
+        const filtered = applyFrontFilters(state.lastRawCards);
+        render(filtered);
+
+        elCount.textContent = String(filtered.length);
         elTotal.textContent = String(res.total || 0);
 
         updatePager();
-        render(state.currentCards);
 
         const label = (view === "pendientes") ? "Pendientes listos." : "Mostrando TN_Resumen.";
         setHint(label);
       } catch(err){
         setHint("Error de conexión.");
         showToast(err?.message || "Error");
-        render([]);
         state.currentCards = [];
-        state.nextOffset = null;
+        state.lastRawCards = [];
+        render([]);
         updatePager();
       }
     }
@@ -575,15 +647,8 @@
     }
 
     document.getElementById("mCancelar").addEventListener("click", closeModal);
-
-    // cerrar modal tocando fondo
-    modalBack.addEventListener("click", (e) => {
-      if (e.target === modalBack) closeModal();
-    });
-    // cerrar con ESC
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modalBack.style.display === "flex") closeModal();
-    });
+    modalBack.addEventListener("click", (e) => { if (e.target === modalBack) closeModal(); });
+    window.addEventListener("keydown", (e) => { if (e.key === "Escape" && modalBack.style.display === "flex") closeModal(); });
 
     document.getElementById("mGuardar").addEventListener("click", async () => {
       if (!state.selected) return;
@@ -595,7 +660,6 @@
       if (!vendedora) return showToast("Selecciona vendedora.");
       if (!origen) return showToast("Selecciona origen.");
 
-      // anti doble click
       btnGuardar.disabled = true;
       btnGuardar.textContent = "Guardando…";
 
@@ -615,8 +679,6 @@
 
       showToast("✅ Guardado para comisiones");
       closeModal();
-
-      // recargar (sin perder búsqueda)
       await load(true);
     });
 
@@ -625,20 +687,14 @@
     document.getElementById("btnBuscar").addEventListener("click", () => load(true));
     elView.addEventListener("change", () => load(true));
     elIncludeCancelled.addEventListener("change", () => load(true));
+    elOnlyAssignedToday.addEventListener("change", () => load(true));
 
-    // Enter para buscar
-    elQ.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") load(true);
+    elQ.addEventListener("keydown", (e) => { if (e.key === "Enter") load(true); });
+
+    document.getElementById("btnNext").addEventListener("click", () => {
+      if (state.nextOffset !== null) { state.offset = state.nextOffset; load(false); }
     });
-
-    elNext.addEventListener("click", () => {
-      if (state.nextOffset !== null) {
-        state.offset = state.nextOffset;
-        load(false);
-      }
-    });
-
-    elPrev.addEventListener("click", () => {
+    document.getElementById("btnPrev").addEventListener("click", () => {
       state.offset = Math.max(0, state.offset - state.limit);
       load(false);
     });
