@@ -1,250 +1,415 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Registro de Ventas HarujaGdl</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#A7B59E" />
+  <title>Panel HarujaGdl • Comisiones</title>
 
-    <style>
-      body {
-        font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        background: #fff;
-        color: #383234;
-        margin: 0;
-        padding: 0 20px;
-      }
-      .container {
-        max-width: 600px;
-        margin: auto;
-        padding-bottom: 40px;
-      }
-      img.logo {
-        width: 250px;
-        display: block;
-        margin: 30px auto 20px;
-      }
-      h2 {
-        text-align: center;
-        color: #383234;
-        margin-bottom: 20px;
-      }
-      label {
-        display: block;
-        margin-top: 15px;
-        font-weight: bold;
-      }
-      input,
-      select,
-      textarea {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        margin-top: 5px;
-        box-sizing: border-box;
-      }
-      button {
-        margin-top: 25px;
-        width: 100%;
-        padding: 12px;
-        background: #A7B59E;
-        color: #fff;
-        border: 0;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-      button:disabled {
-        opacity: 0.6;
-        cursor: default;
-      }
-      .mensaje {
-        margin-top: 20px;
-        text-align: center;
-        font-weight: bold;
-      }
-      .muted {
-        color: #6b7280;
-        font-size: 0.9rem;
-        text-align: center;
-        margin-top: 8px;
-      }
+  <style>
+    :root{
+      --fondo:#fff;
+      --texto:#383234;
+      --acento:#A7B59E;
+      --beige:#FAF6F1;
+      --gris:#6b6b6b;
+      --borde:#e9e4dc;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background:var(--beige);
+      color:var(--texto);
+    }
+    .wrap{max-width:720px;margin:0 auto;padding:20px 14px 60px;}
+    header{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0 18px}
+    header img{height:40px;object-fit:contain}
+    h1{font-size:20px;margin:0}
+    .sub{color:var(--gris);font-size:13px;text-align:center;max-width:520px}
+    .card{
+      background:var(--fondo);
+      border:1px solid var(--borde);
+      border-radius:14px;
+      padding:14px;
+      box-shadow:0 6px 18px rgba(56,50,52,.06);
+      margin-bottom:12px;
+    }
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    input, select, textarea, button{
+      font:inherit;
+      border-radius:10px;
+      border:1px solid var(--borde);
+      padding:10px 12px;
+      background:#fff;
+      color:var(--texto);
+      outline:none;
+    }
+    input:focus, select:focus, textarea:focus{border-color:var(--acento)}
+    .btn{
+      background:var(--acento);
+      border:1px solid var(--acento);
+      color:#fff;
+      cursor:pointer;
+      padding:10px 14px;
+      border-radius:12px;
+      font-weight:600;
+    }
+    .btn.secondary{
+      background:#fff;color:var(--texto);border:1px solid var(--borde);
+    }
+    .row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .pill{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      background:var(--beige);
+      border:1px solid var(--borde);
+      font-size:12px;
+      color:var(--gris);
+    }
+    .order{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .order h3{margin:0;font-size:16px}
+    .meta{color:var(--gris);font-size:13px;margin-top:4px;line-height:1.35}
+    .items{margin-top:10px;color:var(--texto);font-size:13px;line-height:1.35}
+    .actions{display:flex;gap:8px;align-items:center}
+    .footerActions{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+    .hint{color:var(--gris);font-size:12px}
 
-      /* Popups */
-      dialog {
-        border: none;
-        border-radius: 12px;
-        padding: 25px 30px;
-        text-align: center;
-        animation: fadeIn 0.3s ease;
-        font-weight: 500;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: scale(0.9);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
-      .success {
-        background-color: #A7B59E;
-        color: #fff;
-      }
-      .error {
-        background-color: #B0413E;
-        color: #fff;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <!-- Puedes cambiar la URL del logo si lo mueves a otro lado -->
-      <img
-        src="https://i.postimg.cc/nMphkZcC/haruja-logo.png"
-        alt="HarujaGdl Logo"
-        class="logo"
-      />
-      <h2>Registro de Venta</h2>
+    /* Modal */
+    .modalBack{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+    .modal{
+      width:min(520px, 100%);
+      background:#fff;
+      border-radius:16px;
+      border:1px solid var(--borde);
+      box-shadow:0 20px 50px rgba(0,0,0,.2);
+      padding:14px;
+    }
+    .modal h2{margin:0 0 10px 0; font-size:18px}
+    .grid{display:grid;grid-template-columns:1fr;gap:10px}
+    @media(min-width:560px){ .grid{grid-template-columns:1fr 1fr} }
+    .full{grid-column:1/-1}
+    .toast{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:16px;
+      background:#fff;
+      border:1px solid var(--borde);
+      border-radius:999px;
+      padding:10px 14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.12);
+      display:none;
+      font-size:13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <!-- Cambia el src por tu logo si quieres -->
+      <img src="/haruja-logo.png" alt="harujagdl" onerror="this.style.display='none'">
+      <h1>Comisiones • Tiendanube</h1>
+      <div class="sub">Aquí no recapturas ventas. Solo asignas <b>vendedora</b> y <b>origen real</b> a los pedidos del PDV/checkout para comisiones.</div>
+    </header>
 
-      <form id="ventaForm" autocomplete="off">
-        <label>Fecha de venta*</label>
-        <input type="date" name="fecha" required />
-
-        <label>Vendedora*</label>
-        <select name="vendedora" required>
-          <option value="Sam">Sam</option>
-          <option value="Haru">Haru</option>
-          <option value="harujagdl.com">harujagdl.com</option>
+    <div class="card">
+      <div class="toolbar">
+        <select id="view">
+          <option value="pendientes" selected>Pendientes por asignar</option>
+          <option value="todos">Todos (TN_Resumen)</option>
         </select>
 
-        <label>Cliente*</label>
-        <input type="text" name="cliente" required />
-
-        <label>Número de contacto*</label>
-        <input type="tel" name="contacto" required />
-
-        <label>Canal de venta*</label>
-        <select name="canal" required>
-          <option value="Tienda física">Tienda física</option>
-          <option value="Harujagdl.com">Harujagdl.com</option>
-          <option value="Insta">Instagram</option>
-          <option value="Facebook">Facebook</option>
-          <option value="Whatsapp">Whatsapp</option>
-          <option value="Tianguis">Tianguis</option>
-        </select>
-
-        <label>Código(s) (separar con ,)*</label>
-        <input
-          type="text"
-          name="articulo"
-          required
-          placeholder="Ej. HA1001, HA1002, HA1003"
-        />
-
-        <label>Total*</label>
-        <input type="number" name="precio" required />
-
-        <label>Método de pago*</label>
-        <select name="pago" required>
-          <option value="Efectivo">Efectivo</option>
-          <option value="Tarjeta">Tarjeta</option>
-          <option value="Transferencia">Transferencia</option>
-          <option value="Link de pago">Link de pago</option>
-        </select>
-
-        <label>Descuento*</label>
-        <select name="descuento" required>
-          <option value="No aplica">No aplica</option>
-          <option value="10%">10%</option>
-        </select>
-
-        <label>Comentario</label>
-        <textarea name="comentario" rows="3"></textarea>
-
-        <button id="btnGuardar" type="submit">Guardar venta</button>
-        <div class="mensaje" id="mensaje"></div>
-        <div class="muted" id="aviso">
-          Esta pantalla envía los datos directo a tu Google Sheet de ventas.
+        <input id="q" placeholder="Buscar: # pedido, nombre, teléfono, email…" style="flex:1;min-width:240px" />
+        <button class="btn secondary" id="btnBuscar">Buscar</button>
+        <button class="btn" id="btnRefrescar">Refrescar</button>
+      </div>
+      <div style="margin-top:10px" class="footerActions">
+        <div class="hint">Mostrando <span id="count">0</span> • Total <span id="total">0</span></div>
+        <div class="actions">
+          <button class="btn secondary" id="btnNext" disabled>Siguiente →</button>
         </div>
-      </form>
+      </div>
     </div>
 
-    <!-- Pop-ups -->
-    <dialog id="dlgOk" class="success">✅ Venta registrada correctamente.</dialog>
-    <dialog id="dlgErr" class="error">❌ Error al guardar la venta.</dialog>
+    <div id="list"></div>
+  </div>
 
-        <script>
-      // 👉 Endpoint de tu Apps Script (implementación)
-      const ENDPOINT =
-        'https://script.google.com/macros/s/AKfycbwkty3K4kZlK_83GRoO0GSf2o7B3aHb2VmuhxtcyK4L4FnWSj7yE7MDdUuvdV32WbFh0g/exec';
+  <!-- Modal -->
+  <div class="modalBack" id="modalBack">
+    <div class="modal">
+      <h2>Asignar venta para comisiones</h2>
+      <div class="pill" id="mOrder"></div>
 
-      const form = document.getElementById('ventaForm');
-      const mensaje = document.getElementById('mensaje');
-      const dlgOk = document.getElementById('dlgOk');
-      const dlgErr = document.getElementById('dlgErr');
-      const btn = document.getElementById('btnGuardar');
+      <div class="grid" style="margin-top:12px">
+        <div>
+          <label class="hint">Vendedora*</label>
+          <select id="mVendedora" style="width:100%">
+            <option value="">Selecciona…</option>
+            <option>Sam</option>
+            <option>Haru</option>
+            <option>Yair</option>
+          </select>
+        </div>
+        <div>
+          <label class="hint">Origen real*</label>
+          <select id="mOrigen" style="width:100%">
+            <option value="">Selecciona…</option>
+            <option>Instagram</option>
+            <option>Facebook</option>
+            <option>WhatsApp</option>
+            <option>Orgánico (web)</option>
+            <option>Tienda física</option>
+            <option>Tianguis</option>
+            <option>Referido</option>
+          </select>
+        </div>
 
-      function showDialog(dlg, text, timeout = 2500) {
-        dlg.textContent = text;
-        try {
-          dlg.showModal();
-          setTimeout(() => dlg.close(), timeout);
-        } catch (e) {
-          alert(text); // fallback por si dialog no es soportado
+        <div class="full">
+          <label class="hint">Comentario</label>
+          <textarea id="mComentario" rows="3" style="width:100%" placeholder="Ej: lo atendió Sam por WhatsApp, cerró en web…"></textarea>
+        </div>
+
+        <div class="full" style="display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn secondary" id="mCancelar">Cancelar</button>
+          <button class="btn" id="mGuardar">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ========= CONFIG =========
+    const API_BASE = "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
+    const API_KEY  = "harujaTNpwa2025";
+
+    // ========= JSONP helper (evita CORS) =========
+    function jsonp(action, params = {}) {
+      return new Promise((resolve, reject) => {
+        const cb = "cb_" + Math.random().toString(36).slice(2);
+        const script = document.createElement("script");
+        const url = new URL(API_BASE);
+
+        url.searchParams.set("action", action);
+        url.searchParams.set("key", API_KEY);
+        url.searchParams.set("callback", cb);
+
+        Object.entries(params).forEach(([k,v]) => {
+          if (v === undefined || v === null) return;
+          url.searchParams.set(k, String(v));
+        });
+
+        window[cb] = (data) => {
+          cleanup();
+          resolve(data);
+        };
+
+        function cleanup() {
+          try { delete window[cb]; } catch(e){ window[cb] = undefined; }
+          script.remove();
         }
+
+        script.onerror = () => {
+          cleanup();
+          reject(new Error("No se pudo cargar la respuesta (JSONP)."));
+        };
+
+        script.src = url.toString();
+        document.body.appendChild(script);
+
+        // timeout
+        setTimeout(() => {
+          if (window[cb]) {
+            cleanup();
+            reject(new Error("Timeout de la API"));
+          }
+        }, 15000);
+      });
+    }
+
+    // ========= UI state =========
+    let state = {
+      offset: 0,
+      limit: 10,
+      nextOffset: null,
+      currentCards: [],
+      selected: null
+    };
+
+    const elList = document.getElementById("list");
+    const elCount = document.getElementById("count");
+    const elTotal = document.getElementById("total");
+    const elNext = document.getElementById("btnNext");
+    const elView = document.getElementById("view");
+    const elQ = document.getElementById("q");
+    const toast = document.getElementById("toast");
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.style.display = "block";
+      setTimeout(()=>toast.style.display="none", 2600);
+    }
+
+    function money(v) {
+      const n = Number(v);
+      if (isNaN(n)) return String(v ?? "");
+      return n.toLocaleString("es-MX", { style:"currency", currency:"MXN" });
+    }
+
+    function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    function render(cards=[]) {
+      elList.innerHTML = "";
+      if (!cards.length) {
+        elList.innerHTML = `<div class="card"><div class="hint">Sin resultados. 🎈</div></div>`;
+        return;
       }
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+      cards.forEach(c => {
+        const itemsPreview = (c.items_text || "").slice(0, 160);
+        const status = c.status ? `<span class="pill">${esc(c.status)}</span>` : "";
+        const conv = (String(c.convertido).toLowerCase() === "true" || String(c.convertido) === "1")
+          ? `<span class="pill">✅ Ya asignado</span>` : `<span class="pill">🕒 Pendiente</span>`;
 
-        const fd = new FormData(form);
-        const data = Object.fromEntries(fd.entries());
-        const body = new URLSearchParams(data).toString();
-
-        mensaje.textContent = 'Guardando...';
-        btn.disabled = true;
-
-        try {
-          // 👇 no-cors para evitar problemas de CORS
-          await fetch(ENDPOINT, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-            },
-            body,
-          });
-
-          // Si no hubo error en fetch, asumimos OK
-          btn.disabled = false;
-          mensaje.textContent = '';
-          showDialog(dlgOk, '✅ Venta registrada correctamente.', 2000);
-          form.reset();
-        } catch (err) {
-          btn.disabled = false;
-          mensaje.textContent = '';
-          showDialog(
-            dlgErr,
-            '❌ Error de red. Verifica tu conexión e intenta de nuevo.',
-            3000
-          );
-          console.error(err);
-        }
+        const html = `
+          <div class="card">
+            <div class="order">
+              <div>
+                <h3>TN-${esc(c.order_number || "")} <span style="font-weight:500;color:var(--gris);font-size:13px">(${esc(c.order_id || "")})</span></h3>
+                <div class="meta">
+                  <div><b>${esc(c.customer_name || "Sin nombre")}</b> • ${esc(c.customer_phone || "")} • ${esc(c.customer_email || "")}</div>
+                  <div>Total: <b>${esc(money(c.total))}</b></div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+                ${status}
+                ${conv}
+                <button class="btn" data-assign="${esc(c.order_id)}">Asignar</button>
+              </div>
+            </div>
+            <div class="items">${esc(itemsPreview)}${(c.items_text || "").length>160 ? "…" : ""}</div>
+          </div>
+        `;
+        elList.insertAdjacentHTML("beforeend", html);
       });
 
-      // Evitar que Enter mande el form en inputs normales
-      form.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter' && ev.target.tagName !== 'TEXTAREA') {
-          ev.preventDefault();
-        }
+      // bind botones
+      document.querySelectorAll("[data-assign]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-assign");
+          const found = state.currentCards.find(x => String(x.order_id) === String(id));
+          if (found) openModal(found);
+        });
       });
-    </script>
-  </body>
+    }
+
+    async function load(reset=false) {
+      if (reset) state.offset = 0;
+
+      const view = elView.value;
+      const q = elQ.value.trim();
+
+      const action = (view === "pendientes") ? "tn_pendientes" : "tn_resumen";
+      const res = await jsonp(action, {
+        limit: state.limit,
+        offset: state.offset,
+        order: "desc",
+        q: q || ""
+      });
+
+      if (!res || !res.ok) {
+        showToast(res?.error || "Error al cargar.");
+        render([]);
+        return;
+      }
+
+      state.currentCards = res.cards || [];
+      state.nextOffset = res.nextOffset;
+
+      elCount.textContent = String(res.count || 0);
+      elTotal.textContent = String(res.total || 0);
+
+      elNext.disabled = (state.nextOffset === null);
+      render(state.currentCards);
+    }
+
+    // ========= Modal =========
+    const modalBack = document.getElementById("modalBack");
+    const mOrder = document.getElementById("mOrder");
+    const mVendedora = document.getElementById("mVendedora");
+    const mOrigen = document.getElementById("mOrigen");
+    const mComentario = document.getElementById("mComentario");
+
+    function openModal(card) {
+      state.selected = card;
+      mOrder.textContent = `Pedido: TN-${card.order_number} (order_id: ${card.order_id})`;
+      mVendedora.value = "";
+      mOrigen.value = "";
+      mComentario.value = "";
+      modalBack.style.display = "flex";
+    }
+    function closeModal(){ modalBack.style.display = "none"; state.selected = null; }
+
+    document.getElementById("mCancelar").addEventListener("click", closeModal);
+
+    document.getElementById("mGuardar").addEventListener("click", async () => {
+      if (!state.selected) return;
+
+      const vendedora = mVendedora.value.trim();
+      const origen = mOrigen.value.trim();
+      const comentario = mComentario.value.trim();
+
+      if (!vendedora) return showToast("Selecciona vendedora.");
+      if (!origen) return showToast("Selecciona origen.");
+
+      const res = await jsonp("registrar_comision", {
+        order_id: state.selected.order_id,
+        vendedora,
+        origen,
+        comentario
+      });
+
+      if (!res || !res.ok) {
+        showToast(res?.error || "No se pudo guardar.");
+        return;
+      }
+
+      showToast("✅ Guardado para comisiones");
+      closeModal();
+
+      // recargar (sin perder búsqueda)
+      await load(true);
+    });
+
+    // ========= Eventos =========
+    document.getElementById("btnRefrescar").addEventListener("click", () => load(true));
+    document.getElementById("btnBuscar").addEventListener("click", () => load(true));
+    elView.addEventListener("change", () => load(true));
+
+    elNext.addEventListener("click", () => {
+      if (state.nextOffset !== null) {
+        state.offset = state.nextOffset;
+        load(false);
+      }
+    });
+
+    // init
+    load(true).catch(err => showToast(err.message || "Error"));
+  </script>
+</body>
 </html>
-
-
-
