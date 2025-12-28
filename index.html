@@ -12,6 +12,12 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
+    <!-- ✅ CONFIG GLOBAL (PWA) -->
+    <!-- Crea este archivo en GitHub (raíz del repo): /config.js
+         window.HARUJA = { API_URL: ".../exec", API_KEY: "harujaTNpwa2025" }
+    -->
+    <script src="/config.js"></script>
+
     <style>
       :root {
         --fondo: #ffffff;
@@ -520,6 +526,18 @@
     <div id="toast" class="toast" style="display: none"></div>
 
     <script>
+      // ✅ Lee config global (config.js)
+      // Si config.js no cargó, caemos al valor por defecto.
+      const HARUJA_API_URL =
+        (window.HARUJA && window.HARUJA.API_URL) ||
+        "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
+
+      const HARUJA_API_KEY =
+        (window.HARUJA && window.HARUJA.API_KEY) || "harujaTNpwa2025";
+
+      console.log("✅ HARUJA_API_URL:", HARUJA_API_URL);
+      console.log("✅ HARUJA_API_KEY:", HARUJA_API_KEY);
+
       const ADMIN_PASSWORD = "Harujagdl";
 
       const adminToggle = document.getElementById("adminToggle");
@@ -616,6 +634,14 @@
         "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
 
       const API_MASTER_URL = PIPELINE_URL;
+
+      // ✅ Helper para fetch con API KEY (para tus endpoints PWA)
+      // Úsalo cuando llames a tu endpoint TN_API_PWA o el que valide x-api-key.
+      async function fetchHaruja(url, options = {}) {
+        const headers = new Headers(options.headers || {});
+        headers.set("x-api-key", HARUJA_API_KEY);
+        return fetch(url, { ...options, headers });
+      }
 
       async function ejecutarPipelineMaster() {
         const btn = document.getElementById("btnPipelineMaster");
@@ -779,9 +805,7 @@
 
         try {
           const respuesta = await fetch(
-            PIPELINE_URL +
-              "?action=buscarProducto&q=" +
-              encodeURIComponent(q)
+            PIPELINE_URL + "?action=buscarProducto&q=" + encodeURIComponent(q)
           );
           const data = await respuesta.json();
 
