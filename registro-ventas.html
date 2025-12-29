@@ -244,7 +244,7 @@
                 Incluir canceladas
               </label>
 
-              <label class="toggle" title="En vista Todos, muestra solo los que ya se asignaron hoy (según marca en TN_Resumen)">
+              <label class="toggle" title="En vista Todos, muestra solo los que ya se asignaron hoy (best-effort)">
                 <input type="checkbox" id="onlyAssignedToday" />
                 Asignados hoy
               </label>
@@ -279,7 +279,7 @@
           <label class="hint">Vendedora*</label>
           <select id="mVendedora" style="width:100%">
             <option value="">Selecciona…</option>
-            <option>Vendendora</option>
+            <option>Sam</option>
             <option>Haru</option>
             <option>Yair</option>
           </select>
@@ -300,7 +300,7 @@
 
         <div class="full">
           <label class="hint">Comentario</label>
-          <textarea id="mComentario" rows="3" style="width:100%" placeholder="Ej: lo atendió Vendedora por WhatsApp, cerró en web…"></textarea>
+          <textarea id="mComentario" rows="3" style="width:100%" placeholder="Ej: lo atendió Sam por WhatsApp, cerró en web…"></textarea>
         </div>
 
         <div class="full" style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
@@ -312,85 +312,86 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  
-/* ============================================
-   🔥 FIX PWA iOS / Android
-   Desactiva Service Worker SOLO para esta pantalla
-   (Safari rompe JSONP cuando el SW intercepta)
-============================================ */
-(async () => {
-  try {
-    if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      for (const r of regs) await r.unregister();
 
-      // Limpia caches (clave en iOS)
-      if (window.caches) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map(k => caches.delete(k)));
-      }
-    }
-  } catch (e) {}
-})();
   <script>
-    
+    /* ============================================
+       🔥 FIX PWA iOS / Android (solo esta pantalla)
+       Safari/iOS a veces rompe JSONP si SW intercepta.
+       Aquí desregistramos SW + limpiamos caches.
+       (No rompe PC; solo ayuda en PWA)
+    ============================================ */
+    (async () => {
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (const r of regs) await r.unregister();
+
+          if (window.caches) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+          }
+        }
+      } catch (e) {}
+    })();
+
     // ========= CONFIG =========
     const API_BASE = "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
     const API_KEY  = "harujaTNpwa2025";
 
-// ========= JSONP helper (evita CORS) - robusto iOS =========
-function jsonp(action, params = {}) {
-  return new Promise((resolve, reject) => {
-    const cb = "cb_" + Math.random().toString(36).slice(2);
-    const script = document.createElement("script");
-    const url = new URL(API_BASE);
+    // ========= JSONP helper (evita CORS) - robusto iOS =========
+    function jsonp(action, params = {}) {
+      return new Promise((resolve, reject) => {
+        const cb = "cb_" + Math.random().toString(36).slice(2);
+        const script = document.createElement("script");
+        const url = new URL(API_BASE);
 
-    url.searchParams.set("action", action);
-    url.searchParams.set("key", API_KEY);
-    url.searchParams.set("callback", cb);
+        url.searchParams.set("action", action);
+        url.searchParams.set("key", API_KEY);
+        url.searchParams.set("callback", cb);
 
-    // evita cache (clave en iOS/Safari)
-    url.searchParams.set("_", String(Date.now()));
+        // evita cache (clave en iOS/Safari)
+        url.searchParams.set("_", String(Date.now()));
 
-    Object.entries(params).forEach(([k, v]) => {
-      if (v === undefined || v === null) return;
-      url.searchParams.set(k, String(v));
-    });
+        Object.entries(params).forEach(([k, v]) => {
+          if (v === undefined || v === null) return;
+          url.searchParams.set(k, String(v));
+        });
 
-    let done = false;
-    const timer = setTimeout(() => {
-      if (done) return;
-      done = true;
-      cleanup();
-      reject(new Error("Timeout de la API"));
-    }, 15000);
+        let done = false;
+        const timer = setTimeout(() => {
+          if (done) return;
+          done = true;
+          cleanup();
+          reject(new Error("Timeout de la API"));
+        }, 15000);
 
-    window[cb] = (data) => {
-      if (done) return;
-      done = true;
-      clearTimeout(timer);
-      cleanup();
-      resolve(data);
-    };
+        window[cb] = (data) => {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          cleanup();
+          resolve(data);
+        };
 
-    function cleanup() {
-      try { delete window[cb]; } catch (e) { window[cb] = undefined; }
-      if (script && script.parentNode) script.parentNode.removeChild(script);
+        function cleanup() {
+          try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+          if (script && script.parentNode) script.parentNode.removeChild(script);
+        }
+
+        script.async = true;
+        script.onerror = () => {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          cleanup();
+          reject(new Error("No se pudo cargar la respuesta (JSONP)."));
+        };
+
+        script.src = url.toString();
+        document.head.appendChild(script);
+      });
     }
 
-    script.async = true;
-    script.onerror = () => {
-      if (done) return;
-      done = true;
-      clearTimeout(timer);
-      cleanup();
-      reject(new Error("No se pudo cargar la respuesta (JSONP)."));
-    };
-
-    script.src = url.toString();
-    document.head.appendChild(script);
-  });
-}
     // ========= UI state =========
     let state = {
       offset: 0,
@@ -437,10 +438,6 @@ function jsonp(action, params = {}) {
     }
 
     function isAssignedToday(card){
-      // Nota: Esto es “best effort” sin backend extra.
-      // Si tu TN_Resumen tiene una columna tipo inv_updated_at / updated_at y quieres usarla, se puede.
-      // Por ahora: usa el hecho de que "convertido" sea true y que el usuario esté viendo "Todos".
-      // (Mejoramos luego con endpoint de "asignados_hoy" real)
       const conv = String(card.convertido || "").toLowerCase();
       return (conv === "true" || conv === "1");
     }
@@ -448,12 +445,10 @@ function jsonp(action, params = {}) {
     function applyFrontFilters(raw){
       let out = raw.slice();
 
-      // chip por status
       if (state.chip !== "all") {
         out = out.filter(c => statusKey(c.status) === state.chip);
       }
 
-      // asignados hoy (solo en vista Todos; es un filtro útil)
       if (elView.value === "todos" && elOnlyAssignedToday.checked) {
         out = out.filter(c => isAssignedToday(c));
       }
@@ -476,7 +471,6 @@ function jsonp(action, params = {}) {
         { key:"pending", label:"Pending", count: counts["pending"] || 0 },
       ];
 
-      // Solo mostrar cancelled si el toggle está activo
       if (elIncludeCancelled.checked) {
         defs.push({ key:"cancelled", label:"Cancelled", count: counts["cancelled"] || 0 });
       }
@@ -492,7 +486,6 @@ function jsonp(action, params = {}) {
           state.chip = b.getAttribute("data-chip");
           const filtered = applyFrontFilters(state.lastRawCards);
           render(filtered);
-          // count/total aquí son visuales (de página), no global
           elCount.textContent = String(filtered.length);
           setHint(`Filtro: ${state.chip === "all" ? "Todos" : state.chip}`);
         });
@@ -569,7 +562,6 @@ function jsonp(action, params = {}) {
         elList.insertAdjacentHTML("beforeend", html);
       });
 
-      // bind Asignar
       document.querySelectorAll("[data-assign]").forEach(btn => {
         btn.addEventListener("click", () => {
           const id = btn.getAttribute("data-assign");
@@ -578,7 +570,6 @@ function jsonp(action, params = {}) {
         });
       });
 
-      // bind copiar
       document.querySelectorAll("[data-copy]").forEach(btn => {
         btn.addEventListener("click", async () => {
           const val = btn.getAttribute("data-copy") || "";
@@ -586,7 +577,6 @@ function jsonp(action, params = {}) {
             await navigator.clipboard.writeText(val);
             showToast("📋 Copiado");
           } catch(e){
-            // fallback simple
             const ta = document.createElement("textarea");
             ta.value = val;
             document.body.appendChild(ta);
@@ -639,7 +629,6 @@ function jsonp(action, params = {}) {
         state.lastRawCards = res.cards || [];
         state.nextOffset = res.nextOffset;
 
-        // render chips + aplicar filtros front
         renderChips(state.lastRawCards);
 
         const filtered = applyFrontFilters(state.lastRawCards);
@@ -728,7 +717,6 @@ function jsonp(action, params = {}) {
     elView.addEventListener("change", () => load(true));
     elIncludeCancelled.addEventListener("change", () => load(true));
     elOnlyAssignedToday.addEventListener("change", () => load(true));
-
     elQ.addEventListener("keydown", (e) => { if (e.key === "Enter") load(true); });
 
     document.getElementById("btnNext").addEventListener("click", () => {
@@ -744,7 +732,3 @@ function jsonp(action, params = {}) {
   </script>
 </body>
 </html>
-
-
-
-
