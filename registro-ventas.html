@@ -314,58 +314,59 @@
   <div class="toast" id="toast"></div>
 
   <script>
-
     // ========= CONFIG =========
     const API_BASE = "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
     const API_KEY  = "harujaTNpwa2025";
 
-    // ========= JSONP helper (evita CORS) - robusto iOS =========
+    // ========= JSONP helper (ULTRA compatible Android/iOS) =========
     function jsonp(action, params = {}) {
       return new Promise((resolve, reject) => {
-        const cb = "cb_" + Math.random().toString(36).slice(2);
-        const script = document.createElement("script");
-        const url = new URL(API_BASE);
+        const cb = "cb" + Date.now() + Math.floor(Math.random() * 100000);
 
+        const url = new URL(API_BASE);
         url.searchParams.set("action", action);
         url.searchParams.set("key", API_KEY);
         url.searchParams.set("callback", cb);
 
-        // evita cache (clave en iOS/Safari)
+        // anti-cache duro (clave en Android/iOS)
         url.searchParams.set("_", String(Date.now()));
 
-        Object.entries(params).forEach(([k, v]) => {
-          if (v === undefined || v === null) return;
+        for (const [k, v] of Object.entries(params)) {
+          if (v === undefined || v === null) continue;
           url.searchParams.set(k, String(v));
-        });
+        }
 
-        let done = false;
+        let finished = false;
+        const script = document.createElement("script");
+        script.type = "text/javascript";
+        script.async = true;
+        script.referrerPolicy = "no-referrer";
+
         const timer = setTimeout(() => {
-          if (done) return;
-          done = true;
+          if (finished) return;
+          finished = true;
           cleanup();
-          reject(new Error("Timeout de la API"));
-        }, 15000);
+          reject(new Error("Timeout de la API (JSONP)"));
+        }, 20000);
 
         window[cb] = (data) => {
-          if (done) return;
-          done = true;
-          clearTimeout(timer);
+          if (finished) return;
+          finished = true;
           cleanup();
           resolve(data);
         };
 
         function cleanup() {
+          clearTimeout(timer);
           try { delete window[cb]; } catch (e) { window[cb] = undefined; }
           if (script && script.parentNode) script.parentNode.removeChild(script);
         }
 
-        script.async = true;
         script.onerror = () => {
-          if (done) return;
-          done = true;
-          clearTimeout(timer);
+          if (finished) return;
+          finished = true;
           cleanup();
-          reject(new Error("No se pudo cargar la respuesta (JSONP)."));
+          reject(new Error("No se pudo cargar el script JSONP"));
         };
 
         script.src = url.toString();
@@ -713,4 +714,3 @@
   </script>
 </body>
 </html>
-
