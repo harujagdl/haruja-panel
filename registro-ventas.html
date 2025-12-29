@@ -314,25 +314,6 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    /* ============================================
-       🔥 FIX PWA iOS / Android (solo esta pantalla)
-       Safari/iOS a veces rompe JSONP si SW intercepta.
-       Aquí desregistramos SW + limpiamos caches.
-       (No rompe PC; solo ayuda en PWA)
-    ============================================ */
-    (async () => {
-      try {
-        if ('serviceWorker' in navigator) {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          for (const r of regs) await r.unregister();
-
-          if (window.caches) {
-            const keys = await caches.keys();
-            await Promise.all(keys.map(k => caches.delete(k)));
-          }
-        }
-      } catch (e) {}
-    })();
 
     // ========= CONFIG =========
     const API_BASE = "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
@@ -732,3 +713,4 @@
   </script>
 </body>
 </html>
+
