@@ -3,7 +3,7 @@
 // PWA estable + NO rompe JSONP (Apps Script)
 // ===============================
 
-const CACHE_NAME = "haruja-static-v10";
+const CACHE_NAME = "haruja-static-v11";
 
 // Cache SOLO de assets (NO metas HTML aquí)
 const STATIC_ASSETS = [
@@ -91,3 +91,4 @@ async function cacheFirst(request) {
   }
   return res;
 }
+
