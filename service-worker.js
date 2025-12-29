@@ -1,63 +1,85 @@
-// service-worker.js
-// Cache estático SOLO para assets (no HTML)
+// ===============================
+// Haruja PWA Service Worker (v8)
+// - NO cachea HTML (evita bugs en PWA con páginas dinámicas/JSONP)
+// - Excluye páginas sensibles de cache
+// ===============================
+
 const CACHE_NAME = "haruja-static-v8";
 
-// OJO: NO metas HTML aquí (index/registro/etc). Eso congela versiones en PWA.
+// Solo assets realmente estáticos (NO HTML)
 const STATIC_ASSETS = [
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
-  // si tienes css/js estáticos, agrégalos aquí:
-  // "/styles.css",
-  // "/app.js",
+  "/haruja-logo.png"
 ];
 
-// INSTALACIÓN: precache de assets estáticos
+// Páginas que NO deben cachearse (HTML dinámico / JSONP / etc.)
+const NO_CACHE_PAGES = [
+  "/registro-ventas.html",
+  "/comisiones.html",          // si tu página se llama así, déjalo
+  "/calculadora-pedidos.html"  // si también te da lata, déjalo
+];
+
+// ---------- INSTALL ----------
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS)));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+  );
   self.skipWaiting();
 });
 
-// ACTIVACIÓN: limpiar caches viejos
+// ---------- ACTIVATE ----------
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
-    )
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)));
+      await self.clients.claim();
+    })()
   );
-  self.clients.claim();
 });
 
-// FETCH
+// Permite forzar actualización desde la página
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
+// ---------- FETCH ----------
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Solo manejar requests del mismo origen
+  // Solo controlamos requests del MISMO ORIGEN
   if (url.origin !== self.location.origin) return;
 
-  // 1) HTML / navegaciones -> NETWORK FIRST (SIN cachear HTML)
-  if (req.mode === "navigate" || (req.destination === "document" && req.method === "GET")) {
-    event.respondWith(networkFirstNoCache(req));
+  // 1) Navegaciones (HTML)
+  if (req.mode === "navigate" || req.destination === "document") {
+    // Si es una página “sensible”, NO cachear nunca
+    if (NO_CACHE_PAGES.includes(url.pathname)) {
+      event.respondWith(fetch(req, { cache: "no-store" }));
+      return;
+    }
+
+    // Para otras páginas: network-first (pero sin precachearlas)
+    event.respondWith(networkFirstNoHTMLCache(req));
     return;
   }
 
-  // 2) Assets -> CACHE FIRST
+  // 2) Assets estáticos: cache-first
   event.respondWith(cacheFirst(req));
 });
 
-async function networkFirstNoCache(request) {
+async function networkFirstNoHTMLCache(request) {
   try {
-    // cache: "no-store" ayuda MUCHO en iOS/Android PWA
-    const networkResponse = await fetch(request, { cache: "no-store" });
-    return networkResponse;
-  } catch (error) {
-    // fallback offline: intenta servir index.html si existiera en cache (opcional)
-    // Como NO cacheamos HTML, devolvemos mensaje simple.
-    return new Response("Sin conexión 😢", {
-      status: 503,
-      headers: { "Content-Type": "text/plain; charset=utf-8" },
-    });
+    // cache: no-store evita que el navegador “pegue” la respuesta vieja
+    return await fetch(request, { cache: "no-store" });
+  } catch (e) {
+    // fallback mínimo: intenta caché
+    const cached = await caches.match(request);
+    return cached || new Response("Sin conexión 😢", { status: 503 });
   }
 }
 
@@ -65,9 +87,8 @@ async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
 
-  const networkResponse = await fetch(request);
+  const res = await fetch(request);
   const cache = await caches.open(CACHE_NAME);
-  cache.put(request, networkResponse.clone());
-  return networkResponse;
+  cache.put(request, res.clone());
+  return res;
 }
-
