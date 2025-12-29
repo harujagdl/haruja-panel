@@ -673,6 +673,13 @@
         btnGuardar.disabled = true;
         btnGuardar.textContent = "Guardando…";
 
+        // 🔒 Bloqueo si el pedido está cancelado
+if (state.selected.status === "cancelled") {
+  btnGuardar.disabled = false;
+  btnGuardar.textContent = "Guardar";
+  showToast("❌ Pedido cancelado. No se puede registrar comisión.");
+  return;
+}
         const res = await jsonp("registrar_comision", {
           order_id: state.selected.order_id,
           vendedora,
@@ -718,3 +725,4 @@
   </script>
 </body>
 </html>
+
