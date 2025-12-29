@@ -1,6 +1,6 @@
 // service-worker.js
 // Cache estático SOLO para assets (no HTML)
-const CACHE_NAME = "haruja-static-v7";
+const CACHE_NAME = "haruja-static-v8";
 
 // OJO: NO metas HTML aquí (index/registro/etc). Eso congela versiones en PWA.
 const STATIC_ASSETS = [
@@ -70,3 +70,4 @@ async function cacheFirst(request) {
   cache.put(request, networkResponse.clone());
   return networkResponse;
 }
+
