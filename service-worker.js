@@ -1,27 +1,37 @@
 // ===============================
-// Haruja PWA Service Worker (v8)
-// - NO cachea HTML (evita bugs en PWA con páginas dinámicas/JSONP)
-// - Excluye páginas sensibles de cache
+// service-worker.js (FINAL)
+// Fix PWA iOS/Android + JSONP (Tiendanube / Apps Script)
 // ===============================
 
-const CACHE_NAME = "haruja-static-v8";
+// Sube versión cada vez que cambies este archivo
+const CACHE_NAME = "haruja-static-v9";
 
-// Solo assets realmente estáticos (NO HTML)
+// Archivos estáticos que queremos cachear (solo UI, NO endpoints externos)
 const STATIC_ASSETS = [
+  "/",
+  "/index.html",
+  "/registro-ventas.html",
+  "/plan-lealtad.html",
+  "/calculadora-pedidos.html",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/haruja-logo.png"
 ];
 
-// Páginas que NO deben cachearse (HTML dinámico / JSONP / etc.)
-const NO_CACHE_PAGES = [
-  "/registro-ventas.html",
-  "/comisiones.html",          // si tu página se llama así, déjalo
-  "/calculadora-pedidos.html"  // si también te da lata, déjalo
+// Rutas que NO deben pasar por el SW (para evitar romper JSONP / auth)
+const BYPASS_PATHS = [
+  "/registro-ventas.html" // <- pantalla de comisiones (usa JSONP)
 ];
 
-// ---------- INSTALL ----------
+// Hosts externos que NO deben ser interceptados por el SW
+const BYPASS_HOSTS = [
+  "script.google.com",
+  "script.googleusercontent.com",
+  "googleusercontent.com"
+];
+
+// ---------------- INSTALL ----------------
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
@@ -29,57 +39,66 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// ---------- ACTIVATE ----------
+// ---------------- ACTIVATE ----------------
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    (async () => {
-      const keys = await caches.keys();
-      await Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)));
-      await self.clients.claim();
-    })()
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    )
   );
+  self.clients.claim();
 });
 
-// Permite forzar actualización desde la página
-self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
-});
-
-// ---------- FETCH ----------
+// ---------------- FETCH ----------------
 self.addEventListener("fetch", (event) => {
-  const req = event.request;
-  const url = new URL(req.url);
+  const request = event.request;
 
-  // Solo controlamos requests del MISMO ORIGEN
-  if (url.origin !== self.location.origin) return;
+  // Solo manejar GET
+  if (request.method !== "GET") return;
 
-  // 1) Navegaciones (HTML)
-  if (req.mode === "navigate" || req.destination === "document") {
-    // Si es una página “sensible”, NO cachear nunca
-    if (NO_CACHE_PAGES.includes(url.pathname)) {
-      event.respondWith(fetch(req, { cache: "no-store" }));
-      return;
-    }
+  const url = new URL(request.url);
 
-    // Para otras páginas: network-first (pero sin precachearlas)
-    event.respondWith(networkFirstNoHTMLCache(req));
+  // 1) BYPASS por host externo (Apps Script / googleusercontent)
+  if (BYPASS_HOSTS.includes(url.hostname) || BYPASS_HOSTS.some(h => url.hostname.endsWith("." + h))) {
+    return; // deja que el navegador lo maneje
+  }
+
+  // 2) BYPASS por ruta (pantallas que usan JSONP o cosas sensibles)
+  if (BYPASS_PATHS.includes(url.pathname)) {
+    return; // deja que el navegador lo maneje
+  }
+
+  // 3) Navegaciones / HTML -> NETWORK FIRST
+  //    (pero ojo: si es la ruta bypass, ya salió arriba)
+  const isHTML =
+    request.mode === "navigate" ||
+    (request.destination === "document" && request.headers.get("accept")?.includes("text/html"));
+
+  if (isHTML) {
+    event.respondWith(networkFirst(request));
     return;
   }
 
-  // 2) Assets estáticos: cache-first
-  event.respondWith(cacheFirst(req));
+  // 4) Assets -> CACHE FIRST
+  event.respondWith(cacheFirst(request));
 });
 
-async function networkFirstNoHTMLCache(request) {
+// ---------------- STRATEGIES ----------------
+async function networkFirst(request) {
   try {
-    // cache: no-store evita que el navegador “pegue” la respuesta vieja
-    return await fetch(request, { cache: "no-store" });
-  } catch (e) {
-    // fallback mínimo: intenta caché
-    const cached = await caches.match(request);
-    return cached || new Response("Sin conexión 😢", { status: 503 });
+    const networkResponse = await fetch(request);
+
+    // cachea solo si es de tu dominio
+    const url = new URL(request.url);
+    if (url.origin === self.location.origin) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, networkResponse.clone());
+    }
+
+    return networkResponse;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    return cachedResponse || new Response("Sin conexión 😢", { status: 503 });
   }
 }
 
@@ -87,8 +106,14 @@ async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
 
-  const res = await fetch(request);
-  const cache = await caches.open(CACHE_NAME);
-  cache.put(request, res.clone());
-  return res;
+  const networkResponse = await fetch(request);
+
+  // cachea solo si es de tu dominio
+  const url = new URL(request.url);
+  if (url.origin === self.location.origin) {
+    const cache = await caches.open(CACHE_NAME);
+    cache.put(request, networkResponse.clone());
+  }
+
+  return networkResponse;
 }
