@@ -318,55 +318,55 @@
     const API_BASE = "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
     const API_KEY  = "harujaTNpwa2025";
 
-    // ========= JSONP helper (ULTRA compatible Android/iOS) =========
+    // ========= JSONP helper (evita CORS) - robusto Chrome/iOS =========
     function jsonp(action, params = {}) {
       return new Promise((resolve, reject) => {
-        const cb = "cb" + Date.now() + Math.floor(Math.random() * 100000);
-
+        const cb = "cb_" + Math.random().toString(36).slice(2);
+        const script = document.createElement("script");
         const url = new URL(API_BASE);
+
         url.searchParams.set("action", action);
         url.searchParams.set("key", API_KEY);
         url.searchParams.set("callback", cb);
 
-        // anti-cache duro (clave en Android/iOS)
-        url.searchParams.set("_", String(Date.now()));
+        // anti-cache (clave para Safari / Chrome agresivo)
+        url.searchParams.set("_ts", String(Date.now()));
+        url.searchParams.set("_r", Math.random().toString(36).slice(2));
 
-        for (const [k, v] of Object.entries(params)) {
-          if (v === undefined || v === null) continue;
+        Object.entries(params).forEach(([k, v]) => {
+          if (v === undefined || v === null) return;
           url.searchParams.set(k, String(v));
-        }
+        });
 
-        let finished = false;
-        const script = document.createElement("script");
-        script.type = "text/javascript";
-        script.async = true;
-        script.referrerPolicy = "no-referrer";
-
+        let done = false;
         const timer = setTimeout(() => {
-          if (finished) return;
-          finished = true;
+          if (done) return;
+          done = true;
           cleanup();
-          reject(new Error("Timeout de la API (JSONP)"));
-        }, 20000);
+          reject(new Error("Timeout de la API"));
+        }, 15000);
 
         window[cb] = (data) => {
-          if (finished) return;
-          finished = true;
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
           cleanup();
           resolve(data);
         };
 
         function cleanup() {
-          clearTimeout(timer);
           try { delete window[cb]; } catch (e) { window[cb] = undefined; }
           if (script && script.parentNode) script.parentNode.removeChild(script);
         }
 
+        script.async = true;
+
         script.onerror = () => {
-          if (finished) return;
-          finished = true;
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
           cleanup();
-          reject(new Error("No se pudo cargar el script JSONP"));
+          reject(new Error("No se pudo cargar la respuesta (JSONP)."));
         };
 
         script.src = url.toString();
@@ -430,11 +430,9 @@
       if (state.chip !== "all") {
         out = out.filter(c => statusKey(c.status) === state.chip);
       }
-
       if (elView.value === "todos" && elOnlyAssignedToday.checked) {
         out = out.filter(c => isAssignedToday(c));
       }
-
       return out;
     }
 
@@ -662,35 +660,41 @@
     window.addEventListener("keydown", (e) => { if (e.key === "Escape" && modalBack.style.display === "flex") closeModal(); });
 
     document.getElementById("mGuardar").addEventListener("click", async () => {
-      if (!state.selected) return;
+      try {
+        if (!state.selected) return;
 
-      const vendedora = mVendedora.value.trim();
-      const origen = mOrigen.value.trim();
-      const comentario = mComentario.value.trim();
+        const vendedora = mVendedora.value.trim();
+        const origen = mOrigen.value.trim();
+        const comentario = mComentario.value.trim();
 
-      if (!vendedora) return showToast("Selecciona vendedora.");
-      if (!origen) return showToast("Selecciona origen.");
+        if (!vendedora) return showToast("Selecciona vendedora.");
+        if (!origen) return showToast("Selecciona origen.");
 
-      btnGuardar.disabled = true;
-      btnGuardar.textContent = "Guardando…";
+        btnGuardar.disabled = true;
+        btnGuardar.textContent = "Guardando…";
 
-      const res = await jsonp("registrar_comision", {
-        order_id: state.selected.order_id,
-        vendedora,
-        origen,
-        comentario
-      });
+        const res = await jsonp("registrar_comision", {
+          order_id: state.selected.order_id,
+          vendedora,
+          origen,
+          comentario
+        });
 
-      if (!res || !res.ok) {
+        if (!res || !res.ok) {
+          btnGuardar.disabled = false;
+          btnGuardar.textContent = "Guardar";
+          showToast(res?.error || "No se pudo guardar.");
+          return;
+        }
+
+        showToast("✅ Guardado para comisiones");
+        closeModal();
+        await load(true);
+      } catch (e) {
         btnGuardar.disabled = false;
         btnGuardar.textContent = "Guardar";
-        showToast(res?.error || "No se pudo guardar.");
-        return;
+        showToast(e?.message || "Error");
       }
-
-      showToast("✅ Guardado para comisiones");
-      closeModal();
-      await load(true);
     });
 
     // ========= Eventos =========
