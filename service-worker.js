@@ -1,28 +1,28 @@
 // ===============================
-// service-worker.js (FINAL v8)
+// service-worker.js (FINAL v12)
 // PWA estable + NO rompe JSONP (Apps Script)
 // ===============================
 
-const CACHE_NAME = "haruja-static-v11";
+const CACHE_NAME = "haruja-static-v12";
 
 // Cache SOLO de assets (NO metas HTML aquí)
 const STATIC_ASSETS = [
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
-  "/haruja-logo.png"
+  "/haruja-logo.png",
 ];
 
 // Pantallas que NO deben ser tocadas por SW
 const BYPASS_PATHS = [
-  "/registro-ventas.html"
+  "/registro-ventas.html",
 ];
 
 // Hosts externos que NO deben ser interceptados
 const BYPASS_HOSTS = [
   "script.google.com",
   "script.googleusercontent.com",
-  "googleusercontent.com"
+  "googleusercontent.com",
 ];
 
 self.addEventListener("install", (event) => {
@@ -47,18 +47,20 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(req.url);
 
-  // 1) NO tocar hosts externos (Apps Script / googleusercontent)
+  // 0) Si es cross-origin, no lo toques (incluye Apps Script / CDNs / etc.)
+  if (url.origin !== self.location.origin) return;
+
+  // 1) NO tocar hosts externos (por si algún día cambia a proxy dentro del mismo origin)
+  // (Se deja por seguridad extra; normalmente ya cubre el origin check de arriba)
   if (
     BYPASS_HOSTS.includes(url.hostname) ||
     BYPASS_HOSTS.some((h) => url.hostname === h || url.hostname.endsWith("." + h))
   ) {
-    return; // deja al navegador manejarlo
-  }
-
-  // 2) NO tocar esta pantalla (para evitar broncas con JSONP)
-  if (BYPASS_PATHS.includes(url.pathname)) {
     return;
   }
+
+  // 2) NO tocar pantallas específicas
+  if (BYPASS_PATHS.includes(url.pathname)) return;
 
   // 3) NO cachear HTML nunca (evita versión vieja en PWA)
   const accept = req.headers.get("accept") || "";
@@ -67,28 +69,25 @@ self.addEventListener("fetch", (event) => {
     req.destination === "document" ||
     accept.includes("text/html");
 
-  if (isHTML) {
-    return; // navegador directo (network only)
-  }
+  if (isHTML) return; // network-only
 
-  // 4) Assets: cache first (solo para tu dominio)
-  if (url.origin === self.location.origin) {
-    event.respondWith(cacheFirst(req));
-  }
+  // 4) Assets de tu dominio: cache-first
+  event.respondWith(cacheFirst(req));
 });
 
 async function cacheFirst(request) {
-  const cached = await caches.match(request);
+  // Para assets, a veces se agregan query params (?v=123)
+  // ignoreSearch ayuda a reutilizar el mismo archivo cacheado.
+  const cached = await caches.match(request, { ignoreSearch: true });
   if (cached) return cached;
 
   const res = await fetch(request);
-  const url = new URL(request.url);
 
-  // Solo cachea si es tu dominio y la respuesta está OK
-  if (url.origin === self.location.origin && res && res.ok) {
+  // Solo cachea si la respuesta está OK y es "básica" (misma origen)
+  if (res && res.ok && res.type === "basic") {
     const cache = await caches.open(CACHE_NAME);
     cache.put(request, res.clone());
   }
+
   return res;
 }
-
