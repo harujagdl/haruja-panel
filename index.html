@@ -1110,6 +1110,19 @@
           hideLoader();
         }
       }
+      
+  // ✅ Register Service Worker (PWA)
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", async () => {
+      try {
+        const reg = await navigator.serviceWorker.register("/service-worker.js", { scope: "/" });
+        console.log("✅ SW registrado:", reg.scope);
+      } catch (err) {
+        console.warn("❌ SW no se pudo registrar:", err);
+      }
+    });
+  }
     </script>
   </body>
 </html>
+
