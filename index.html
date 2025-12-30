@@ -789,111 +789,7 @@
         return x.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
       }
 
-      // ✅ TARJETA: Ventas vs Meta (Mensual)
       async function cargarVentasVsMeta() {
-        const statusEl = document.getElementById("ventasVsMetaStatus");
-        const rowsEl = document.getElementById("ventasVsMetaRows");
-        const hintEl = document.getElementById("ventasVsMetaHint");
-
-        if (!statusEl || !rowsEl) return;
-
-        statusEl.textContent = "Cargando…";
-        rowsEl.innerHTML = "";
-        if (hintEl) hintEl.style.display = "none";
-
-        try {
-          const url =
-            HARUJA_API_URL +
-            "?action=dashboard_mensual" +
-            "&key=" +
-            encodeURIComponent(HARUJA_API_KEY);
-
-          const data = await jsonp(url);
-
-          if (!data || data.ok !== true) {
-            throw new Error((data && data.error) || "Respuesta inválida");
-          }
-
-          const labels = Array.isArray(data.labels) ? data.labels : [];
-          const ventas = Array.isArray(data.ventas) ? data.ventas : [];
-          const metaArr = Array.isArray(data.meta) ? data.meta : [];
-
-          if (!labels.length) {
-            statusEl.textContent = "Sin datos";
-            return;
-          }
-
-          // meta default: 10k si no viene
-          const META_DEFAULT = 10000;
-
-          // calcular escalas
-          let maxVal = 0;
-          for (let i = 0; i < labels.length; i++) {
-            const v = Number(ventas[i]) || 0;
-            const m = (metaArr.length ? Number(metaArr[i]) : META_DEFAULT) || META_DEFAULT;
-            maxVal = Math.max(maxVal, v, m);
-          }
-          if (maxVal <= 0) maxVal = META_DEFAULT;
-
-          // construir filas (últimos 6 meses para que no se vea gigante)
-          const N = 6;
-          const start = Math.max(0, labels.length - N);
-
-          for (let i = start; i < labels.length; i++) {
-            const mes = String(labels[i] || "");
-            const v = Number(ventas[i]) || 0;
-            const m = (metaArr.length ? Number(metaArr[i]) : META_DEFAULT) || META_DEFAULT;
-
-            const pct = m > 0 ? Math.round((v / m) * 100) : 0;
-
-            // bar width relativo a maxVal
-            const w = Math.max(0, Math.min(100, (v / maxVal) * 100));
-            const metaPos = Math.max(0, Math.min(100, (m / maxVal) * 100));
-
-            const row = document.createElement("div");
-            row.className = "mini-chart__row";
-
-            const label = document.createElement("div");
-            label.className = "mini-chart__label";
-            label.textContent = mes;
-
-            const barwrap = document.createElement("div");
-            barwrap.className = "mini-chart__barwrap";
-
-            const bar = document.createElement("div");
-            bar.className = "mini-chart__bar";
-            bar.style.width = "0%"; // animación
-            barwrap.appendChild(bar);
-
-            const metaLine = document.createElement("div");
-            metaLine.className = "mini-chart__metaLine";
-            metaLine.style.left = `calc(${metaPos}% - 1px)`;
-            barwrap.appendChild(metaLine);
-
-            const value = document.createElement("div");
-            value.className = "mini-chart__value";
-            value.textContent = `${moneyMX(v)} • ${pct}%`;
-
-            row.appendChild(label);
-            row.appendChild(barwrap);
-            row.appendChild(value);
-
-            rowsEl.appendChild(row);
-
-            // animar al siguiente frame
-            requestAnimationFrame(() => {
-              bar.style.width = `${w}%`;
-            });
-          }
-
-          statusEl.textContent = "OK";
-          if (hintEl) hintEl.style.display = "block";
-        } catch (err) {
-          console.error(err);
-          statusEl.textContent = "Error";
-          showToast("No pude cargar Ventas vs Meta. Revisa el endpoint.", "error");
-        }
-      }
 
       // Auto-cargar al abrir (sin molestar)
       document.addEventListener("DOMContentLoaded", () => {
@@ -1125,4 +1021,5 @@
     </script>
   </body>
 </html>
+
 
