@@ -315,45 +315,46 @@
   <div class="toast" id="toast"></div>
 
   <script>
-// ========= API helper (fetch + proxy Vercel) =========
-// Usa GET con query params (igual que JSONP) pero sin <script>
-async function api(action, params = {}) {
-  const base = (API_BASE || "/api/gs");
+    // ========= CONFIG =========
+    // Proxy Vercel (misma-origin) -> evita CORS/JSONP y funciona en Chrome/iOS PWA
+    const API_BASE = "/api/gs";
+    const API_KEY  = "harujaTNpwa2025";
 
-  // construye URL absoluta para que URL() funcione con path relativo
-  const url = new URL(base, window.location.origin);
+    // ========= API helper (fetch + proxy Vercel) =========
+    async function api(action, params = {}) {
+      const url = new URL(API_BASE, window.location.origin);
 
-  url.searchParams.set("action", action);
-  url.searchParams.set("key", API_KEY);
+      url.searchParams.set("action", action);
+      url.searchParams.set("key", API_KEY);
 
-  // anti-cache (Chrome/iOS agresivo)
-  url.searchParams.set("_ts", String(Date.now()));
-  url.searchParams.set("_r", Math.random().toString(36).slice(2));
+      // anti-cache (Chrome/iOS agresivo)
+      url.searchParams.set("_ts", String(Date.now()));
+      url.searchParams.set("_r", Math.random().toString(36).slice(2));
 
-  Object.entries(params).forEach(([k, v]) => {
-    if (v === undefined || v === null) return;
-    url.searchParams.set(k, String(v));
-  });
+      Object.entries(params).forEach(([k, v]) => {
+        if (v === undefined || v === null) return;
+        url.searchParams.set(k, String(v));
+      });
 
-  const res = await fetch(url.toString(), {
-    method: "GET",
-    cache: "no-store",
-    headers: { "Accept": "application/json" }
-  });
+      const res = await fetch(url.toString(), {
+        method: "GET",
+        cache: "no-store",
+        headers: { "Accept": "application/json" }
+      });
 
-  let data;
-  try {
-    data = await res.json();
-  } catch (e) {
-    const txt = await res.text().catch(() => "");
-    throw new Error("Respuesta no-JSON del servidor: " + (txt || "").slice(0, 140));
-  }
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        const txt = await res.text().catch(() => "");
+        throw new Error("Respuesta no-JSON del servidor: " + (txt || "").slice(0, 140));
+      }
 
-  if (!res.ok || data?.ok === false) {
-    throw new Error(data?.error || `Error API (${res.status})`);
-  }
-  return data;
-}
+      if (!res.ok || data?.ok === false) {
+        throw new Error(data?.error || `Error API (${res.status})`);
+      }
+      return data;
+    }
 
     // ========= UI state =========
     let state = {
@@ -652,7 +653,7 @@ async function api(action, params = {}) {
           return;
         }
 
-        const res = await api("registrar_comision", {
+        await api("registrar_comision", {
           order_id: state.selected.order_id,
           vendedora,
           origen,
@@ -690,4 +691,3 @@ async function api(action, params = {}) {
   </script>
 </body>
 </html>
-
