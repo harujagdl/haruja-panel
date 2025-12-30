@@ -1,25 +1,22 @@
-/* service-worker.js — HarujaGdl (SAFE CACHE) */
-const SW_VERSION = "haruja-sw-2025-01-02"; // cambia el texto si vuelves a editar
+/* service-worker.js — HarujaGdl (BLINDADO) */
+const SW_VERSION = "haruja-sw-2025-01-01-v3"; // <-- súbele v1/v2/v3 cada cambio
 const CACHE_NAME = `haruja-static-${SW_VERSION}`;
 
-// Archivos “seguros” para cachear (estáticos)
+// Solo estáticos (NO HTML, NO API)
 const STATIC_ASSETS = [
-  "/",               // si tu index.html es la raíz
-  "/index.html",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
+  "/config.js",
 ];
 
-// Rutas que JAMÁS deben cachearse
-const NEVER_CACHE = [
-  "/api/gs",     // tu proxy Vercel
-  "/config.js",  // config dinámico
+// Rutas que JAMÁS se deben cachear
+const NEVER_CACHE_PREFIXES = [
+  "/api/",       // tu proxy Vercel
 ];
 
-// Helper
 function isNeverCache(url) {
-  return NEVER_CACHE.some((p) => url.pathname.startsWith(p));
+  return NEVER_CACHE_PREFIXES.some((p) => url.pathname.startsWith(p));
 }
 
 self.addEventListener("install", (event) => {
@@ -35,7 +32,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
-      // borrar caches viejos
+      // limpia caches viejos
       const keys = await caches.keys();
       await Promise.all(
         keys
@@ -50,56 +47,64 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
 
-  // 🚫 Nunca interceptar nada que no sea GET
+  // Solo GET
   if (req.method !== "GET") return;
 
   const url = new URL(req.url);
 
-  // 🚫 NUNCA tocar APIs, JSONP ni config
-  if (
-    url.pathname.startsWith("/api/") ||
-    url.pathname.includes("script.google.com") ||
-    url.pathname.endsWith(".json") ||
-    url.pathname.includes("callback=") ||
-    url.pathname.includes("action=")
-  ) {
+  // Solo mismo origen
+  if (url.origin !== self.location.origin) return;
+
+  // Nunca cachear /api/
+  if (isNeverCache(url)) {
+    event.respondWith(fetch(req, { cache: "no-store" }));
     return;
   }
 
-  // 🚫 Solo mismo origen
-  if (url.origin !== self.location.origin) return;
-
-  // ✅ Navegación HTML → NETWORK FIRST (clave para iOS)
+  // ✅ HTML / navegaciones: NETWORK FIRST (clave para iOS/Android)
   const isNav =
-    req.mode === "navigate" ||
-    (req.headers.get("accept") || "").includes("text/html");
+    req.mode === "navigate" || (req.headers.get("accept") || "").includes("text/html");
 
   if (isNav) {
     event.respondWith(
-      fetch(req)
-        .then((fresh) => {
-          const copy = fresh.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+      (async () => {
+        try {
+          const fresh = await fetch(req, { cache: "no-store" });
           return fresh;
-        })
-        .catch(async () => {
-          const cached = await caches.match(req);
-          return cached || caches.match("/index.html");
-        })
+        } catch (e) {
+          // si no hay red, cae a cache si existe (pero NO guardamos HTML)
+          return (await caches.match("/")) || (await caches.match("/index.html"));
+        }
+      })()
     );
     return;
   }
 
-  // ✅ Assets estáticos → CACHE FIRST
+  // ✅ Estáticos: CACHE FIRST + refresh
   event.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
+    (async () => {
+      const cached = await caches.match(req);
+      if (cached) {
+        event.waitUntil(
+          (async () => {
+            try {
+              const fresh = await fetch(req);
+              const cache = await caches.open(CACHE_NAME);
+              cache.put(req, fresh.clone());
+            } catch (_) {}
+          })()
+        );
+        return cached;
+      }
 
-      return fetch(req).then((fresh) => {
-        const copy = fresh.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+      try {
+        const fresh = await fetch(req);
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(req, fresh.clone());
         return fresh;
-      });
-    })
+      } catch (e) {
+        return cached;
+      }
+    })()
   );
 });
