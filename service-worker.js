@@ -1,79 +1,92 @@
-// ===============================
-// service-worker.js (FINAL v14)
-// PWA estable + NO rompe API / JSONP
-// ===============================
+/* service-worker.js  (HarujaGdl)
+ * - Cachea solo assets estáticos
+ * - NO cachea /api/gs (ni nada de /api/)
+ * - Navegación: Network-first para que el index se actualice
+ * - Activa inmediatamente nuevas versiones
+ */
 
-const CACHE_NAME = "haruja-static-v14";
+const CACHE_VERSION = "haruja-panel-v2025-12-30-01";
+const STATIC_CACHE = `static-${CACHE_VERSION}`;
 
-// Cache SOLO de assets (NO metas HTML aquí)
+// Ajusta esta lista a tus archivos reales
 const STATIC_ASSETS = [
+  "/",                 // ojo: navegación
+  "/index.html",
   "/manifest.webmanifest",
+  "/config.js",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
-  "/haruja-logo.png",
-];
-
-// Rutas que NO deben ser tocadas por SW
-const BYPASS_PATH_PREFIXES = [
-  "/api/",                // <-- IMPORTANTÍSIMO (proxy Vercel)
-  "/registro-ventas.html" // tu pantalla
+  "/registro-ventas.html",
+  "/plan-lealtad.html",
+  "/calculadora-pedidos.html",
+  "/movimientos-ropa.html",
+  "/scanner.html",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    (async () => {
+      const cache = await caches.open(STATIC_CACHE);
+      await cache.addAll(STATIC_ASSETS);
+      await self.skipWaiting(); // ✅ activa la nueva versión YA
+    })()
   );
-  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys
+          .filter((k) => k.startsWith("static-") && k !== STATIC_CACHE)
+          .map((k) => caches.delete(k))
+      );
+      await self.clients.claim(); // ✅ toma control inmediato
+    })()
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;
-  if (req.method !== "GET") return;
-
   const url = new URL(req.url);
 
-  // 0) Si es cross-origin, no lo toques
-  if (url.origin !== self.location.origin) return;
-
-  // 1) BYPASS rutas sensibles (API + pantallas)
-  if (BYPASS_PATH_PREFIXES.some((p) => url.pathname.startsWith(p))) return;
-
-  // 2) NO cachear HTML nunca
-  const accept = req.headers.get("accept") || "";
-  const isHTML =
-    req.mode === "navigate" ||
-    req.destination === "document" ||
-    accept.includes("text/html");
-
-  if (isHTML) return; // network-only
-
-  // 3) NO cachear JSON
-  const isJSON = accept.includes("application/json");
-  if (isJSON) return; // network-only
-
-  // 4) Assets: cache-first
-  event.respondWith(cacheFirst(req));
-});
-
-async function cacheFirst(request) {
-  const cached = await caches.match(request, { ignoreSearch: true });
-  if (cached) return cached;
-
-  const res = await fetch(request);
-
-  if (res && res.ok && res.type === "basic") {
-    const cache = await caches.open(CACHE_NAME);
-    cache.put(request, res.clone());
+  // ✅ NUNCA cachear API
+  if (url.pathname.startsWith("/api/")) {
+    return; // deja que pase directo a la red
   }
 
-  return res;
-}
+  // ✅ Navegación (index/links): NETWORK FIRST para evitar “versión vieja”
+  if (req.mode === "navigate") {
+    event.respondWith(
+      (async () => {
+        try {
+          const fresh = await fetch(req, { cache: "no-store" });
+          const cache = await caches.open(STATIC_CACHE);
+          cache.put(req, fresh.clone());
+          return fresh;
+        } catch (e) {
+          const cached = await caches.match(req);
+          return cached || caches.match("/index.html");
+        }
+      })()
+    );
+    return;
+  }
+
+  // ✅ Assets: CACHE FIRST
+  event.respondWith(
+    (async () => {
+      const cached = await caches.match(req);
+      if (cached) return cached;
+
+      const fresh = await fetch(req);
+      // Cachea solo GET y solo same-origin
+      if (req.method === "GET" && url.origin === self.location.origin) {
+        const cache = await caches.open(STATIC_CACHE);
+        cache.put(req, fresh.clone());
+      }
+      return fresh;
+    })()
+  );
+});
