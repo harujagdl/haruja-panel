@@ -324,10 +324,10 @@
     async function api(action, params = {}) {
       const url = new URL(API_BASE, window.location.origin);
 
-      url.searchParams.set("action", action);
+      url.searchParams.set("action", String(action || "").trim());
       url.searchParams.set("key", API_KEY);
 
-      // anti-cache (Chrome/iOS agresivo)
+      // anti-cache
       url.searchParams.set("_ts", String(Date.now()));
       url.searchParams.set("_r", Math.random().toString(36).slice(2));
 
@@ -342,12 +342,12 @@
         headers: { "Accept": "application/json" }
       });
 
+      const text = await res.text();
       let data;
       try {
-        data = await res.json();
-      } catch (e) {
-        const txt = await res.text().catch(() => "");
-        throw new Error("Respuesta no-JSON del servidor: " + (txt || "").slice(0, 140));
+        data = JSON.parse(text);
+      } catch {
+        throw new Error("Respuesta no-JSON del servidor: " + (text || "").slice(0, 140));
       }
 
       if (!res.ok || data?.ok === false) {
@@ -646,7 +646,7 @@
         btnGuardar.textContent = "Guardando…";
 
         // 🔒 Bloqueo si el pedido está cancelado
-        if (state.selected.status === "cancelled") {
+        if (String(state.selected.status || "").toLowerCase() === "cancelled") {
           btnGuardar.disabled = false;
           btnGuardar.textContent = "Guardar";
           showToast("❌ Pedido cancelado. No se puede registrar comisión.");
