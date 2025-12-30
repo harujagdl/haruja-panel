@@ -1,5 +1,5 @@
 /* service-worker.js — HarujaGdl (SAFE CACHE) */
-const SW_VERSION = "haruja-sw-2025-01-01"; // cambia el texto si vuelves a editar
+const SW_VERSION = "haruja-sw-2025-01-02"; // cambia el texto si vuelves a editar
 const CACHE_NAME = `haruja-static-${SW_VERSION}`;
 
 // Archivos “seguros” para cachear (estáticos)
@@ -50,61 +50,56 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
 
-  // Solo GET
+  // 🚫 Nunca interceptar nada que no sea GET
   if (req.method !== "GET") return;
 
   const url = new URL(req.url);
 
-  // Solo mismo origen
-  if (url.origin !== self.location.origin) return;
-
-  // NUNCA cachear API ni config
-  if (isNeverCache(url)) {
-    event.respondWith(fetch(req));
+  // 🚫 NUNCA tocar APIs, JSONP ni config
+  if (
+    url.pathname.startsWith("/api/") ||
+    url.pathname.includes("script.google.com") ||
+    url.pathname.endsWith(".json") ||
+    url.pathname.includes("callback=") ||
+    url.pathname.includes("action=")
+  ) {
     return;
   }
 
-  // Navegaciones (HTML): NETWORK FIRST (clave para iOS/Android)
-  const isNav = req.mode === "navigate" || (req.headers.get("accept") || "").includes("text/html");
+  // 🚫 Solo mismo origen
+  if (url.origin !== self.location.origin) return;
+
+  // ✅ Navegación HTML → NETWORK FIRST (clave para iOS)
+  const isNav =
+    req.mode === "navigate" ||
+    (req.headers.get("accept") || "").includes("text/html");
+
   if (isNav) {
     event.respondWith(
-      (async () => {
-        try {
-          const fresh = await fetch(req, { cache: "no-store" });
-          const cache = await caches.open(CACHE_NAME);
-          cache.put(req, fresh.clone());
+      fetch(req)
+        .then((fresh) => {
+          const copy = fresh.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
           return fresh;
-        } catch (err) {
+        })
+        .catch(async () => {
           const cached = await caches.match(req);
           return cached || caches.match("/index.html");
-        }
-      })()
+        })
     );
     return;
   }
 
-  // Estáticos (CSS/JS/IMG): CACHE FIRST con actualización en background
+  // ✅ Assets estáticos → CACHE FIRST
   event.respondWith(
-    (async () => {
-      const cached = await caches.match(req);
-      if (cached) {
-        event.waitUntil(
-          (async () => {
-            try {
-              const fresh = await fetch(req);
-              const cache = await caches.open(CACHE_NAME);
-              cache.put(req, fresh.clone());
-            } catch (_) {}
-          })()
-        );
-        return cached;
-      }
+    caches.match(req).then((cached) => {
+      if (cached) return cached;
 
-      // si no está cacheado, trae de red y guarda
-      const fresh = await fetch(req);
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(req, fresh.clone());
-      return fresh;
-    })()
+      return fetch(req).then((fresh) => {
+        const copy = fresh.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+        return fresh;
+      });
+    })
   );
 });
