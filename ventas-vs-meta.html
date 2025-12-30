@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+  <meta name="theme-color" content="#A7B59E" />
+  <title>Ventas vs Meta • HarujaGdl</title>
+
+  <style>
+    :root {
+      --texto:#383234;
+      --acento:#A7B59E;
+      --beige:#FAF6F1;
+      --gris:#6b6b6b;
+    }
+
+    body{
+      margin:0;
+      font-family:"Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background:var(--beige);
+      color:var(--texto);
+      padding:20px;
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:6px;
+    }
+
+    .sub{
+      text-align:center;
+      font-size:14px;
+      color:var(--gris);
+      margin-bottom:20px;
+    }
+
+    .card{
+      background:#fff;
+      border-radius:18px;
+      padding:18px;
+      box-shadow:0 6px 18px rgba(0,0,0,.08);
+      max-width:720px;
+      margin:auto;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:60px 1fr 70px;
+      gap:10px;
+      align-items:center;
+      padding:8px 0;
+      border-bottom:1px dashed rgba(0,0,0,.08);
+    }
+
+    .row:last-child{ border-bottom:none }
+
+    .label{
+      font-size:13px;
+      font-weight:600;
+    }
+
+    .barwrap{
+      height:12px;
+      background:rgba(167,181,158,.25);
+      border-radius:999px;
+      overflow:hidden;
+      position:relative;
+    }
+
+    .bar{
+      height:100%;
+      width:0%;
+      background:var(--acento);
+      border-radius:999px;
+      transition:width .4s ease;
+    }
+
+    .meta{
+      position:absolute;
+      top:-3px;
+      bottom:-3px;
+      width:2px;
+      background:rgba(56,50,52,.4);
+      left:100%;
+    }
+
+    .value{
+      text-align:right;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .status{
+      text-align:center;
+      font-size:13px;
+      margin:14px 0 6px;
+      color:var(--gris);
+    }
+
+    .btn{
+      margin-top:14px;
+      width:100%;
+      padding:10px;
+      border-radius:12px;
+      border:none;
+      background:var(--acento);
+      color:#fff;
+      font-size:14px;
+      cursor:pointer;
+    }
+
+    .back{
+      margin-top:18px;
+      text-align:center;
+      font-size:14px;
+    }
+
+    .back a{
+      color:var(--texto);
+      text-decoration:underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>📈 Ventas vs Meta</h1>
+  <div class="sub">Meta mensual: $10,000</div>
+
+  <div class="card">
+    <div id="status" class="status">Cargando datos…</div>
+    <div id="rows"></div>
+
+    <button class="btn" onclick="cargar()">Actualizar</button>
+  </div>
+
+  <div class="back">
+    <a href="/">⬅️ Volver al panel</a>
+  </div>
+
+<script>
+  const API_URL =
+    (window.HARUJA && window.HARUJA.API_URL) ||
+    "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
+
+  const META = 10000;
+
+  function jsonp(url, timeout = 15000) {
+    return new Promise((resolve, reject) => {
+      const cb = "cb_" + Date.now();
+      const s = document.createElement("script");
+      const t = setTimeout(() => reject("timeout"), timeout);
+
+      window[cb] = data => {
+        clearTimeout(t);
+        delete window[cb];
+        s.remove();
+        resolve(data);
+      };
+
+      s.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
+      document.body.appendChild(s);
+    });
+  }
+
+  function money(n){
+    return Number(n||0).toLocaleString("es-MX",{style:"currency",currency:"MXN"});
+  }
+
+  async function cargar(){
+    const status = document.getElementById("status");
+    const rows = document.getElementById("rows");
+    rows.innerHTML = "";
+    status.textContent = "Cargando datos…";
+
+    try{
+      const data = await jsonp(API_URL + "?action=ventasVsMetaMensual");
+
+      if(!data || !data.success){
+        status.textContent = "No se pudo cargar la información";
+        return;
+      }
+
+      data.meses.forEach(m => {
+        const pct = Math.min(100, Math.round((m.total / META) * 100));
+
+        const div = document.createElement("div");
+        div.className = "row";
+        div.innerHTML = `
+          <div class="label">${m.mes}</div>
+          <div class="barwrap">
+            <div class="bar" style="width:${pct}%"></div>
+            <div class="meta"></div>
+          </div>
+          <div class="value">${money(m.total)}</div>
+        `;
+        rows.appendChild(div);
+      });
+
+      status.textContent = "Comparativo mensual";
+    }catch(e){
+      status.textContent = "Error al conectar con el servidor";
+      console.error(e);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", cargar);
+</script>
+
+</body>
+</html>
