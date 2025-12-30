@@ -103,11 +103,7 @@
     }
     .pill strong{color:var(--texto);font-weight:800}
 
-    /* Chips */
-    .chips{
-      display:flex;gap:8px;flex-wrap:wrap;align-items:center;
-      margin-top:10px;
-    }
+    .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;}
     .chip{
       border:1px solid var(--borde);
       background:#fff;
@@ -120,21 +116,13 @@
       align-items:center;
       gap:8px;
     }
-    .chip small{
-      color:var(--gris);
-      font-weight:700;
-    }
-    .chip.active{
-      border-color:var(--acento);
-      box-shadow:0 0 0 3px rgba(167,181,158,.25);
-    }
+    .chip small{color:var(--gris);font-weight:700;}
+    .chip.active{border-color:var(--acento);box-shadow:0 0 0 3px rgba(167,181,158,.25);}
 
-    /* Toggle */
     .toggleRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .toggle{display:inline-flex;align-items:center;gap:8px;user-select:none;cursor:pointer;font-size:13px;color:var(--gris)}
     .toggle input{width:18px;height:18px}
 
-    /* Lista */
     #list{display:grid;grid-template-columns:1fr;gap:12px}
     .order{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
     .order h3{margin:0;font-size:16px}
@@ -154,12 +142,7 @@
     }
 
     details{margin-top:10px}
-    details summary{
-      cursor:pointer;
-      color:var(--gris);
-      font-size:13px;
-      user-select:none;
-    }
+    details summary{cursor:pointer;color:var(--gris);font-size:13px;user-select:none;}
 
     @media (max-width: 480px){
       .rightCol{min-width:auto;align-items:flex-start}
@@ -167,7 +150,6 @@
       .btn{width:100%}
     }
 
-    /* Skeleton */
     .skeleton{
       animation:pulse 1.15s ease-in-out infinite;
       background:linear-gradient(90deg, #f5f1ea, #fff, #f5f1ea);
@@ -178,7 +160,6 @@
     }
     @keyframes pulse{0%{background-position:0% 0%}100%{background-position:-200% 0%}}
 
-    /* Modal */
     .modalBack{
       position:fixed; inset:0;
       background:rgba(0,0,0,.35);
@@ -326,8 +307,6 @@
 
       url.searchParams.set("action", action);
       url.searchParams.set("key", API_KEY);
-
-      // anti-cache (Chrome/iOS agresivo)
       url.searchParams.set("_ts", String(Date.now()));
       url.searchParams.set("_r", Math.random().toString(36).slice(2));
 
@@ -342,22 +321,15 @@
         headers: { "Accept": "application/json" }
       });
 
-      let data;
-      try {
-        data = await res.json();
-      } catch (e) {
-        const txt = await res.text().catch(() => "");
-        throw new Error("Respuesta no-JSON del servidor: " + (txt || "").slice(0, 140));
-      }
+      const text = await res.text();
+      let data = null;
+      try { data = JSON.parse(text); } catch {}
 
-      // Si el proxy devolvió raw HTML, lo tratamos como error (para no fallar silencioso)
-      if (data && typeof data === "object" && "raw" in data && !("cards" in data)) {
-        const raw = String(data.raw || "");
-        throw new Error("GAS devolvió HTML (auth o redirect). Revisa GAS_URL. " + raw.slice(0, 80));
+      if (!data) {
+        throw new Error("Respuesta no-JSON del proxy: " + (text || "").slice(0, 180));
       }
-
-      if (!res.ok || data?.ok === false) {
-        throw new Error(data?.error || `Error API (${res.status})`);
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || `Error API (${res.status})`);
       }
       return data;
     }
@@ -402,11 +374,7 @@
       return String(s ?? "")
         .replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
-
-    function statusKey(s){
-      return String(s || "").trim().toLowerCase() || "sin_status";
-    }
-
+    function statusKey(s){ return String(s || "").trim().toLowerCase() || "sin_status"; }
     function isAssignedToday(card){
       const conv = String(card.convertido || "").toLowerCase();
       return (conv === "true" || conv === "1");
@@ -414,13 +382,8 @@
 
     function applyFrontFilters(raw){
       let out = raw.slice();
-
-      if (state.chip !== "all") {
-        out = out.filter(c => statusKey(c.status) === state.chip);
-      }
-      if (elView.value === "todos" && elOnlyAssignedToday.checked) {
-        out = out.filter(c => isAssignedToday(c));
-      }
+      if (state.chip !== "all") out = out.filter(c => statusKey(c.status) === state.chip);
+      if (elView.value === "todos" && elOnlyAssignedToday.checked) out = out.filter(c => isAssignedToday(c));
       return out;
     }
 
@@ -438,10 +401,7 @@
         { key:"delivered", label:"Delivered", count: counts["delivered"] || 0 },
         { key:"pending", label:"Pending", count: counts["pending"] || 0 },
       ];
-
-      if (elIncludeCancelled.checked) {
-        defs.push({ key:"cancelled", label:"Cancelled", count: counts["cancelled"] || 0 });
-      }
+      if (elIncludeCancelled.checked) defs.push({ key:"cancelled", label:"Cancelled", count: counts["cancelled"] || 0 });
 
       elChips.innerHTML = defs.map(d => `
         <button class="chip ${state.chip===d.key ? "active":""}" data-chip="${d.key}">
@@ -494,9 +454,7 @@
             <div class="order">
               <div style="min-width:0">
                 <h3>${orderNum}
-                  <span style="font-weight:500;color:var(--gris);font-size:13px">
-                    (${esc(c.order_id || "")})
-                  </span>
+                  <span style="font-weight:500;color:var(--gris);font-size:13px">(${esc(c.order_id || "")})</span>
                 </h3>
                 <div class="meta">
                   <div><b>${customer}</b>${phone ? ` • ${phone}` : ""}${email ? ` • ${email}` : ""}</div>
@@ -524,7 +482,6 @@
                 <div class="items" style="margin-top:8px">${esc(itemsFull)}</div>
               </details>
             ` : ""}
-
           </div>
         `;
         elList.insertAdjacentHTML("beforeend", html);
@@ -596,9 +553,7 @@
         elTotal.textContent = String(res.total || 0);
 
         updatePager();
-
-        const label = (view === "pendientes") ? "Pendientes listos." : "Mostrando TN_Resumen.";
-        setHint(label);
+        setHint((view === "pendientes") ? "Pendientes listos." : "Mostrando TN_Resumen.");
       } catch(err){
         setHint("Error de conexión.");
         showToast(err?.message || "Error");
@@ -648,16 +603,14 @@
         if (!vendedora) return showToast("Selecciona vendedora.");
         if (!origen) return showToast("Selecciona origen.");
 
-        btnGuardar.disabled = true;
-        btnGuardar.textContent = "Guardando…";
-
-        // 🔒 Bloqueo si el pedido está cancelado
-        if (state.selected.status === "cancelled") {
-          btnGuardar.disabled = false;
-          btnGuardar.textContent = "Guardar";
+        // Bloqueo si el pedido está cancelado
+        if (String(state.selected.status || "").toLowerCase() === "cancelled") {
           showToast("❌ Pedido cancelado. No se puede registrar comisión.");
           return;
         }
+
+        btnGuardar.disabled = true;
+        btnGuardar.textContent = "Guardando…";
 
         await api("registrar_comision", {
           order_id: state.selected.order_id,
