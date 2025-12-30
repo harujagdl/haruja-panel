@@ -13,160 +13,172 @@
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
     <!-- ✅ CONFIG GLOBAL (PWA) -->
-    <!-- /config.js:
-      window.HARUJA = { API_URL: ".../exec", API_KEY: "harujaTNpwa2025" }
-    -->
+    <!-- /config.js -> window.HARUJA = { API_URL: ".../exec", API_KEY: "harujaTNpwa2025" } -->
     <script src="/config.js"></script>
 
     <style>
       :root {
+        --fondo: #ffffff;
         --texto: #383234;
         --acento: #a7b59e;
         --beige: #faf6f1;
         --gris: #6b6b6b;
         --borde: #e9e4dc;
-        --shadow: 0 10px 30px rgba(56, 50, 52, 0.1);
-        --shadowSoft: 0 6px 18px rgba(56, 50, 52, 0.06);
+        --shadow: 0 10px 30px rgba(56, 50, 52, 0.10);
         --radius: 18px;
       }
 
       * { box-sizing: border-box; }
 
-      body {
-        margin: 0;
-        font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont,
-          "Segoe UI", sans-serif;
+      body{
+        margin:0;
+        font-family:"Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
         background: var(--beige);
         color: var(--texto);
+      }
+
+      .wrap{
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 26px 18px 70px;
         text-align: center;
       }
 
-      .wrap {
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 22px 16px 40px;
+      .title{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap: 12px;
+        margin-top: 8px;
       }
 
-      .title {
-        display: inline-flex;
-        gap: 10px;
-        align-items: center;
-        justify-content: center;
-        margin-top: 12px;
+      .title .icon{
+        width: 36px; height: 36px;
+        display:flex; align-items:center; justify-content:center;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 6px 16px rgba(56,50,52,.10);
       }
 
-      .title h1 {
-        margin: 0;
+      h1{
+        margin:0;
         font-size: 34px;
-        font-weight: 800;
-        letter-spacing: -0.3px;
+        letter-spacing: .2px;
       }
 
-      .subtitle {
+      .sub{
         margin: 6px 0 22px;
         color: var(--gris);
         font-size: 14px;
       }
 
-      .card {
-        background: #fff;
-        border: 1px solid rgba(0,0,0,0.06);
+      .card{
+        background:#fff;
+        border: 1px solid var(--borde);
+        box-shadow: var(--shadow);
         border-radius: 22px;
         padding: 18px 18px 16px;
-        box-shadow: var(--shadowSoft);
-        max-width: 780px;
+        max-width: 860px;
         margin: 0 auto;
-      }
-
-      .status {
-        font-size: 13px;
-        color: var(--gris);
-        margin: 6px 0 14px;
-      }
-
-      .legend {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        justify-content: space-between;
-        margin: 6px 0 10px;
-        font-size: 12px;
-        color: var(--gris);
-      }
-
-      .legend b { color: var(--texto); }
-
-      .rows { margin-top: 6px; }
-
-      .row {
-        display: grid;
-        grid-template-columns: 68px 1fr 92px;
-        gap: 10px;
-        align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px dashed rgba(0,0,0,0.06);
-      }
-
-      .row:last-child { border-bottom: none; }
-
-      .label {
-        font-size: 12px;
-        color: var(--texto);
-        opacity: 0.9;
         text-align: left;
       }
 
-      .barwrap {
-        height: 14px;
-        border-radius: 999px;
-        background: rgba(167, 181, 158, 0.22);
+      .legend{
+        display:flex;
+        justify-content: space-between;
+        align-items:center;
+        gap: 12px;
+        margin-bottom: 10px;
+        font-size: 13px;
+        color: var(--gris);
+      }
+      .legend b{ color: var(--texto); }
+
+      .rows{
+        display:flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 8px 0 2px;
+      }
+
+      .row{
+        display:grid;
+        grid-template-columns: 88px 1fr 96px;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .label{
+        font-size: 13px;
+        color: var(--texto);
+        opacity: .95;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .barwrap{
         position: relative;
+        height: 14px;
+        background: rgba(167, 181, 158, 0.22);
+        border-radius: 999px;
         overflow: hidden;
       }
 
-      .bar {
+      .bar{
         height: 100%;
         width: 0%;
-        border-radius: 999px;
         background: var(--acento);
-        transition: width 0.35s ease;
+        border-radius: 999px;
+        transition: width .35s ease;
       }
 
-      /* línea meta al 100% */
-      .meta {
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: calc(100% - 1px);
+      .metaLine{
+        position:absolute;
+        top: -4px; bottom: -4px;
         width: 2px;
         background: rgba(56, 50, 52, 0.35);
         border-radius: 2px;
       }
 
-      .value {
+      .value{
         text-align: right;
-        font-size: 12px;
+        font-size: 13px;
         color: var(--texto);
         white-space: nowrap;
       }
 
-      .btn {
-        margin-top: 14px;
-        width: 100%;
-        background: var(--acento);
-        border: none;
-        color: #fff;
-        padding: 12px 0;
-        border-radius: 12px;
-        font-size: 14px;
-        cursor: pointer;
-        box-shadow: var(--shadowSoft);
+      .hint{
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--gris);
+        line-height: 1.35;
       }
 
-      .btn:disabled { opacity: 0.7; cursor: default; }
+      .actions{
+        margin-top: 14px;
+        display:flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
 
-      .back {
-        display: inline-block;
+      .btn{
+        width: min(520px, 100%);
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: none;
+        background: var(--acento);
+        color:#fff;
+        font-size: 14px;
+        cursor:pointer;
+      }
+      .btn:disabled{ opacity:.7; cursor: default; }
+
+      .link{
+        display:inline-flex;
+        gap: 8px;
+        align-items: center;
         margin-top: 14px;
         color: var(--texto);
         text-decoration: underline;
@@ -174,7 +186,7 @@
       }
 
       /* Toast */
-      .toast {
+      .toast{
         position: fixed;
         bottom: 16px;
         left: 50%;
@@ -183,54 +195,59 @@
         color: #fff;
         padding: 10px 16px;
         border-radius: 999px;
-        font-size: 0.9rem;
+        font-size: .9rem;
         max-width: 92%;
         text-align: center;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,.25);
+        z-index: 9999;
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.25s ease, transform 0.25s ease;
+        transition: opacity .25s ease, transform .25s ease;
       }
-      .toast--visible {
+      .toast--visible{
         opacity: 1;
         transform: translateX(-50%) translateY(0);
       }
-      .toast--error { background: #b53737; }
-      .toast--success { background: #3a7f4a; }
+      .toast--error{ background:#b53737; }
+      .toast--success{ background:#3a7f4a; }
+      .toast--info{ background:#383234; }
     </style>
   </head>
 
   <body>
     <div class="wrap">
       <div class="title">
-        <span style="font-size: 26px">📈</span>
-        <h1>Ventas vs Meta</h1>
+        <div class="icon">📈</div>
+        <div>
+          <h1>Ventas vs Meta</h1>
+          <div class="sub">Meta mensual: <b id="metaTxt">$10,000</b></div>
+        </div>
       </div>
-      <div class="subtitle">Meta mensual: <b>$10,000</b></div>
 
       <div class="card">
-        <div id="status" class="status">Cargando datos...</div>
-
         <div class="legend">
           <span><b>Mes</b> / Ventas</span>
-          <span id="hint" style="display:none;">% = Ventas / Meta</span>
+          <span id="status">Listo</span>
         </div>
 
         <div id="rows" class="rows"></div>
 
-        <button id="btnUpdate" class="btn" type="button">Actualizar</button>
+        <div class="hint">
+          La línea vertical marca la meta mensual. El porcentaje es <b>Ventas / Meta</b>.
+        </div>
+
+        <div class="actions">
+          <button id="btnReload" class="btn" type="button">Actualizar</button>
+        </div>
       </div>
 
-      <a class="back" href="/index.html">⬅️ Volver al panel</a>
+      <a class="link" href="/index.html">⬅️ Volver al panel</a>
     </div>
 
-    <div id="toast" class="toast" style="display:none;"></div>
+    <div id="toast" class="toast"></div>
 
     <script>
-      // ===== CONFIG =====
-      const META = 10000;
-
+      // ===================== CONFIG =====================
       const HARUJA_API_URL =
         (window.HARUJA && window.HARUJA.API_URL) ||
         "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
@@ -238,32 +255,38 @@
       const HARUJA_API_KEY =
         (window.HARUJA && window.HARUJA.API_KEY) || "harujaTNpwa2025";
 
-      // ===== UI =====
-      const statusEl = document.getElementById("status");
-      const rowsEl = document.getElementById("rows");
-      const btnUpdate = document.getElementById("btnUpdate");
-      const hintEl = document.getElementById("hint");
-      const toastEl = document.getElementById("toast");
-      let toastTimer = null;
+      // Ajusta la meta aquí si quieres
+      const META_MENSUAL = 10000;
 
-      function showToast(msg, type = "error") {
-        if (!toastEl) return;
+      // Tu endpoint/acción (ajústalo si tu backend usa otro action)
+      const ACTION = "ventasVsMeta"; // <-- si tu Apps Script usa otro, cámbialo aquí
+
+      // ===================== UI HELPERS =====================
+      const elRows = document.getElementById("rows");
+      const elStatus = document.getElementById("status");
+      const btnReload = document.getElementById("btnReload");
+      const toastEl = document.getElementById("toast");
+      document.getElementById("metaTxt").textContent =
+        META_MENSUAL.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+
+      let toastTimer = null;
+      function showToast(msg, type="info"){
         toastEl.textContent = msg || "";
-        toastEl.className = "toast toast--visible " + (type === "success" ? "toast--success" : "toast--error");
-        toastEl.style.display = "block";
-        clearTimeout(toastTimer);
+        toastEl.className = "toast toast--visible toast--" + type;
+        if(toastTimer) clearTimeout(toastTimer);
         toastTimer = setTimeout(() => {
           toastEl.className = "toast";
-          setTimeout(() => (toastEl.style.display = "none"), 200);
-        }, 3200);
+        }, 3600);
       }
 
-      function money(n) {
+      function moneyMX(n){
         const x = Number(n) || 0;
         return x.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
       }
 
-      // ✅ JSONP helper (CORS-safe)
+      function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+      // ===================== JSONP (para CORS / Apps Script si lo necesitas) =====================
       function jsonp(url, timeoutMs = 15000) {
         return new Promise((resolve, reject) => {
           const cbName = "cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
@@ -282,7 +305,7 @@
 
           function cleanup() {
             clearTimeout(timer);
-            try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+            try { delete window[cbName]; } catch(e){ window[cbName] = undefined; }
             if (script && script.parentNode) script.parentNode.removeChild(script);
           }
 
@@ -305,91 +328,177 @@
         });
       }
 
-      function normalizeLabel(lab) {
-        if (!lab) return "";
-        // por si viene con fecha larguísima tipo "Aug 2025 00:00:00 GMT-0600..."
-        return String(lab).replace(" 00:00:00 GMT-0600 (Central Standard Time)", "").trim();
+      // ===================== PARSER “A PRUEBA DE BALAS” =====================
+      function normalizeResponse(raw){
+        // 1) si es string JSON
+        if (typeof raw === "string") {
+          try { raw = JSON.parse(raw); } catch(e) { /* deja raw como string */ }
+        }
+
+        // 2) si es array directo
+        if (Array.isArray(raw)) {
+          return { ok: true, items: raw };
+        }
+
+        // 3) si viene envuelto
+        const obj = raw && typeof raw === "object" ? raw : null;
+        if (!obj) return { ok:false, error:"Respuesta vacía o inválida." };
+
+        // Mensajes de error comunes
+        const msg = obj.message || obj.error || obj.errors || obj.msg;
+
+        // data containers comunes
+        const container =
+          obj.data || obj.result || obj.results || obj.rows || obj.items || obj.payload;
+
+        // a) container array
+        if (Array.isArray(container)) {
+          return { ok: obj.success !== false && obj.ok !== false, items: container, message: msg };
+        }
+
+        // b) obj trae labels/values
+        const labels = obj.labels || obj.meses || obj.months;
+        const values = obj.values || obj.ventas || obj.totales || obj.amounts;
+        if (Array.isArray(labels) && Array.isArray(values)) {
+          const items = labels.map((lab, i) => ({
+            mes: lab,
+            ventas: values[i]
+          }));
+          return { ok: obj.success !== false && obj.ok !== false, items, message: msg };
+        }
+
+        // c) container trae labels/values
+        if (container && typeof container === "object") {
+          const cLabels = container.labels || container.meses || container.months;
+          const cValues = container.values || container.ventas || container.totales || container.amounts;
+          if (Array.isArray(cLabels) && Array.isArray(cValues)) {
+            const items = cLabels.map((lab, i) => ({ mes: lab, ventas: cValues[i] }));
+            return { ok: true, items, message: msg };
+          }
+          if (Array.isArray(container.items)) {
+            return { ok: true, items: container.items, message: msg };
+          }
+        }
+
+        // d) si no entendimos el shape
+        return {
+          ok:false,
+          error: msg || "Respuesta del endpoint no reconocida.",
+          raw: obj
+        };
       }
 
-      function clearRows() {
-        rowsEl.innerHTML = "";
+      function pickMes(it){
+        return it.mes ?? it.Mes ?? it.month ?? it.Month ?? it.label ?? it.Label ?? it.periodo ?? it.period;
       }
 
-      function addRow(label, total) {
-        const pctRaw = META > 0 ? (Number(total) || 0) / META : 0;
-        const pct = Math.max(0, Math.min(1.5, pctRaw)); // permitimos hasta 150% visual
-        const width = Math.round(pct * 100);
-
-        const row = document.createElement("div");
-        row.className = "row";
-        row.innerHTML = `
-          <div class="label">${normalizeLabel(label)}</div>
-          <div class="barwrap">
-            <div class="bar" style="width:${width}%"></div>
-            <div class="meta"></div>
-          </div>
-          <div class="value">${money(total)} • ${Math.round(pctRaw * 100)}%</div>
-        `;
-        rowsEl.appendChild(row);
+      function pickVentas(it){
+        return it.ventas ?? it.Ventas ?? it.total ?? it.Total ?? it.value ?? it.Value ?? it.monto ?? it.amount;
       }
 
-      async function cargar() {
-        btnUpdate.disabled = true;
-        statusEl.textContent = "Cargando datos...";
-        hintEl.style.display = "none";
-        clearRows();
+      // ===================== RENDER =====================
+      function render(items){
+        elRows.innerHTML = "";
 
-        try {
-          // ⬇️ AJUSTA AQUÍ el action si tu backend usa otro nombre
+        if(!items || !items.length){
+          elStatus.textContent = "Sin datos";
+          elRows.innerHTML = `<div style="color:var(--gris); font-size:13px; padding:8px 0;">No hay información para mostrar.</div>`;
+          return;
+        }
+
+        // Normalizamos a {mes, ventas}
+        const normalized = items
+          .map((it) => ({ mes: String(pickMes(it) ?? "").trim(), ventas: Number(pickVentas(it) ?? 0) }))
+          .filter((x) => x.mes);
+
+        // Si todo viene sin "mes", lo mostramos igual como fallback
+        if(!normalized.length){
+          elStatus.textContent = "Sin formato";
+          elRows.innerHTML = `<div style="color:var(--gris); font-size:13px; padding:8px 0;">El endpoint devolvió datos pero no encontré campos de mes/ventas.</div>`;
+          return;
+        }
+
+        // Escala barras (max = 150% de la meta o el máximo real)
+        const maxVentas = Math.max(...normalized.map(x => x.ventas), META_MENSUAL);
+        const scaleMax = Math.max(META_MENSUAL * 1.5, maxVentas);
+
+        // meta line position en %
+        const metaPct = clamp((META_MENSUAL / scaleMax) * 100, 0, 100);
+
+        normalized.forEach((x) => {
+          const pct = clamp((x.ventas / scaleMax) * 100, 0, 100);
+          const ratio = (x.ventas / META_MENSUAL) * 100;
+          const ratioTxt = isFinite(ratio) ? `${Math.round(ratio)}%` : "—";
+
+          const row = document.createElement("div");
+          row.className = "row";
+          row.innerHTML = `
+            <div class="label" title="${x.mes}">${x.mes}</div>
+            <div class="barwrap" aria-label="Barra de ventas">
+              <div class="bar" style="width:${pct.toFixed(2)}%"></div>
+              <div class="metaLine" style="left:${metaPct.toFixed(2)}%"></div>
+            </div>
+            <div class="value" title="${moneyMX(x.ventas)}">
+              ${moneyMX(x.ventas)} · ${ratioTxt}
+            </div>
+          `;
+          elRows.appendChild(row);
+        });
+
+        elStatus.textContent = "OK";
+      }
+
+      // ===================== FETCH DATA =====================
+      async function cargar(){
+        btnReload.disabled = true;
+        elStatus.textContent = "Cargando…";
+
+        try{
+          // OJO: si tu endpoint NO usa JSONP, puedes cambiar a fetch normal.
+          // Aquí intentamos JSONP primero (por CORS en móviles/PWA suele ser más estable).
           const url =
             HARUJA_API_URL +
-            "?action=ventasVsMeta" +
+            "?action=" + encodeURIComponent(ACTION) +
             "&key=" + encodeURIComponent(HARUJA_API_KEY) +
-            "&_ts=" + Date.now();
+            "&t=" + Date.now();
 
-          const data = await jsonp(url, 20000);
+          const raw = await jsonp(url, 20000);
 
-          // ✅ MODO A: tu respuesta real (ok + labels + ventas)
-          if (data && data.ok === true) {
-            const labels = Array.isArray(data.labels) ? data.labels : [];
-            const ventas = Array.isArray(data.ventas) ? data.ventas : [];
+          // DEBUG: imprime el raw completo para que veas el shape exacto
+          console.log("📦 ventas-vs-meta raw:", raw);
 
-            if (!labels.length) {
-              statusEl.textContent = "Sin datos para mostrar.";
-              showToast("No llegaron labels en la respuesta.", "error");
-              return;
-            }
+          const parsed = normalizeResponse(raw);
 
-            labels.forEach((lab, i) => addRow(lab, ventas[i] || 0));
-            hintEl.style.display = "inline";
-            statusEl.textContent = "Listo ✅";
+          if(!parsed.ok){
+            console.warn("⚠️ Respuesta no reconocida:", parsed);
+            elStatus.textContent = "Error";
+            render([]);
+            showToast(parsed.error || "No se pudo cargar la información", "error");
             return;
           }
 
-          // ✅ MODO B: alternativa (success + meses[])
-          if (data && data.success === true && Array.isArray(data.meses)) {
-            data.meses.forEach((m) => addRow(m.mes || m.label || "-", m.total || m.ventas || 0));
-            hintEl.style.display = "inline";
-            statusEl.textContent = "Listo ✅";
-            return;
+          if(parsed.message){
+            console.log("ℹ️ message:", parsed.message);
           }
 
-          // ❌ Si no coincide nada
-          console.log("Respuesta no reconocida:", data);
-          statusEl.textContent = "No se pudo cargar la información";
-          showToast("Respuesta del endpoint no reconocida. Revisa console.", "error");
-        } catch (err) {
-          console.error(err);
-          statusEl.textContent = "No se pudo cargar la información";
-          showToast("Error cargando datos. Revisa el endpoint.", "error");
-        } finally {
-          btnUpdate.disabled = false;
+          render(parsed.items);
+          showToast("Datos actualizados ✅", "success");
+        }catch(err){
+          console.error("❌ Error cargar Ventas vs Meta:", err);
+          elStatus.textContent = "Error";
+          render([]);
+          showToast("No se pudo cargar la información. Revisa el endpoint.", "error");
+        }finally{
+          btnReload.disabled = false;
         }
       }
 
-      // Eventos
-      btnUpdate.addEventListener("click", cargar);
-      document.addEventListener("DOMContentLoaded", cargar);
+      // ===================== INIT =====================
+      btnReload.addEventListener("click", cargar);
+
+      document.addEventListener("DOMContentLoaded", () => {
+        cargar();
+      });
 
       // ✅ Register Service Worker (PWA)
       if ("serviceWorker" in navigator) {
