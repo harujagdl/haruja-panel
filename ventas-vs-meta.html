@@ -179,8 +179,11 @@
     try{
       const data = await jsonp(API_URL + "?action=ventasVsMetaMensual");
 
-      if (!data || data.ok !== true) {
-        status.textContent = "No se pudo cargar la información";
+      const ok = data && (data.ok === true || (data.labels && data.ventas));
+      if (!ok) {
+        status.textContent = data && data.message
+          ? data.message
+          : "No se pudo cargar la información";
         return;
       }
 
