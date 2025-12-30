@@ -239,6 +239,85 @@
       .toast--info {
         background: #383234;
       }
+
+      /* ===== Mini chart (sin librerías) ===== */
+      .mini-chart {
+        margin-top: 10px;
+        text-align: left;
+      }
+
+      .mini-chart__legend {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin: 10px 0 8px;
+        font-size: 12px;
+        color: var(--gris);
+      }
+
+      .mini-chart__legend b {
+        color: var(--texto);
+      }
+
+      .mini-chart__row {
+        display: grid;
+        grid-template-columns: 58px 1fr 64px;
+        gap: 10px;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
+      }
+
+      .mini-chart__row:last-child {
+        border-bottom: none;
+      }
+
+      .mini-chart__label {
+        font-size: 12px;
+        color: var(--texto);
+        opacity: 0.9;
+      }
+
+      .mini-chart__barwrap {
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(167, 181, 158, 0.22);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .mini-chart__bar {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        background: var(--acento);
+        transition: width 0.35s ease;
+      }
+
+      .mini-chart__metaLine {
+        position: absolute;
+        top: -3px;
+        bottom: -3px;
+        width: 2px;
+        background: rgba(56, 50, 52, 0.35);
+        border-radius: 2px;
+      }
+
+      .mini-chart__value {
+        text-align: right;
+        font-size: 12px;
+        color: var(--texto);
+        white-space: nowrap;
+      }
+
+      .mini-chart__hint {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--gris);
+        text-align: left;
+        line-height: 1.35;
+      }
     </style>
   </head>
 
@@ -268,6 +347,30 @@
           href="https://docs.google.com/spreadsheets/d/1FvUAsQZr8vqh_OOsHsHjHA7RprV_fmuqikm0U_Ja3_M/edit?gid=1077810078#gid=1077810078"
           >Ir a app</a
         >
+      </div>
+
+      <!-- ✅ NUEVA TARJETA: Ventas vs Meta (Mensual) -->
+      <div class="card card--auto" id="cardVentasVsMeta">
+        <div class="icon-circle"><span class="emoji">📈</span></div>
+        <h3>Ventas vs Meta</h3>
+        <p style="margin-top: 0; color: var(--gris); font-size: 13px">
+          Comparativo mensual (meta $10,000).
+        </p>
+
+        <div id="ventasVsMetaChart" class="mini-chart">
+          <div class="mini-chart__legend">
+            <span><b>Mes</b> / Ventas</span>
+            <span id="ventasVsMetaStatus">Cargando…</span>
+          </div>
+          <div id="ventasVsMetaRows"></div>
+          <div class="mini-chart__hint" id="ventasVsMetaHint" style="display: none">
+            La línea vertical marca la meta mensual. El % mostrado es Ventas / Meta.
+          </div>
+        </div>
+
+        <button class="btn" type="button" onclick="cargarVentasVsMeta()">
+          Actualizar gráfica
+        </button>
       </div>
 
       <div class="card">
@@ -356,7 +459,6 @@
         <a class="btn" href="/calculadora-pedidos.html">Ir a app</a>
       </div>
 
-      <!-- AHORA SOLO LINK A OTRA PÁGINA -->
       <div class="card">
         <div class="icon-circle"><span class="emoji">🚚</span></div>
         <h3>Movimientos de ropa</h3>
@@ -527,7 +629,6 @@
 
     <script>
       // ✅ Lee config global (config.js)
-      // Si config.js no cargó, caemos al valor por defecto.
       const HARUJA_API_URL =
         (window.HARUJA && window.HARUJA.API_URL) ||
         "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
@@ -635,13 +736,169 @@
 
       const API_MASTER_URL = PIPELINE_URL;
 
-      // ✅ Helper para fetch con API KEY (para tus endpoints PWA)
-      // Úsalo cuando llames a tu endpoint TN_API_PWA o el que valide x-api-key.
-      async function fetchHaruja(url, options = {}) {
-        const headers = new Headers(options.headers || {});
-        headers.set("x-api-key", HARUJA_API_KEY);
-        return fetch(url, { ...options, headers });
+      // ✅ JSONP helper (para TN_API_PWA / CORS)
+      function jsonp(url, timeoutMs = 15000) {
+        return new Promise((resolve, reject) => {
+          const cbName =
+            "cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+
+          const sep = url.includes("?") ? "&" : "?";
+          const fullUrl = url + sep + "callback=" + encodeURIComponent(cbName);
+
+          let done = false;
+          const script = document.createElement("script");
+
+          const timer = setTimeout(() => {
+            if (done) return;
+            done = true;
+            cleanup();
+            reject(new Error("Timeout JSONP"));
+          }, timeoutMs);
+
+          function cleanup() {
+            clearTimeout(timer);
+            try {
+              delete window[cbName];
+            } catch (e) {
+              window[cbName] = undefined;
+            }
+            if (script && script.parentNode) script.parentNode.removeChild(script);
+          }
+
+          window[cbName] = (data) => {
+            if (done) return;
+            done = true;
+            cleanup();
+            resolve(data);
+          };
+
+          script.onerror = () => {
+            if (done) return;
+            done = true;
+            cleanup();
+            reject(new Error("Error cargando JSONP"));
+          };
+
+          script.src = fullUrl;
+          document.body.appendChild(script);
+        });
       }
+
+      function moneyMX(n) {
+        const x = Number(n) || 0;
+        return x.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+      }
+
+      // ✅ TARJETA: Ventas vs Meta (Mensual)
+      async function cargarVentasVsMeta() {
+        const statusEl = document.getElementById("ventasVsMetaStatus");
+        const rowsEl = document.getElementById("ventasVsMetaRows");
+        const hintEl = document.getElementById("ventasVsMetaHint");
+
+        if (!statusEl || !rowsEl) return;
+
+        statusEl.textContent = "Cargando…";
+        rowsEl.innerHTML = "";
+        if (hintEl) hintEl.style.display = "none";
+
+        try {
+          const url =
+            HARUJA_API_URL +
+            "?action=dashboard_mensual" +
+            "&key=" +
+            encodeURIComponent(HARUJA_API_KEY);
+
+          const data = await jsonp(url);
+
+          if (!data || data.ok !== true) {
+            throw new Error((data && data.error) || "Respuesta inválida");
+          }
+
+          const labels = Array.isArray(data.labels) ? data.labels : [];
+          const ventas = Array.isArray(data.ventas) ? data.ventas : [];
+          const metaArr = Array.isArray(data.meta) ? data.meta : [];
+
+          if (!labels.length) {
+            statusEl.textContent = "Sin datos";
+            return;
+          }
+
+          // meta default: 10k si no viene
+          const META_DEFAULT = 10000;
+
+          // calcular escalas
+          let maxVal = 0;
+          for (let i = 0; i < labels.length; i++) {
+            const v = Number(ventas[i]) || 0;
+            const m = (metaArr.length ? Number(metaArr[i]) : META_DEFAULT) || META_DEFAULT;
+            maxVal = Math.max(maxVal, v, m);
+          }
+          if (maxVal <= 0) maxVal = META_DEFAULT;
+
+          // construir filas (últimos 6 meses para que no se vea gigante)
+          const N = 6;
+          const start = Math.max(0, labels.length - N);
+
+          for (let i = start; i < labels.length; i++) {
+            const mes = String(labels[i] || "");
+            const v = Number(ventas[i]) || 0;
+            const m = (metaArr.length ? Number(metaArr[i]) : META_DEFAULT) || META_DEFAULT;
+
+            const pct = m > 0 ? Math.round((v / m) * 100) : 0;
+
+            // bar width relativo a maxVal
+            const w = Math.max(0, Math.min(100, (v / maxVal) * 100));
+            const metaPos = Math.max(0, Math.min(100, (m / maxVal) * 100));
+
+            const row = document.createElement("div");
+            row.className = "mini-chart__row";
+
+            const label = document.createElement("div");
+            label.className = "mini-chart__label";
+            label.textContent = mes;
+
+            const barwrap = document.createElement("div");
+            barwrap.className = "mini-chart__barwrap";
+
+            const bar = document.createElement("div");
+            bar.className = "mini-chart__bar";
+            bar.style.width = "0%"; // animación
+            barwrap.appendChild(bar);
+
+            const metaLine = document.createElement("div");
+            metaLine.className = "mini-chart__metaLine";
+            metaLine.style.left = `calc(${metaPos}% - 1px)`;
+            barwrap.appendChild(metaLine);
+
+            const value = document.createElement("div");
+            value.className = "mini-chart__value";
+            value.textContent = `${moneyMX(v)} • ${pct}%`;
+
+            row.appendChild(label);
+            row.appendChild(barwrap);
+            row.appendChild(value);
+
+            rowsEl.appendChild(row);
+
+            // animar al siguiente frame
+            requestAnimationFrame(() => {
+              bar.style.width = `${w}%`;
+            });
+          }
+
+          statusEl.textContent = "OK";
+          if (hintEl) hintEl.style.display = "block";
+        } catch (err) {
+          console.error(err);
+          statusEl.textContent = "Error";
+          showToast("No pude cargar Ventas vs Meta. Revisa el endpoint.", "error");
+        }
+      }
+
+      // Auto-cargar al abrir (sin molestar)
+      document.addEventListener("DOMContentLoaded", () => {
+        cargarVentasVsMeta();
+      });
 
       async function ejecutarPipelineMaster() {
         const btn = document.getElementById("btnPipelineMaster");
