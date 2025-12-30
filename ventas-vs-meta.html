@@ -1,221 +1,407 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  />
-  <meta name="theme-color" content="#A7B59E" />
-  <title>Ventas vs Meta • HarujaGdl</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#A7B59E" />
+    <title>Ventas vs Meta • HarujaGdl</title>
 
-  <style>
-    :root {
-      --texto:#383234;
-      --acento:#A7B59E;
-      --beige:#FAF6F1;
-      --gris:#6b6b6b;
-    }
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
-    body{
-      margin:0;
-      font-family:"Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
-      background:var(--beige);
-      color:var(--texto);
-      padding:20px;
-    }
+    <!-- ✅ CONFIG GLOBAL (PWA) -->
+    <!-- /config.js:
+      window.HARUJA = { API_URL: ".../exec", API_KEY: "harujaTNpwa2025" }
+    -->
+    <script src="/config.js"></script>
 
-    h1{
-      text-align:center;
-      margin-bottom:6px;
-    }
-
-    .sub{
-      text-align:center;
-      font-size:14px;
-      color:var(--gris);
-      margin-bottom:20px;
-    }
-
-    .card{
-      background:#fff;
-      border-radius:18px;
-      padding:18px;
-      box-shadow:0 6px 18px rgba(0,0,0,.08);
-      max-width:720px;
-      margin:auto;
-    }
-
-    .row{
-      display:grid;
-      grid-template-columns:60px 1fr 70px;
-      gap:10px;
-      align-items:center;
-      padding:8px 0;
-      border-bottom:1px dashed rgba(0,0,0,.08);
-    }
-
-    .row:last-child{ border-bottom:none }
-
-    .label{
-      font-size:13px;
-      font-weight:600;
-    }
-
-    .barwrap{
-      height:12px;
-      background:rgba(167,181,158,.25);
-      border-radius:999px;
-      overflow:hidden;
-      position:relative;
-    }
-
-    .bar{
-      height:100%;
-      width:0%;
-      background:var(--acento);
-      border-radius:999px;
-      transition:width .4s ease;
-    }
-
-    .meta{
-      position:absolute;
-      top:-3px;
-      bottom:-3px;
-      width:2px;
-      background:rgba(56,50,52,.4);
-      left:100%;
-    }
-
-    .value{
-      text-align:right;
-      font-size:12px;
-      white-space:nowrap;
-    }
-
-    .status{
-      text-align:center;
-      font-size:13px;
-      margin:14px 0 6px;
-      color:var(--gris);
-    }
-
-    .btn{
-      margin-top:14px;
-      width:100%;
-      padding:10px;
-      border-radius:12px;
-      border:none;
-      background:var(--acento);
-      color:#fff;
-      font-size:14px;
-      cursor:pointer;
-    }
-
-    .back{
-      margin-top:18px;
-      text-align:center;
-      font-size:14px;
-    }
-
-    .back a{
-      color:var(--texto);
-      text-decoration:underline;
-    }
-  </style>
-</head>
-
-<body>
-
-  <h1>📈 Ventas vs Meta</h1>
-  <div class="sub">Meta mensual: $10,000</div>
-
-  <div class="card">
-    <div id="status" class="status">Cargando datos…</div>
-    <div id="rows"></div>
-
-    <button class="btn" onclick="cargar()">Actualizar</button>
-  </div>
-
-  <div class="back">
-    <a href="/">⬅️ Volver al panel</a>
-  </div>
-
-<script>
-  const API_URL =
-    (window.HARUJA && window.HARUJA.API_URL) ||
-    "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
-
-  const META = 10000;
-
-  function jsonp(url, timeout = 15000) {
-    return new Promise((resolve, reject) => {
-      const cb = "cb_" + Date.now();
-      const s = document.createElement("script");
-      const t = setTimeout(() => reject("timeout"), timeout);
-
-      window[cb] = data => {
-        clearTimeout(t);
-        delete window[cb];
-        s.remove();
-        resolve(data);
-      };
-
-      s.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
-      document.body.appendChild(s);
-    });
-  }
-
-  function money(n){
-    return Number(n||0).toLocaleString("es-MX",{style:"currency",currency:"MXN"});
-  }
-
-  async function cargar(){
-    const status = document.getElementById("status");
-    const rows = document.getElementById("rows");
-    rows.innerHTML = "";
-    status.textContent = "Cargando datos…";
-
-    try{
-      const data = await jsonp(API_URL + "?action=ventasVsMetaMensual");
-
-      const ok = data && (data.ok === true || (data.labels && data.ventas));
-      if (!ok) {
-        status.textContent = data && data.message
-          ? data.message
-          : "No se pudo cargar la información";
-        return;
+    <style>
+      :root {
+        --texto: #383234;
+        --acento: #a7b59e;
+        --beige: #faf6f1;
+        --gris: #6b6b6b;
+        --borde: #e9e4dc;
+        --shadow: 0 10px 30px rgba(56, 50, 52, 0.1);
+        --shadowSoft: 0 6px 18px rgba(56, 50, 52, 0.06);
+        --radius: 18px;
       }
 
-      const labels = data.labels || [];
-      const ventas = data.ventas || [];
+      * { box-sizing: border-box; }
 
-      labels.forEach((label, i) => {
-        const total = ventas[i] || 0;
-        const pct = Math.min(100, Math.round((total / META) * 100));
+      body {
+        margin: 0;
+        font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        background: var(--beige);
+        color: var(--texto);
+        text-align: center;
+      }
 
-        const div = document.createElement("div");
-        div.className = "row";
-        div.innerHTML = `
-          <div class="label">${label.replace(" 00:00:00 GMT-0600 (Central Standard Time)", "")}</div>
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 22px 16px 40px;
+      }
+
+      .title {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        margin-top: 12px;
+      }
+
+      .title h1 {
+        margin: 0;
+        font-size: 34px;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+      }
+
+      .subtitle {
+        margin: 6px 0 22px;
+        color: var(--gris);
+        font-size: 14px;
+      }
+
+      .card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 22px;
+        padding: 18px 18px 16px;
+        box-shadow: var(--shadowSoft);
+        max-width: 780px;
+        margin: 0 auto;
+      }
+
+      .status {
+        font-size: 13px;
+        color: var(--gris);
+        margin: 6px 0 14px;
+      }
+
+      .legend {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin: 6px 0 10px;
+        font-size: 12px;
+        color: var(--gris);
+      }
+
+      .legend b { color: var(--texto); }
+
+      .rows { margin-top: 6px; }
+
+      .row {
+        display: grid;
+        grid-template-columns: 68px 1fr 92px;
+        gap: 10px;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px dashed rgba(0,0,0,0.06);
+      }
+
+      .row:last-child { border-bottom: none; }
+
+      .label {
+        font-size: 12px;
+        color: var(--texto);
+        opacity: 0.9;
+        text-align: left;
+      }
+
+      .barwrap {
+        height: 14px;
+        border-radius: 999px;
+        background: rgba(167, 181, 158, 0.22);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .bar {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        background: var(--acento);
+        transition: width 0.35s ease;
+      }
+
+      /* línea meta al 100% */
+      .meta {
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: calc(100% - 1px);
+        width: 2px;
+        background: rgba(56, 50, 52, 0.35);
+        border-radius: 2px;
+      }
+
+      .value {
+        text-align: right;
+        font-size: 12px;
+        color: var(--texto);
+        white-space: nowrap;
+      }
+
+      .btn {
+        margin-top: 14px;
+        width: 100%;
+        background: var(--acento);
+        border: none;
+        color: #fff;
+        padding: 12px 0;
+        border-radius: 12px;
+        font-size: 14px;
+        cursor: pointer;
+        box-shadow: var(--shadowSoft);
+      }
+
+      .btn:disabled { opacity: 0.7; cursor: default; }
+
+      .back {
+        display: inline-block;
+        margin-top: 14px;
+        color: var(--texto);
+        text-decoration: underline;
+        font-size: 14px;
+      }
+
+      /* Toast */
+      .toast {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        background: #383234;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        max-width: 92%;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        z-index: 10000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+      }
+      .toast--visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .toast--error { background: #b53737; }
+      .toast--success { background: #3a7f4a; }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <div class="title">
+        <span style="font-size: 26px">📈</span>
+        <h1>Ventas vs Meta</h1>
+      </div>
+      <div class="subtitle">Meta mensual: <b>$10,000</b></div>
+
+      <div class="card">
+        <div id="status" class="status">Cargando datos...</div>
+
+        <div class="legend">
+          <span><b>Mes</b> / Ventas</span>
+          <span id="hint" style="display:none;">% = Ventas / Meta</span>
+        </div>
+
+        <div id="rows" class="rows"></div>
+
+        <button id="btnUpdate" class="btn" type="button">Actualizar</button>
+      </div>
+
+      <a class="back" href="/index.html">⬅️ Volver al panel</a>
+    </div>
+
+    <div id="toast" class="toast" style="display:none;"></div>
+
+    <script>
+      // ===== CONFIG =====
+      const META = 10000;
+
+      const HARUJA_API_URL =
+        (window.HARUJA && window.HARUJA.API_URL) ||
+        "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
+
+      const HARUJA_API_KEY =
+        (window.HARUJA && window.HARUJA.API_KEY) || "harujaTNpwa2025";
+
+      // ===== UI =====
+      const statusEl = document.getElementById("status");
+      const rowsEl = document.getElementById("rows");
+      const btnUpdate = document.getElementById("btnUpdate");
+      const hintEl = document.getElementById("hint");
+      const toastEl = document.getElementById("toast");
+      let toastTimer = null;
+
+      function showToast(msg, type = "error") {
+        if (!toastEl) return;
+        toastEl.textContent = msg || "";
+        toastEl.className = "toast toast--visible " + (type === "success" ? "toast--success" : "toast--error");
+        toastEl.style.display = "block";
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toastEl.className = "toast";
+          setTimeout(() => (toastEl.style.display = "none"), 200);
+        }, 3200);
+      }
+
+      function money(n) {
+        const x = Number(n) || 0;
+        return x.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+      }
+
+      // ✅ JSONP helper (CORS-safe)
+      function jsonp(url, timeoutMs = 15000) {
+        return new Promise((resolve, reject) => {
+          const cbName = "cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+          const sep = url.includes("?") ? "&" : "?";
+          const fullUrl = url + sep + "callback=" + encodeURIComponent(cbName);
+
+          let done = false;
+          const script = document.createElement("script");
+
+          const timer = setTimeout(() => {
+            if (done) return;
+            done = true;
+            cleanup();
+            reject(new Error("Timeout JSONP"));
+          }, timeoutMs);
+
+          function cleanup() {
+            clearTimeout(timer);
+            try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+            if (script && script.parentNode) script.parentNode.removeChild(script);
+          }
+
+          window[cbName] = (data) => {
+            if (done) return;
+            done = true;
+            cleanup();
+            resolve(data);
+          };
+
+          script.onerror = () => {
+            if (done) return;
+            done = true;
+            cleanup();
+            reject(new Error("Error cargando JSONP"));
+          };
+
+          script.src = fullUrl;
+          document.body.appendChild(script);
+        });
+      }
+
+      function normalizeLabel(lab) {
+        if (!lab) return "";
+        // por si viene con fecha larguísima tipo "Aug 2025 00:00:00 GMT-0600..."
+        return String(lab).replace(" 00:00:00 GMT-0600 (Central Standard Time)", "").trim();
+      }
+
+      function clearRows() {
+        rowsEl.innerHTML = "";
+      }
+
+      function addRow(label, total) {
+        const pctRaw = META > 0 ? (Number(total) || 0) / META : 0;
+        const pct = Math.max(0, Math.min(1.5, pctRaw)); // permitimos hasta 150% visual
+        const width = Math.round(pct * 100);
+
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+          <div class="label">${normalizeLabel(label)}</div>
           <div class="barwrap">
-            <div class="bar" style="width:${pct}%"></div>
+            <div class="bar" style="width:${width}%"></div>
             <div class="meta"></div>
           </div>
-          <div class="value">${money(total)}</div>
+          <div class="value">${money(total)} • ${Math.round(pctRaw * 100)}%</div>
         `;
-        rows.appendChild(div);
-      });
+        rowsEl.appendChild(row);
+      }
 
-      status.textContent = "Comparativo mensual";
-    }catch(e){
-      status.textContent = "Error al conectar con el servidor";
-      console.error(e);
-    }
-  }
+      async function cargar() {
+        btnUpdate.disabled = true;
+        statusEl.textContent = "Cargando datos...";
+        hintEl.style.display = "none";
+        clearRows();
 
-  document.addEventListener("DOMContentLoaded", cargar);
-</script>
+        try {
+          // ⬇️ AJUSTA AQUÍ el action si tu backend usa otro nombre
+          const url =
+            HARUJA_API_URL +
+            "?action=ventasVsMeta" +
+            "&key=" + encodeURIComponent(HARUJA_API_KEY) +
+            "&_ts=" + Date.now();
 
-</body>
+          const data = await jsonp(url, 20000);
+
+          // ✅ MODO A: tu respuesta real (ok + labels + ventas)
+          if (data && data.ok === true) {
+            const labels = Array.isArray(data.labels) ? data.labels : [];
+            const ventas = Array.isArray(data.ventas) ? data.ventas : [];
+
+            if (!labels.length) {
+              statusEl.textContent = "Sin datos para mostrar.";
+              showToast("No llegaron labels en la respuesta.", "error");
+              return;
+            }
+
+            labels.forEach((lab, i) => addRow(lab, ventas[i] || 0));
+            hintEl.style.display = "inline";
+            statusEl.textContent = "Listo ✅";
+            return;
+          }
+
+          // ✅ MODO B: alternativa (success + meses[])
+          if (data && data.success === true && Array.isArray(data.meses)) {
+            data.meses.forEach((m) => addRow(m.mes || m.label || "-", m.total || m.ventas || 0));
+            hintEl.style.display = "inline";
+            statusEl.textContent = "Listo ✅";
+            return;
+          }
+
+          // ❌ Si no coincide nada
+          console.log("Respuesta no reconocida:", data);
+          statusEl.textContent = "No se pudo cargar la información";
+          showToast("Respuesta del endpoint no reconocida. Revisa console.", "error");
+        } catch (err) {
+          console.error(err);
+          statusEl.textContent = "No se pudo cargar la información";
+          showToast("Error cargando datos. Revisa el endpoint.", "error");
+        } finally {
+          btnUpdate.disabled = false;
+        }
+      }
+
+      // Eventos
+      btnUpdate.addEventListener("click", cargar);
+      document.addEventListener("DOMContentLoaded", cargar);
+
+      // ✅ Register Service Worker (PWA)
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", async () => {
+          try {
+            const reg = await navigator.serviceWorker.register("/service-worker.js", { scope: "/" });
+            console.log("✅ SW registrado:", reg.scope);
+          } catch (err) {
+            console.warn("❌ SW no se pudo registrar:", err);
+          }
+        });
+      }
+    </script>
+  </body>
 </html>
