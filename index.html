@@ -239,85 +239,6 @@
       .toast--info {
         background: #383234;
       }
-
-      /* ===== Mini chart (sin librerías) ===== */
-      .mini-chart {
-        margin-top: 10px;
-        text-align: left;
-      }
-
-      .mini-chart__legend {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        justify-content: space-between;
-        margin: 10px 0 8px;
-        font-size: 12px;
-        color: var(--gris);
-      }
-
-      .mini-chart__legend b {
-        color: var(--texto);
-      }
-
-      .mini-chart__row {
-        display: grid;
-        grid-template-columns: 58px 1fr 64px;
-        gap: 10px;
-        align-items: center;
-        padding: 6px 0;
-        border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
-      }
-
-      .mini-chart__row:last-child {
-        border-bottom: none;
-      }
-
-      .mini-chart__label {
-        font-size: 12px;
-        color: var(--texto);
-        opacity: 0.9;
-      }
-
-      .mini-chart__barwrap {
-        height: 12px;
-        border-radius: 999px;
-        background: rgba(167, 181, 158, 0.22);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .mini-chart__bar {
-        height: 100%;
-        width: 0%;
-        border-radius: 999px;
-        background: var(--acento);
-        transition: width 0.35s ease;
-      }
-
-      .mini-chart__metaLine {
-        position: absolute;
-        top: -3px;
-        bottom: -3px;
-        width: 2px;
-        background: rgba(56, 50, 52, 0.35);
-        border-radius: 2px;
-      }
-
-      .mini-chart__value {
-        text-align: right;
-        font-size: 12px;
-        color: var(--texto);
-        white-space: nowrap;
-      }
-
-      .mini-chart__hint {
-        margin-top: 8px;
-        font-size: 12px;
-        color: var(--gris);
-        text-align: left;
-        line-height: 1.35;
-      }
     </style>
   </head>
 
@@ -349,28 +270,12 @@
         >
       </div>
 
-      <!-- ✅ NUEVA TARJETA: Ventas vs Meta (Mensual) -->
-      <div class="card card--auto" id="cardVentasVsMeta">
+      <!-- ✅ Ventas vs Meta: SOLO ENTRADA A OTRA PÁGINA -->
+      <div class="card">
         <div class="icon-circle"><span class="emoji">📈</span></div>
         <h3>Ventas vs Meta</h3>
-        <p style="margin-top: 0; color: var(--gris); font-size: 13px">
-          Comparativo mensual (meta $10,000).
-        </p>
-
-        <div id="ventasVsMetaChart" class="mini-chart">
-          <div class="mini-chart__legend">
-            <span><b>Mes</b> / Ventas</span>
-            <span id="ventasVsMetaStatus">Cargando…</span>
-          </div>
-          <div id="ventasVsMetaRows"></div>
-          <div class="mini-chart__hint" id="ventasVsMetaHint" style="display: none">
-            La línea vertical marca la meta mensual. El % mostrado es Ventas / Meta.
-          </div>
-        </div>
-
-        <button class="btn" type="button" onclick="cargarVentasVsMeta()">
-          Actualizar gráfica
-        </button>
+        <p>Comparativo mensual (meta $10,000).</p>
+        <a class="btn" href="/ventas-vs-meta.html">Ver gráfica</a>
       </div>
 
       <div class="card">
@@ -734,67 +639,11 @@
       const PIPELINE_URL =
         "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
 
-      const API_MASTER_URL = PIPELINE_URL;
-
-      // ✅ JSONP helper (para TN_API_PWA / CORS)
-      function jsonp(url, timeoutMs = 15000) {
-        return new Promise((resolve, reject) => {
-          const cbName =
-            "cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
-
-          const sep = url.includes("?") ? "&" : "?";
-          const fullUrl = url + sep + "callback=" + encodeURIComponent(cbName);
-
-          let done = false;
-          const script = document.createElement("script");
-
-          const timer = setTimeout(() => {
-            if (done) return;
-            done = true;
-            cleanup();
-            reject(new Error("Timeout JSONP"));
-          }, timeoutMs);
-
-          function cleanup() {
-            clearTimeout(timer);
-            try {
-              delete window[cbName];
-            } catch (e) {
-              window[cbName] = undefined;
-            }
-            if (script && script.parentNode) script.parentNode.removeChild(script);
-          }
-
-          window[cbName] = (data) => {
-            if (done) return;
-            done = true;
-            cleanup();
-            resolve(data);
-          };
-
-          script.onerror = () => {
-            if (done) return;
-            done = true;
-            cleanup();
-            reject(new Error("Error cargando JSONP"));
-          };
-
-          script.src = fullUrl;
-          document.body.appendChild(script);
-        });
-      }
-
+      // ✅ Helpers
       function moneyMX(n) {
         const x = Number(n) || 0;
         return x.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
       }
-
-      async function cargarVentasVsMeta() {
-
-      // Auto-cargar al abrir (sin molestar)
-      document.addEventListener("DOMContentLoaded", () => {
-        cargarVentasVsMeta();
-      });
 
       async function ejecutarPipelineMaster() {
         const btn = document.getElementById("btnPipelineMaster");
@@ -815,7 +664,8 @@
           showLoader("Actualizando Master (códigos + precios)...");
 
           const respuesta = await fetch(
-            PIPELINE_URL + "?action=ejecutarPipeline"
+            PIPELINE_URL + "?action=ejecutarPipeline",
+            { cache: "no-store" }
           );
           const data = await respuesta.json();
 
@@ -865,7 +715,8 @@
           showLoader("Generando CSV con IVA...");
 
           const respuesta = await fetch(
-            PIPELINE_URL + "?action=generarCSVConIVA"
+            PIPELINE_URL + "?action=generarCSVConIVA",
+            { cache: "no-store" }
           );
           const data = await respuesta.json();
 
@@ -900,7 +751,10 @@
         showLoader("Cargando resumen del día...");
 
         try {
-          const respuesta = await fetch(PIPELINE_URL + "?action=dashboardHoy");
+          const respuesta = await fetch(
+            PIPELINE_URL + "?action=dashboardHoy",
+            { cache: "no-store" }
+          );
           const data = await respuesta.json();
 
           if (!data.success) {
@@ -920,20 +774,11 @@
 
           const msg =
             "📈 Resumen del día\n\n" +
-            "💸 Ventas hoy: $" +
-            ventasHoy.toLocaleString("es-MX") +
-            "\n" +
-            "🧾 Tickets hoy: " +
-            ticketsHoy +
-            "\n\n" +
-            "📅 Ventas últimos 7 días: $" +
-            ventasSemana.toLocaleString("es-MX") +
-            "\n" +
-            "📆 Ventas del mes: $" +
-            ventasMes.toLocaleString("es-MX") +
-            "\n\n" +
-            "⚠️ Prendas sin precio en Master: " +
-            prendasSinPrecio;
+            "💸 Ventas hoy: " + moneyMX(ventasHoy) + "\n" +
+            "🧾 Tickets hoy: " + ticketsHoy + "\n\n" +
+            "📅 Ventas últimos 7 días: " + moneyMX(ventasSemana) + "\n" +
+            "📆 Ventas del mes: " + moneyMX(ventasMes) + "\n\n" +
+            "⚠️ Prendas sin precio en Master: " + prendasSinPrecio;
 
           alert(msg);
         } catch (error) {
@@ -958,7 +803,8 @@
 
         try {
           const respuesta = await fetch(
-            PIPELINE_URL + "?action=buscarProducto&q=" + encodeURIComponent(q)
+            PIPELINE_URL + "?action=buscarProducto&q=" + encodeURIComponent(q),
+            { cache: "no-store" }
           );
           const data = await respuesta.json();
 
@@ -976,23 +822,11 @@
           let texto = "Resultados de búsqueda (" + resultados.length + "):\n\n";
           resultados.slice(0, 5).forEach((item, idx) => {
             texto +=
-              "#" +
-              (idx + 1) +
-              " " +
-              (item.codigo || "") +
-              " | " +
-              (item.descripcion || "") +
-              "\n" +
-              "Tipo: " +
-              (item.tipo || "-") +
-              " | Color: " +
-              (item.color || "-") +
-              " | Talla: " +
-              (item.talla || "-") +
-              "\n" +
-              "Precio: " +
-              (item.precio !== "" ? "$" + item.precio : "N/D") +
-              "\n\n";
+              "#" + (idx + 1) + " " + (item.codigo || "") + " | " + (item.descripcion || "") + "\n" +
+              "Tipo: " + (item.tipo || "-") +
+              " | Color: " + (item.color || "-") +
+              " | Talla: " + (item.talla || "-") + "\n" +
+              "Precio: " + (item.precio !== "" ? "$" + item.precio : "N/D") + "\n\n";
           });
 
           alert(texto);
@@ -1006,20 +840,18 @@
           hideLoader();
         }
       }
-      
-  // ✅ Register Service Worker (PWA)
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", async () => {
-      try {
-        const reg = await navigator.serviceWorker.register("/service-worker.js", { scope: "/" });
-        console.log("✅ SW registrado:", reg.scope);
-      } catch (err) {
-        console.warn("❌ SW no se pudo registrar:", err);
+
+      // ✅ Register Service Worker (PWA)
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", async () => {
+          try {
+            const reg = await navigator.serviceWorker.register("/service-worker.js", { scope: "/" });
+            console.log("✅ SW registrado:", reg.scope);
+          } catch (err) {
+            console.warn("❌ SW no se pudo registrar:", err);
+          }
+        });
       }
-    });
-  }
     </script>
   </body>
 </html>
-
-
