@@ -1,11 +1,12 @@
 // ===============================
-// service-worker.js (FINAL v12)
-// PWA estable + NO rompe JSONP (Apps Script)
+// service-worker.js (FINAL v13)
+// PWA estable + fetch + proxy Vercel
+// NO cachea API / NO cachea HTML
 // ===============================
 
 const CACHE_NAME = "haruja-static-v13";
 
-// Cache SOLO de assets (NO metas HTML aquí)
+// Cache SOLO de assets estáticos
 const STATIC_ASSETS = [
   "/manifest.webmanifest",
   "/icons/icon-192.png",
@@ -13,18 +14,14 @@ const STATIC_ASSETS = [
   "/haruja-logo.png",
 ];
 
-// Pantallas que NO deben ser tocadas por SW
+// Pantallas que NO deben ser tocadas por el SW
 const BYPASS_PATHS = [
   "/registro-ventas.html",
 ];
 
-// Hosts externos que NO deben ser interceptados
-const BYPASS_HOSTS = [
-  "script.google.com",
-  "script.googleusercontent.com",
-  "googleusercontent.com",
-];
-
+// ===============================
+// INSTALL
+// ===============================
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
@@ -32,37 +29,43 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
+// ===============================
+// ACTIVATE
+// ===============================
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      Promise.all(
+        keys
+          .filter((k) => k !== CACHE_NAME)
+          .map((k) => caches.delete(k))
+      )
     )
   );
   self.clients.claim();
 });
 
+// ===============================
+// FETCH
+// ===============================
 self.addEventListener("fetch", (event) => {
   const req = event.request;
+
+  // Solo GET
   if (req.method !== "GET") return;
 
   const url = new URL(req.url);
 
-  // 0) Si es cross-origin, no lo toques (incluye Apps Script / CDNs / etc.)
+  // 0) 🔥 NUNCA interceptar API (proxy Vercel)
+  if (url.pathname.startsWith("/api/")) return;
+
+  // 1) No tocar cross-origin (CDNs, Google, etc.)
   if (url.origin !== self.location.origin) return;
 
-  // 1) NO tocar hosts externos (por si algún día cambia a proxy dentro del mismo origin)
-  // (Se deja por seguridad extra; normalmente ya cubre el origin check de arriba)
-  if (
-    BYPASS_HOSTS.includes(url.hostname) ||
-    BYPASS_HOSTS.some((h) => url.hostname === h || url.hostname.endsWith("." + h))
-  ) {
-    return;
-  }
-
-  // 2) NO tocar pantallas específicas
+  // 2) No tocar pantallas específicas
   if (BYPASS_PATHS.includes(url.pathname)) return;
 
-  // 3) NO cachear HTML nunca (evita versión vieja en PWA)
+  // 3) NO cachear HTML (evita versiones viejas en PWA)
   const accept = req.headers.get("accept") || "";
   const isHTML =
     req.mode === "navigate" ||
@@ -71,19 +74,19 @@ self.addEventListener("fetch", (event) => {
 
   if (isHTML) return; // network-only
 
-  // 4) Assets de tu dominio: cache-first
+  // 4) Assets del dominio: cache-first
   event.respondWith(cacheFirst(req));
 });
 
+// ===============================
+// CACHE-FIRST PARA ASSETS
+// ===============================
 async function cacheFirst(request) {
-  // Para assets, a veces se agregan query params (?v=123)
-  // ignoreSearch ayuda a reutilizar el mismo archivo cacheado.
   const cached = await caches.match(request, { ignoreSearch: true });
   if (cached) return cached;
 
   const res = await fetch(request);
 
-  // Solo cachea si la respuesta está OK y es "básica" (misma origen)
   if (res && res.ok && res.type === "basic") {
     const cache = await caches.open(CACHE_NAME);
     cache.put(request, res.clone());
@@ -91,4 +94,3 @@ async function cacheFirst(request) {
 
   return res;
 }
-
