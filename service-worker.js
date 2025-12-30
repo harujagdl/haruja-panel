@@ -1,34 +1,33 @@
-/* service-worker.js  (HarujaGdl)
- * - Cachea solo assets estáticos
- * - NO cachea /api/gs (ni nada de /api/)
- * - Navegación: Network-first para que el index se actualice
- * - Activa inmediatamente nuevas versiones
- */
+/* service-worker.js — HarujaGdl (SAFE CACHE) */
+const SW_VERSION = "haruja-sw-2025-01-01"; // cambia el texto si vuelves a editar
+const CACHE_NAME = `haruja-static-${SW_VERSION}`;
 
-const CACHE_VERSION = "haruja-panel-v2025-12-30-01";
-const STATIC_CACHE = `static-${CACHE_VERSION}`;
-
-// Ajusta esta lista a tus archivos reales
+// Archivos “seguros” para cachear (estáticos)
 const STATIC_ASSETS = [
-  "/",                 // ojo: navegación
+  "/",               // si tu index.html es la raíz
   "/index.html",
   "/manifest.webmanifest",
-  "/config.js",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
-  "/registro-ventas.html",
-  "/plan-lealtad.html",
-  "/calculadora-pedidos.html",
-  "/movimientos-ropa.html",
-  "/scanner.html",
 ];
 
+// Rutas que JAMÁS deben cachearse
+const NEVER_CACHE = [
+  "/api/gs",     // tu proxy Vercel
+  "/config.js",  // config dinámico
+];
+
+// Helper
+function isNeverCache(url) {
+  return NEVER_CACHE.some((p) => url.pathname.startsWith(p));
+}
+
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
   event.waitUntil(
     (async () => {
-      const cache = await caches.open(STATIC_CACHE);
+      const cache = await caches.open(CACHE_NAME);
       await cache.addAll(STATIC_ASSETS);
-      await self.skipWaiting(); // ✅ activa la nueva versión YA
     })()
   );
 });
@@ -36,36 +35,46 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
+      // borrar caches viejos
       const keys = await caches.keys();
       await Promise.all(
         keys
-          .filter((k) => k.startsWith("static-") && k !== STATIC_CACHE)
+          .filter((k) => k.startsWith("haruja-static-") && k !== CACHE_NAME)
           .map((k) => caches.delete(k))
       );
-      await self.clients.claim(); // ✅ toma control inmediato
+      await self.clients.claim();
     })()
   );
 });
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;
+
+  // Solo GET
+  if (req.method !== "GET") return;
+
   const url = new URL(req.url);
 
-  // ✅ NUNCA cachear API
-  if (url.pathname.startsWith("/api/")) {
-    return; // deja que pase directo a la red
+  // Solo mismo origen
+  if (url.origin !== self.location.origin) return;
+
+  // NUNCA cachear API ni config
+  if (isNeverCache(url)) {
+    event.respondWith(fetch(req));
+    return;
   }
 
-  // ✅ Navegación (index/links): NETWORK FIRST para evitar “versión vieja”
-  if (req.mode === "navigate") {
+  // Navegaciones (HTML): NETWORK FIRST (clave para iOS/Android)
+  const isNav = req.mode === "navigate" || (req.headers.get("accept") || "").includes("text/html");
+  if (isNav) {
     event.respondWith(
       (async () => {
         try {
           const fresh = await fetch(req, { cache: "no-store" });
-          const cache = await caches.open(STATIC_CACHE);
+          const cache = await caches.open(CACHE_NAME);
           cache.put(req, fresh.clone());
           return fresh;
-        } catch (e) {
+        } catch (err) {
           const cached = await caches.match(req);
           return cached || caches.match("/index.html");
         }
@@ -74,18 +83,27 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // ✅ Assets: CACHE FIRST
+  // Estáticos (CSS/JS/IMG): CACHE FIRST con actualización en background
   event.respondWith(
     (async () => {
       const cached = await caches.match(req);
-      if (cached) return cached;
-
-      const fresh = await fetch(req);
-      // Cachea solo GET y solo same-origin
-      if (req.method === "GET" && url.origin === self.location.origin) {
-        const cache = await caches.open(STATIC_CACHE);
-        cache.put(req, fresh.clone());
+      if (cached) {
+        event.waitUntil(
+          (async () => {
+            try {
+              const fresh = await fetch(req);
+              const cache = await caches.open(CACHE_NAME);
+              cache.put(req, fresh.clone());
+            } catch (_) {}
+          })()
+        );
+        return cached;
       }
+
+      // si no está cacheado, trae de red y guarda
+      const fresh = await fetch(req);
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(req, fresh.clone());
       return fresh;
     })()
   );
