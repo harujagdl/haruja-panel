@@ -2,10 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#A7B59E" />
     <title>Ventas vs Meta • HarujaGdl</title>
 
@@ -103,7 +100,7 @@
 
       .row{
         display:grid;
-        grid-template-columns: 88px 1fr 96px;
+        grid-template-columns: 88px 1fr 120px;
         gap: 12px;
         align-items: center;
       }
@@ -255,19 +252,17 @@
       const HARUJA_API_KEY =
         (window.HARUJA && window.HARUJA.API_KEY) || "harujaTNpwa2025";
 
-      // Ajusta la meta aquí si quieres
-      const META_MENSUAL = 10000;
+      // ✅ Meta default (si tu hoja no trae meta o trae 0)
+      const META_MENSUAL_DEFAULT = 10000;
 
-      // Tu endpoint/acción (ajústalo si tu backend usa otro action)
-      const ACTION = "ventasVsMeta"; // <-- si tu Apps Script usa otro, cámbialo aquí
+      // ✅ Acción REAL en tu TN_API_PWA.gs
+      const ACTION = "dashboard_mensual";
 
       // ===================== UI HELPERS =====================
       const elRows = document.getElementById("rows");
       const elStatus = document.getElementById("status");
       const btnReload = document.getElementById("btnReload");
       const toastEl = document.getElementById("toast");
-      document.getElementById("metaTxt").textContent =
-        META_MENSUAL.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
 
       let toastTimer = null;
       function showToast(msg, type="info"){
@@ -286,7 +281,13 @@
 
       function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
-      // ===================== JSONP (para CORS / Apps Script si lo necesitas) =====================
+      function setMetaTxt(meta){
+        const m = Number(meta) || META_MENSUAL_DEFAULT;
+        document.getElementById("metaTxt").textContent =
+          m.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+      }
+
+      // ===================== JSONP (Apps Script + Vercel) =====================
       function jsonp(url, timeoutMs = 15000) {
         return new Promise((resolve, reject) => {
           const cbName = "cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
@@ -328,124 +329,61 @@
         });
       }
 
-      // ===================== PARSER “A PRUEBA DE BALAS” =====================
-      function normalizeResponse(raw){
-        // 1) si es string JSON
-        if (typeof raw === "string") {
-          try { raw = JSON.parse(raw); } catch(e) { /* deja raw como string */ }
-        }
-
-        // 2) si es array directo
-        if (Array.isArray(raw)) {
-          return { ok: true, items: raw };
-        }
-
-        // 3) si viene envuelto
-        const obj = raw && typeof raw === "object" ? raw : null;
-        if (!obj) return { ok:false, error:"Respuesta vacía o inválida." };
-
-        // Mensajes de error comunes
-        const msg = obj.message || obj.error || obj.errors || obj.msg;
-
-        // data containers comunes
-        const container =
-          obj.data || obj.result || obj.results || obj.rows || obj.items || obj.payload;
-
-        // a) container array
-        if (Array.isArray(container)) {
-          return { ok: obj.success !== false && obj.ok !== false, items: container, message: msg };
-        }
-
-        // b) obj trae labels/values
-        const labels = obj.labels || obj.meses || obj.months;
-        const values = obj.values || obj.ventas || obj.totales || obj.amounts;
-        if (Array.isArray(labels) && Array.isArray(values)) {
-          const items = labels.map((lab, i) => ({
-            mes: lab,
-            ventas: values[i]
-          }));
-          return { ok: obj.success !== false && obj.ok !== false, items, message: msg };
-        }
-
-        // c) container trae labels/values
-        if (container && typeof container === "object") {
-          const cLabels = container.labels || container.meses || container.months;
-          const cValues = container.values || container.ventas || container.totales || container.amounts;
-          if (Array.isArray(cLabels) && Array.isArray(cValues)) {
-            const items = cLabels.map((lab, i) => ({ mes: lab, ventas: cValues[i] }));
-            return { ok: true, items, message: msg };
-          }
-          if (Array.isArray(container.items)) {
-            return { ok: true, items: container.items, message: msg };
-          }
-        }
-
-        // d) si no entendimos el shape
-        return {
-          ok:false,
-          error: msg || "Respuesta del endpoint no reconocida.",
-          raw: obj
-        };
-      }
-
-      function pickMes(it){
-        return it.mes ?? it.Mes ?? it.month ?? it.Month ?? it.label ?? it.Label ?? it.periodo ?? it.period;
-      }
-
-      function pickVentas(it){
-        return it.ventas ?? it.Ventas ?? it.total ?? it.Total ?? it.value ?? it.Value ?? it.monto ?? it.amount;
-      }
-
       // ===================== RENDER =====================
-      function render(items){
+      function renderMonthly(labels, ventas, metas){
         elRows.innerHTML = "";
 
-        if(!items || !items.length){
+        const n = Math.min(labels.length, ventas.length);
+        if(!n){
           elStatus.textContent = "Sin datos";
           elRows.innerHTML = `<div style="color:var(--gris); font-size:13px; padding:8px 0;">No hay información para mostrar.</div>`;
           return;
         }
 
-        // Normalizamos a {mes, ventas}
-        const normalized = items
-          .map((it) => ({ mes: String(pickMes(it) ?? "").trim(), ventas: Number(pickVentas(it) ?? 0) }))
-          .filter((x) => x.mes);
+        // meta por fila si viene, si no -> default
+        const metaByRow = Array.from({length:n}, (_, i) => {
+          const m = Number((metas && metas[i] != null) ? metas[i] : 0) || 0;
+          return m > 0 ? m : META_MENSUAL_DEFAULT;
+        });
 
-        // Si todo viene sin "mes", lo mostramos igual como fallback
-        if(!normalized.length){
-          elStatus.textContent = "Sin formato";
-          elRows.innerHTML = `<div style="color:var(--gris); font-size:13px; padding:8px 0;">El endpoint devolvió datos pero no encontré campos de mes/ventas.</div>`;
-          return;
-        }
+        // meta “principal” para texto: usa la primera meta válida o default
+        const metaPrincipal = metaByRow.find(m => m > 0) || META_MENSUAL_DEFAULT;
+        setMetaTxt(metaPrincipal);
 
-        // Escala barras (max = 150% de la meta o el máximo real)
-        const maxVentas = Math.max(...normalized.map(x => x.ventas), META_MENSUAL);
-        const scaleMax = Math.max(META_MENSUAL * 1.5, maxVentas);
+        // escala: máximo entre ventas y meta (y un colchón)
+        const maxVentas = Math.max(...ventas.slice(0,n).map(v => Number(v)||0), 0);
+        const maxMeta = Math.max(...metaByRow, META_MENSUAL_DEFAULT);
+        const scaleMax = Math.max(maxMeta * 1.5, maxVentas, META_MENSUAL_DEFAULT);
 
-        // meta line position en %
-        const metaPct = clamp((META_MENSUAL / scaleMax) * 100, 0, 100);
+        // Render
+        for(let i=0; i<n; i++){
+          const mes = String(labels[i] ?? "").trim();
+          const v = Number(ventas[i]) || 0;
+          const meta = metaByRow[i];
 
-        normalized.forEach((x) => {
-          const pct = clamp((x.ventas / scaleMax) * 100, 0, 100);
-          const ratio = (x.ventas / META_MENSUAL) * 100;
+          const pct = clamp((v / scaleMax) * 100, 0, 100);
+          const metaPct = clamp((meta / scaleMax) * 100, 0, 100);
+          const ratio = meta > 0 ? (v / meta) * 100 : NaN;
           const ratioTxt = isFinite(ratio) ? `${Math.round(ratio)}%` : "—";
 
           const row = document.createElement("div");
           row.className = "row";
           row.innerHTML = `
-            <div class="label" title="${x.mes}">${x.mes}</div>
+            <div class="label" title="${mes}">${mes}</div>
             <div class="barwrap" aria-label="Barra de ventas">
               <div class="bar" style="width:${pct.toFixed(2)}%"></div>
               <div class="metaLine" style="left:${metaPct.toFixed(2)}%"></div>
             </div>
-            <div class="value" title="${moneyMX(x.ventas)}">
-              ${moneyMX(x.ventas)} · ${ratioTxt}
+            <div class="value" title="${moneyMX(v)}">
+              ${moneyMX(v)} · ${ratioTxt}
             </div>
           `;
           elRows.appendChild(row);
-        });
+        }
 
-        elStatus.textContent = "OK";
+        // si todo viene en 0, dilo
+        const sumVentas = ventas.slice(0,n).reduce((a,b)=>a+(Number(b)||0),0);
+        elStatus.textContent = sumVentas > 0 ? "OK" : "Sin datos";
       }
 
       // ===================== FETCH DATA =====================
@@ -454,8 +392,6 @@
         elStatus.textContent = "Cargando…";
 
         try{
-          // OJO: si tu endpoint NO usa JSONP, puedes cambiar a fetch normal.
-          // Aquí intentamos JSONP primero (por CORS en móviles/PWA suele ser más estable).
           const url =
             HARUJA_API_URL +
             "?action=" + encodeURIComponent(ACTION) +
@@ -464,29 +400,26 @@
 
           const raw = await jsonp(url, 20000);
 
-          // DEBUG: imprime el raw completo para que veas el shape exacto
-          console.log("📦 ventas-vs-meta raw:", raw);
+          console.log("📦 dashboard_mensual raw:", raw);
 
-          const parsed = normalizeResponse(raw);
-
-          if(!parsed.ok){
-            console.warn("⚠️ Respuesta no reconocida:", parsed);
+          if(!raw || raw.ok !== true){
+            const errMsg = (raw && (raw.error || raw.message)) ? (raw.error || raw.message) : "No se pudo cargar la información.";
             elStatus.textContent = "Error";
-            render([]);
-            showToast(parsed.error || "No se pudo cargar la información", "error");
+            elRows.innerHTML = `<div style="color:var(--gris); font-size:13px; padding:8px 0;">No se pudo cargar la información.</div>`;
+            showToast(errMsg, "error");
             return;
           }
 
-          if(parsed.message){
-            console.log("ℹ️ message:", parsed.message);
-          }
+          const labels = Array.isArray(raw.labels) ? raw.labels : [];
+          const ventas = Array.isArray(raw.ventas) ? raw.ventas : [];
+          const meta = Array.isArray(raw.meta) ? raw.meta : [];
 
-          render(parsed.items);
+          renderMonthly(labels, ventas, meta);
           showToast("Datos actualizados ✅", "success");
         }catch(err){
           console.error("❌ Error cargar Ventas vs Meta:", err);
           elStatus.textContent = "Error";
-          render([]);
+          elRows.innerHTML = `<div style="color:var(--gris); font-size:13px; padding:8px 0;">No se pudo cargar la información. Revisa consola.</div>`;
           showToast("No se pudo cargar la información. Revisa el endpoint.", "error");
         }finally{
           btnReload.disabled = false;
@@ -495,10 +428,7 @@
 
       // ===================== INIT =====================
       btnReload.addEventListener("click", cargar);
-
-      document.addEventListener("DOMContentLoaded", () => {
-        cargar();
-      });
+      document.addEventListener("DOMContentLoaded", cargar);
 
       // ✅ Register Service Worker (PWA)
       if ("serviceWorker" in navigator) {
