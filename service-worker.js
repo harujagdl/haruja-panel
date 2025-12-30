@@ -1,9 +1,9 @@
 // ===============================
-// service-worker.js (FINAL v15)
-// PWA estable + NO cachea API (/api/*)
+// service-worker.js (FINAL v14)
+// PWA estable + NO rompe API / JSONP
 // ===============================
 
-const CACHE_NAME = "haruja-static-v15";
+const CACHE_NAME = "haruja-static-v14";
 
 // Cache SOLO de assets (NO metas HTML aquí)
 const STATIC_ASSETS = [
@@ -13,16 +13,10 @@ const STATIC_ASSETS = [
   "/haruja-logo.png",
 ];
 
-// Pantallas que NO deben ser tocadas por SW
-const BYPASS_PATHS = [
-  "/registro-ventas.html",
-];
-
-// Hosts externos que NO deben ser interceptados
-const BYPASS_HOSTS = [
-  "script.google.com",
-  "script.googleusercontent.com",
-  "googleusercontent.com",
+// Rutas que NO deben ser tocadas por SW
+const BYPASS_PATH_PREFIXES = [
+  "/api/",                // <-- IMPORTANTÍSIMO (proxy Vercel)
+  "/registro-ventas.html" // tu pantalla
 ];
 
 self.addEventListener("install", (event) => {
@@ -47,24 +41,13 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(req.url);
 
-  // 0) Si es cross-origin, no lo toques (incluye Apps Script / CDNs / etc.)
+  // 0) Si es cross-origin, no lo toques
   if (url.origin !== self.location.origin) return;
 
-  // 0.1) NO cachear NUNCA la API (esto arregla tu problema)
-  if (url.pathname.startsWith("/api/")) return; // network-only
+  // 1) BYPASS rutas sensibles (API + pantallas)
+  if (BYPASS_PATH_PREFIXES.some((p) => url.pathname.startsWith(p))) return;
 
-  // 1) NO tocar hosts externos (por si algún día cambia a proxy dentro del mismo origin)
-  if (
-    BYPASS_HOSTS.includes(url.hostname) ||
-    BYPASS_HOSTS.some((h) => url.hostname === h || url.hostname.endsWith("." + h))
-  ) {
-    return;
-  }
-
-  // 2) NO tocar pantallas específicas
-  if (BYPASS_PATHS.includes(url.pathname)) return;
-
-  // 3) NO cachear HTML nunca (evita versión vieja en PWA)
+  // 2) NO cachear HTML nunca
   const accept = req.headers.get("accept") || "";
   const isHTML =
     req.mode === "navigate" ||
@@ -73,7 +56,11 @@ self.addEventListener("fetch", (event) => {
 
   if (isHTML) return; // network-only
 
-  // 4) Assets de tu dominio: cache-first
+  // 3) NO cachear JSON
+  const isJSON = accept.includes("application/json");
+  if (isJSON) return; // network-only
+
+  // 4) Assets: cache-first
   event.respondWith(cacheFirst(req));
 });
 
@@ -83,7 +70,6 @@ async function cacheFirst(request) {
 
   const res = await fetch(request);
 
-  // Solo cachea si la respuesta está OK y es "básica" (misma origen)
   if (res && res.ok && res.type === "basic") {
     const cache = await caches.open(CACHE_NAME);
     cache.put(request, res.clone());
