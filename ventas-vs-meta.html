@@ -180,43 +180,26 @@
       const data = await jsonp(API_URL + "?action=ventasVsMetaMensual");
 
       if (!data || data.ok !== true) {
-  status.textContent = "No se pudo cargar la información";
-  return;
-}
+        status.textContent = "No se pudo cargar la información";
+        return;
+      }
 
-const labels = data.labels || [];
-const ventas = data.ventas || [];
+      const labels = data.labels || [];
+      const ventas = data.ventas || [];
 
-labels.forEach((label, i) => {
-  const total = ventas[i] || 0;
-  const pct = Math.min(100, Math.round((total / META) * 100));
-
-  const div = document.createElement("div");
-  div.className = "row";
-  div.innerHTML = `
-    <div class="label">${label.replace(" 00:00:00 GMT-0600 (Central Standard Time)", "")}</div>
-    <div class="barwrap">
-      <div class="bar" style="width:${pct}%"></div>
-      <div class="meta"></div>
-    </div>
-    <div class="value">${money(total)}</div>
-  `;
-  rows.appendChild(div);
-});
-
-status.textContent = "Comparativo mensual";
-
-        const pct = Math.min(100, Math.round((m.total / META) * 100));
+      labels.forEach((label, i) => {
+        const total = ventas[i] || 0;
+        const pct = Math.min(100, Math.round((total / META) * 100));
 
         const div = document.createElement("div");
         div.className = "row";
         div.innerHTML = `
-          <div class="label">${m.mes}</div>
+          <div class="label">${label.replace(" 00:00:00 GMT-0600 (Central Standard Time)", "")}</div>
           <div class="barwrap">
             <div class="bar" style="width:${pct}%"></div>
             <div class="meta"></div>
           </div>
-          <div class="value">${money(m.total)}</div>
+          <div class="value">${money(total)}</div>
         `;
         rows.appendChild(div);
       });
