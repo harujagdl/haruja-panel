@@ -2,6 +2,7 @@
   "name": "Panel de Herramientas HarujaGdl",
   "short_name": "HarujaGdl",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#FAF6F1",
   "theme_color": "#A7B59E",

@@ -7,6 +7,8 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <meta name="theme-color" content="#A7B59E" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Panel HarujaGdl</title>
 
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -239,6 +241,21 @@
       .toast--info {
         background: #383234;
       }
+
+      .error-banner {
+        position: fixed;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #b53737;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        max-width: 92%;
+        z-index: 10001;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
     </style>
   </head>
 
@@ -248,6 +265,7 @@
     </div>
 
     <h1 id="panelTitle">Panel de Herramientas HarujaGdl</h1>
+    <div id="appError" class="error-banner" role="alert" style="display: none"></div>
 
     <!-- PANEL PÚBLICO -->
     <div id="publicGrid" class="grid">
@@ -533,324 +551,394 @@
     <div id="toast" class="toast" style="display: none"></div>
 
     <script>
-      // ✅ Lee config global (config.js)
-      const HARUJA_API_URL =
-        (window.HARUJA && window.HARUJA.API_URL) ||
-        "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
+      let fatalErrorShown = false;
 
-      const HARUJA_API_KEY =
-        (window.HARUJA && window.HARUJA.API_KEY) || "harujaTNpwa2025";
-
-      console.log("✅ HARUJA_API_URL:", HARUJA_API_URL);
-      console.log("✅ HARUJA_API_KEY:", HARUJA_API_KEY);
-
-      const ADMIN_PASSWORD = "Harujagdl";
-
-      const adminToggle = document.getElementById("adminToggle");
-      const adminGrid = document.getElementById("adminGrid");
-      const publicGrid = document.getElementById("publicGrid");
-      const panelTitle = document.getElementById("panelTitle");
-
-      let adminUnlocked = localStorage.getItem("harujaAdmin") === "true";
-
-      function showAdmin() {
-        publicGrid.style.display = "none";
-        adminGrid.style.display = "grid";
-        panelTitle.textContent = "Panel Administrador HarujaGdl";
-        adminToggle.textContent = "⬅️ Volver al panel";
-      }
-
-      function showPublic() {
-        publicGrid.style.display = "grid";
-        adminGrid.style.display = "none";
-        panelTitle.textContent = "Panel de Herramientas HarujaGdl";
-        adminToggle.textContent = "🔐 Administrador";
-      }
-
-      if (adminUnlocked) {
-        showAdmin();
-      }
-
-      adminToggle.addEventListener("click", () => {
-        if (!adminUnlocked) {
-          const pass = prompt("Introduce la contraseña de administrador:");
-          if (pass === ADMIN_PASSWORD) {
-            adminUnlocked = true;
-            localStorage.setItem("harujaAdmin", "true");
-            showAdmin();
-          } else {
-            showToast("Contraseña incorrecta.", "error");
-          }
+      function showFatalError(message, error) {
+        if (fatalErrorShown) return;
+        fatalErrorShown = true;
+        console.error(message, error || "");
+        const banner = document.getElementById("appError");
+        if (banner) {
+          banner.textContent =
+            message ||
+            "Ocurrió un error al iniciar la app. Intenta recargar.";
+          banner.style.display = "block";
         } else {
-          if (adminGrid.style.display === "grid") {
-            showPublic();
-          } else {
-            showAdmin();
-          }
+          alert(message || "Ocurrió un error al iniciar la app.");
         }
-      });
-
-      // Loader + Toast
-      const loadingOverlay = document.getElementById("loadingOverlay");
-      const loadingMessage = document.getElementById("loadingMessage");
-      const toastEl = document.getElementById("toast");
-      let toastTimeoutId = null;
-
-      function showLoader(message) {
-        if (loadingMessage)
-          loadingMessage.textContent = message || "Procesando...";
-        if (loadingOverlay) loadingOverlay.style.display = "flex";
       }
 
-      function hideLoader() {
-        if (loadingOverlay) loadingOverlay.style.display = "none";
-      }
-
-      function showToast(message, type = "info") {
-        if (!toastEl) return;
-
-        toastEl.textContent = message || "";
-        toastEl.classList.remove(
-          "toast--success",
-          "toast--error",
-          "toast--info",
-          "toast--visible"
-        );
-
-        if (type === "success") toastEl.classList.add("toast--success");
-        else if (type === "error") toastEl.classList.add("toast--error");
-        else toastEl.classList.add("toast--info");
-
-        toastEl.style.display = "block";
-        requestAnimationFrame(() => {
-          toastEl.classList.add("toast--visible");
+      function boot() {
+        window.addEventListener("error", (event) => {
+          showFatalError("La app tuvo un error inesperado.", event.error);
         });
 
-        if (toastTimeoutId) clearTimeout(toastTimeoutId);
-        toastTimeoutId = setTimeout(() => {
-          toastEl.classList.remove("toast--visible");
-          setTimeout(() => {
-            toastEl.style.display = "none";
-          }, 250);
-        }, 3500);
-      }
+        window.addEventListener("unhandledrejection", (event) => {
+          showFatalError("La app tuvo un error inesperado.", event.reason);
+        });
 
-      // Endpoints Apps Script
-      const PIPELINE_URL =
-        "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
+        // ✅ Lee config global (config.js)
+        const HARUJA_API_URL =
+          (window.HARUJA && window.HARUJA.API_URL) ||
+          "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
 
-      // ✅ Helpers
-      function moneyMX(n) {
-        const x = Number(n) || 0;
-        return x.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
-      }
+        const HARUJA_API_KEY =
+          (window.HARUJA && window.HARUJA.API_KEY) || "harujaTNpwa2025";
 
-      async function ejecutarPipelineMaster() {
-        const btn = document.getElementById("btnPipelineMaster");
-        const textoOriginal = btn ? btn.textContent : "";
+        console.log("✅ HARUJA_API_URL:", HARUJA_API_URL);
+        console.log("✅ HARUJA_API_KEY:", HARUJA_API_KEY);
 
-        const confirmar = confirm(
-          "¿Quieres ejecutar la actualización del Master?\n\n" +
-            "Esto correrá: códigos nuevos y precios desde Calculadora."
-        );
-        if (!confirmar) return;
+        const ADMIN_PASSWORD = "Harujagdl";
 
-        try {
-          if (btn) {
-            btn.disabled = true;
-            btn.textContent = "Ejecutando...";
-          }
+        const adminToggle = document.getElementById("adminToggle");
+        const adminGrid = document.getElementById("adminGrid");
+        const publicGrid = document.getElementById("publicGrid");
+        const panelTitle = document.getElementById("panelTitle");
 
-          showLoader("Actualizando Master (códigos + precios)...");
+        let adminUnlocked = localStorage.getItem("harujaAdmin") === "true";
 
-          const respuesta = await fetch(
-            PIPELINE_URL + "?action=ejecutarPipeline",
-            { cache: "no-store" }
-          );
-          const data = await respuesta.json();
-
-          if (data.success) {
-            showToast(
-              data.message ||
-                "Pipeline ejecutado correctamente. Revisa el Master.",
-              "success"
-            );
-          } else {
-            showToast(
-              data.message || "Hubo un problema al ejecutar el pipeline.",
-              "error"
-            );
-          }
-        } catch (error) {
-          console.error(error);
-          showToast(
-            "Error al conectar con el Master. Intenta de nuevo.",
-            "error"
-          );
-        } finally {
-          hideLoader();
-          if (btn) {
-            btn.disabled = false;
-            btn.textContent = textoOriginal || "Ejecutar actualización";
-          }
+        function showAdmin() {
+          if (publicGrid) publicGrid.style.display = "none";
+          if (adminGrid) adminGrid.style.display = "grid";
+          if (panelTitle)
+            panelTitle.textContent = "Panel Administrador HarujaGdl";
+          if (adminToggle) adminToggle.textContent = "⬅️ Volver al panel";
         }
-      }
 
-      async function ejecutarCSVConIVA() {
-        const btn = document.getElementById("btnCSVConIVA");
-        const textoOriginal = btn ? btn.textContent : "";
-
-        const confirmar = confirm(
-          "¿Generar el CSV con IVA?\n\n" +
-            "Esto actualizará la base que usas para SMP / etiquetas."
-        );
-        if (!confirmar) return;
-
-        try {
-          if (btn) {
-            btn.disabled = true;
-            btn.textContent = "Generando...";
-          }
-
-          showLoader("Generando CSV con IVA...");
-
-          const respuesta = await fetch(
-            PIPELINE_URL + "?action=generarCSVConIVA",
-            { cache: "no-store" }
-          );
-          const data = await respuesta.json();
-
-          if (data.success) {
-            showToast(
-              data.message ||
-                "CSV con IVA generado correctamente. Revisa el archivo SMP.",
-              "success"
-            );
-          } else {
-            showToast(
-              data.message || "Hubo un problema al generar el CSV con IVA.",
-              "error"
-            );
-          }
-        } catch (error) {
-          console.error(error);
-          showToast(
-            "Error al conectar con el Master. Intenta de nuevo.",
-            "error"
-          );
-        } finally {
-          hideLoader();
-          if (btn) {
-            btn.disabled = false;
-            btn.textContent = textoOriginal || "Generar CSV";
-          }
+        function showPublic() {
+          if (publicGrid) publicGrid.style.display = "grid";
+          if (adminGrid) adminGrid.style.display = "none";
+          if (panelTitle)
+            panelTitle.textContent = "Panel de Herramientas HarujaGdl";
+          if (adminToggle) adminToggle.textContent = "🔐 Administrador";
         }
-      }
 
-      async function verDashboardHoy() {
-        showLoader("Cargando resumen del día...");
-
-        try {
-          const respuesta = await fetch(
-            PIPELINE_URL + "?action=dashboardHoy",
-            { cache: "no-store" }
+        if (!adminToggle || !adminGrid || !publicGrid || !panelTitle) {
+          showFatalError(
+            "Faltan elementos del panel. Actualiza la página.",
+            "missing-dom"
           );
-          const data = await respuesta.json();
-
-          if (!data.success) {
-            showToast(
-              data.message || "No se pudo obtener el resumen del día.",
-              "error"
-            );
-            return;
-          }
-
-          const d = data.dashboard || {};
-          const ventasHoy = d.ventasHoy || 0;
-          const ticketsHoy = d.ticketsHoy || 0;
-          const ventasSemana = d.ventasSemana || 0;
-          const ventasMes = d.ventasMes || 0;
-          const prendasSinPrecio = d.prendasSinPrecio || 0;
-
-          const msg =
-            "📈 Resumen del día\n\n" +
-            "💸 Ventas hoy: " + moneyMX(ventasHoy) + "\n" +
-            "🧾 Tickets hoy: " + ticketsHoy + "\n\n" +
-            "📅 Ventas últimos 7 días: " + moneyMX(ventasSemana) + "\n" +
-            "📆 Ventas del mes: " + moneyMX(ventasMes) + "\n\n" +
-            "⚠️ Prendas sin precio en Master: " + prendasSinPrecio;
-
-          alert(msg);
-        } catch (error) {
-          console.error(error);
-          showToast(
-            "Error al conectar con el Master para el dashboard.",
-            "error"
-          );
-        } finally {
-          hideLoader();
         }
-      }
 
-      async function abrirBuscadorProducto() {
-        const q = prompt(
-          "Buscar producto en Master:\n\n" +
-            "Ingresa código o parte de la descripción."
-        );
-        if (!q) return;
+        if (adminUnlocked) {
+          showAdmin();
+        }
 
-        showLoader("Buscando producto...");
+        if (adminToggle) {
+          adminToggle.addEventListener("click", () => {
+            if (!adminUnlocked) {
+              const pass = prompt(
+                "Introduce la contraseña de administrador:"
+              );
+              if (pass === ADMIN_PASSWORD) {
+                adminUnlocked = true;
+                localStorage.setItem("harujaAdmin", "true");
+                showAdmin();
+              } else {
+                showToast("Contraseña incorrecta.", "error");
+              }
+            } else {
+              if (adminGrid && adminGrid.style.display === "grid") {
+                showPublic();
+              } else {
+                showAdmin();
+              }
+            }
+          });
+        }
 
-        try {
-          const respuesta = await fetch(
-            PIPELINE_URL + "?action=buscarProducto&q=" + encodeURIComponent(q),
-            { cache: "no-store" }
+        // Loader + Toast
+        const loadingOverlay = document.getElementById("loadingOverlay");
+        const loadingMessage = document.getElementById("loadingMessage");
+        const toastEl = document.getElementById("toast");
+        let toastTimeoutId = null;
+
+        function showLoader(message) {
+          if (loadingMessage)
+            loadingMessage.textContent = message || "Procesando...";
+          if (loadingOverlay) loadingOverlay.style.display = "flex";
+        }
+
+        function hideLoader() {
+          if (loadingOverlay) loadingOverlay.style.display = "none";
+        }
+
+        function showToast(message, type = "info") {
+          if (!toastEl) return;
+
+          toastEl.textContent = message || "";
+          toastEl.classList.remove(
+            "toast--success",
+            "toast--error",
+            "toast--info",
+            "toast--visible"
           );
-          const data = await respuesta.json();
 
-          if (!data.success) {
-            showToast(data.message || "Error en la búsqueda.", "error");
-            return;
-          }
+          if (type === "success") toastEl.classList.add("toast--success");
+          else if (type === "error") toastEl.classList.add("toast--error");
+          else toastEl.classList.add("toast--info");
 
-          const resultados = data.resultados || [];
-          if (!resultados.length) {
-            showToast("No se encontraron productos para: " + q, "info");
-            return;
-          }
-
-          let texto = "Resultados de búsqueda (" + resultados.length + "):\n\n";
-          resultados.slice(0, 5).forEach((item, idx) => {
-            texto +=
-              "#" + (idx + 1) + " " + (item.codigo || "") + " | " + (item.descripcion || "") + "\n" +
-              "Tipo: " + (item.tipo || "-") +
-              " | Color: " + (item.color || "-") +
-              " | Talla: " + (item.talla || "-") + "\n" +
-              "Precio: " + (item.precio !== "" ? "$" + item.precio : "N/D") + "\n\n";
+          toastEl.style.display = "block";
+          requestAnimationFrame(() => {
+            toastEl.classList.add("toast--visible");
           });
 
-          alert(texto);
-        } catch (error) {
-          console.error(error);
-          showToast(
-            "Error al conectar con el Master para la búsqueda.",
-            "error"
-          );
-        } finally {
-          hideLoader();
+          if (toastTimeoutId) clearTimeout(toastTimeoutId);
+          toastTimeoutId = setTimeout(() => {
+            toastEl.classList.remove("toast--visible");
+            setTimeout(() => {
+              toastEl.style.display = "none";
+            }, 250);
+          }, 3500);
         }
+
+        // Endpoints Apps Script
+        const PIPELINE_URL =
+          "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
+
+        // ✅ Helpers
+        function moneyMX(n) {
+          const x = Number(n) || 0;
+          return x.toLocaleString("es-MX", {
+            style: "currency",
+            currency: "MXN",
+          });
+        }
+
+        async function ejecutarPipelineMaster() {
+          const btn = document.getElementById("btnPipelineMaster");
+          const textoOriginal = btn ? btn.textContent : "";
+
+          const confirmar = confirm(
+            "¿Quieres ejecutar la actualización del Master?\n\n" +
+              "Esto correrá: códigos nuevos y precios desde Calculadora."
+          );
+          if (!confirmar) return;
+
+          try {
+            if (btn) {
+              btn.disabled = true;
+              btn.textContent = "Ejecutando...";
+            }
+
+            showLoader("Actualizando Master (códigos + precios)...");
+
+            const respuesta = await fetch(
+              PIPELINE_URL + "?action=ejecutarPipeline",
+              { cache: "no-store" }
+            );
+            const data = await respuesta.json();
+
+            if (data.success) {
+              showToast(
+                data.message ||
+                  "Pipeline ejecutado correctamente. Revisa el Master.",
+                "success"
+              );
+            } else {
+              showToast(
+                data.message || "Hubo un problema al ejecutar el pipeline.",
+                "error"
+              );
+            }
+          } catch (error) {
+            console.error(error);
+            showToast(
+              "Error al conectar con el Master. Intenta de nuevo.",
+              "error"
+            );
+          } finally {
+            hideLoader();
+            if (btn) {
+              btn.disabled = false;
+              btn.textContent = textoOriginal || "Ejecutar actualización";
+            }
+          }
+        }
+
+        async function ejecutarCSVConIVA() {
+          const btn = document.getElementById("btnCSVConIVA");
+          const textoOriginal = btn ? btn.textContent : "";
+
+          const confirmar = confirm(
+            "¿Generar el CSV con IVA?\n\n" +
+              "Esto actualizará la base que usas para SMP / etiquetas."
+          );
+          if (!confirmar) return;
+
+          try {
+            if (btn) {
+              btn.disabled = true;
+              btn.textContent = "Generando...";
+            }
+
+            showLoader("Generando CSV con IVA...");
+
+            const respuesta = await fetch(
+              PIPELINE_URL + "?action=generarCSVConIVA",
+              { cache: "no-store" }
+            );
+            const data = await respuesta.json();
+
+            if (data.success) {
+              showToast(
+                data.message ||
+                  "CSV con IVA generado correctamente. Revisa el archivo SMP.",
+                "success"
+              );
+            } else {
+              showToast(
+                data.message || "Hubo un problema al generar el CSV con IVA.",
+                "error"
+              );
+            }
+          } catch (error) {
+            console.error(error);
+            showToast(
+              "Error al conectar con el Master. Intenta de nuevo.",
+              "error"
+            );
+          } finally {
+            hideLoader();
+            if (btn) {
+              btn.disabled = false;
+              btn.textContent = textoOriginal || "Generar CSV";
+            }
+          }
+        }
+
+        async function verDashboardHoy() {
+          showLoader("Cargando resumen del día...");
+
+          try {
+            const respuesta = await fetch(
+              PIPELINE_URL + "?action=dashboardHoy",
+              { cache: "no-store" }
+            );
+            const data = await respuesta.json();
+
+            if (!data.success) {
+              showToast(
+                data.message || "No se pudo obtener el resumen del día.",
+                "error"
+              );
+              return;
+            }
+
+            const d = data.dashboard || {};
+            const ventasHoy = d.ventasHoy || 0;
+            const ticketsHoy = d.ticketsHoy || 0;
+            const ventasSemana = d.ventasSemana || 0;
+            const ventasMes = d.ventasMes || 0;
+            const prendasSinPrecio = d.prendasSinPrecio || 0;
+
+            const msg =
+              "📈 Resumen del día\n\n" +
+              "💸 Ventas hoy: " + moneyMX(ventasHoy) + "\n" +
+              "🧾 Tickets hoy: " + ticketsHoy + "\n\n" +
+              "📅 Ventas últimos 7 días: " + moneyMX(ventasSemana) + "\n" +
+              "📆 Ventas del mes: " + moneyMX(ventasMes) + "\n\n" +
+              "⚠️ Prendas sin precio en Master: " + prendasSinPrecio;
+
+            alert(msg);
+          } catch (error) {
+            console.error(error);
+            showToast(
+              "Error al conectar con el Master para el dashboard.",
+              "error"
+            );
+          } finally {
+            hideLoader();
+          }
+        }
+
+        async function abrirBuscadorProducto() {
+          const q = prompt(
+            "Buscar producto en Master:\n\n" +
+              "Ingresa código o parte de la descripción."
+          );
+          if (!q) return;
+
+          showLoader("Buscando producto...");
+
+          try {
+            const respuesta = await fetch(
+              PIPELINE_URL + "?action=buscarProducto&q=" + encodeURIComponent(q),
+              { cache: "no-store" }
+            );
+            const data = await respuesta.json();
+
+            if (!data.success) {
+              showToast(data.message || "Error en la búsqueda.", "error");
+              return;
+            }
+
+            const resultados = data.resultados || [];
+            if (!resultados.length) {
+              showToast("No se encontraron productos para: " + q, "info");
+              return;
+            }
+
+            let texto =
+              "Resultados de búsqueda (" + resultados.length + "):\n\n";
+            resultados.slice(0, 5).forEach((item, idx) => {
+              texto +=
+                "#" +
+                (idx + 1) +
+                " " +
+                (item.codigo || "") +
+                " | " +
+                (item.descripcion || "") +
+                "\n" +
+                "Tipo: " +
+                (item.tipo || "-") +
+                " | Color: " +
+                (item.color || "-") +
+                " | Talla: " +
+                (item.talla || "-") +
+                "\n" +
+                "Precio: " +
+                (item.precio !== "" ? "$" + item.precio : "N/D") +
+                "\n\n";
+            });
+
+            alert(texto);
+          } catch (error) {
+            console.error(error);
+            showToast(
+              "Error al conectar con el Master para la búsqueda.",
+              "error"
+            );
+          } finally {
+            hideLoader();
+          }
+        }
+
+        // ✅ Register Service Worker (PWA)
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", async () => {
+            try {
+              const reg = await navigator.serviceWorker.register(
+                "/service-worker.js",
+                { scope: "/" }
+              );
+              console.log("✅ SW registrado:", reg.scope);
+            } catch (err) {
+              console.warn("❌ SW no se pudo registrar:", err);
+            }
+          });
+        }
+
+        window.ejecutarPipelineMaster = ejecutarPipelineMaster;
+        window.ejecutarCSVConIVA = ejecutarCSVConIVA;
+        window.verDashboardHoy = verDashboardHoy;
+        window.abrirBuscadorProducto = abrirBuscadorProducto;
       }
 
-      // ✅ Register Service Worker (PWA)
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", async () => {
-          try {
-            const reg = await navigator.serviceWorker.register("/service-worker.js", { scope: "/" });
-            console.log("✅ SW registrado:", reg.scope);
-          } catch (err) {
-            console.warn("❌ SW no se pudo registrar:", err);
-          }
-        });
+      try {
+        boot();
+      } catch (error) {
+        showFatalError("La app no pudo iniciar. Intenta recargar.", error);
       }
     </script>
   </body>
