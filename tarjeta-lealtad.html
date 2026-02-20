@@ -1,282 +1,313 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Tarjeta de Lealtad HarujaGdl</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="icon" href="/icons/icon-192.png" />
-  <meta name="theme-color" content="#A7B59E" />
-
-  <!-- Fuente Montserrat -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Tarjeta de Lealtad | HarujaGdl</title>
 
   <style>
     :root{
-      --fondo:#ffffff;
-      --texto:#383234;
-      --acento:#a7b59e;
-      --beige:#faf6f1;
-      --gris:#777;
+      --bg: #f6efe7;            /* beige suave */
+      --card: #ffffff;          /* blanco */
+      --text: #1f2937;          /* gris-azulado oscuro */
+      --muted: #6b7280;         /* gris */
+      --shadow: 0 14px 30px rgba(15, 23, 42, .10);
+      --radius: 18px;
+      --olive: #A7B59E;         /* botón (como tu diseño original) */
+      --olive-dark: #8f9f86;
+      --danger: #c2410c;
+      --border: rgba(15, 23, 42, .10);
     }
-    *{
-      box-sizing:border-box;
-    }
+
+    *{ box-sizing: border-box; }
     body{
       margin:0;
-      font-family:'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background:var(--beige);
-      color:var(--texto);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap{
+      min-height: 100vh;
       display:flex;
       align-items:center;
       justify-content:center;
-      min-height:100vh;
+      padding: 28px 14px;
     }
+
     .card{
-      width:90%;
-      max-width:380px;
-      background:var(--fondo);
-      border-radius:24px;
-      box-shadow:0 14px 40px rgba(0,0,0,0.08);
-      padding:20px 22px 24px;
+      width: 100%;
+      max-width: 420px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px 22px 18px;
+      border: 1px solid var(--border);
+      text-align:center;
     }
+
     .logo{
-      width:160px;
+      display:flex;
+      justify-content:center;
+      margin-top: 2px;
+      margin-bottom: 16px;
+    }
+
+    .logo img{
+      width: 160px;
+      height:auto;
       display:block;
-      margin:0 auto 10px;
-      object-fit:contain;
+      opacity:.95;
     }
-    .titulo{
-      text-align:center;
-      font-weight:600;
-      font-size:0.8rem;
-      text-transform:uppercase;
-      color:var(--gris);
-      margin-bottom:4px;
-      letter-spacing:0.12em;
+
+    .subtitle{
+      letter-spacing: .16em;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      text-transform: uppercase;
     }
-    .nombre{
-      text-align:center;
-      font-size:1.15rem;
-      font-weight:700;
-      margin-bottom:8px;
+
+    h1{
+      font-size: 18px;
+      margin: 4px 0 8px;
+      font-weight: 800;
     }
-    .puntos{
-      font-size:2rem;
-      font-weight:700;
-      text-align:center;
-      margin:10px 0 4px;
+
+    .points{
+      margin: 12px 0 10px;
+      font-size: 44px;
+      font-weight: 900;
+      line-height: 1;
     }
-    .puntos span{
-      font-size:1rem;
-      font-weight:600;
+    .points span{
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--muted);
+      margin-left: 6px;
     }
-    .subtexto{
-      text-align:center;
-      font-size:0.8rem;
-      color:var(--gris);
-      margin-bottom:12px;
+
+    .hint{
+      font-size: 14px;
+      color: var(--muted);
+      margin: 10px 0 14px;
     }
-    .fila{
-      display:flex;
-      justify-content:space-between;
-      font-size:0.9rem;
-      margin:4px 0;
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 14px;
+      margin: 12px 0 14px;
+      text-align:left;
+      font-size: 14px;
     }
+
     .label{
-      color:var(--gris);
-    }
-    .valor{
-      font-weight:600;
+      color: var(--muted);
     }
 
-    /* QR */
-    .qr-wrapper{
-      margin-top:16px;
+    .value{
+      font-weight: 800;
+      text-align:right;
+      word-break: break-word;
+    }
+
+    .qrbox{
       display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:6px;
-    }
-    .qr-img{
-      width:150px;
-      height:150px;
-      border-radius:16px;
-      background:#f3f3f3;
-      padding:6px;
-      object-fit:contain;
-    }
-    .qr-text{
-      font-size:0.75rem;
-      color:var(--gris);
-      text-align:center;
-      max-width:260px;
+      justify-content:center;
+      margin: 10px 0 8px;
     }
 
-    .boton{
-      margin-top:18px;
-      width:100%;
-      padding:12px 14px;
-      border-radius:999px;
-      border:none;
-      background:var(--acento);
-      color:#fff;
-      font-weight:600;
-      font-size:0.95rem;
-      box-shadow:0 6px 14px rgba(167,181,158,0.6);
-      transition:transform 0.08s ease, box-shadow 0.08s ease, opacity 0.08s ease;
+    .qrbox img{
+      width: 210px;
+      height: 210px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background:#fff;
     }
-    .boton:active{
-      transform:scale(0.97);
-      box-shadow:0 3px 8px rgba(0,0,0,0.25);
-      opacity:0.9;
+
+    .qrtext{
+      font-size: 13px;
+      color: var(--muted);
+      margin: 8px 0 14px;
     }
-    .estado{
-      text-align:center;
-      font-size:0.8rem;
-      margin-top:10px;
-      min-height:16px;
+
+    .btn{
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 14px 14px;
+      font-weight: 900;
+      font-size: 16px;
+      cursor: pointer;
+      background: var(--olive);
+      color: #fff;
+      transition: transform .05s ease, background .15s ease;
     }
-    .estado.error{
-      color:#b3261e;
+    .btn:active{ transform: translateY(1px); }
+    .btn:hover{ background: var(--olive-dark); }
+
+    .status{
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
     }
-    .info-pequeña{
-      margin-top:8px;
-      font-size:0.75rem;
-      text-align:center;
-      color:var(--gris);
+    .status.error{
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .small{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 10px;
+      background: rgba(15,23,42,.02);
     }
   </style>
 </head>
+
 <body>
-  <div class="card">
-    <!-- Logo Haruja -->
-    <img class="logo" src="/icons/icon-192.png" alt="HarujaGdl" />
+  <div class="wrap">
+    <div class="card">
+      <div class="logo">
+        <!-- Si en tu Vercel tienes el logo en otra ruta, cámbiala aquí -->
+        <img src="logo-haruja.png" alt="HarujaGdl" onerror="this.style.display='none'">
+      </div>
 
-    <div class="titulo">Tarjeta de Lealtad</div>
-    <div class="nombre" id="nombreCliente">Sin token</div>
+      <div class="subtitle">Tarjeta de lealtad</div>
+      <h1 id="nombreCliente">Cargando…</h1>
 
-    <div class="puntos" id="puntosCliente">-- <span>pts</span></div>
-    <div class="subtexto">Presenta esta tarjeta en cada visita 💚</div>
+      <div class="points" id="puntosCliente">-- <span>pts</span></div>
 
-    <div class="fila">
-      <span class="label">Visitas</span>
-      <span class="valor" id="visitasCliente">--</span>
-    </div>
-    <div class="fila">
-      <span class="label">Código cliente</span>
-      <span class="valor" id="codigoCliente">---</span>
-    </div>
+      <div class="hint">Presenta esta tarjeta en cada visita 💚</div>
 
-    <!-- 🔳 QR con el TOKEN del cliente -->
-    <div class="qr-wrapper">
-      <img id="qrToken" class="qr-img" alt="QR de cliente" />
-      <div class="qr-text">
+      <div class="grid">
+        <div class="label">Visitas</div>
+        <div class="value" id="visitasCliente">--</div>
+
+        <div class="label">Nivel</div>
+        <div class="value" id="nivelCliente">--</div>
+
+        <div class="label">Total compras</div>
+        <div class="value" id="comprasCliente">$0.00</div>
+      </div>
+
+      <div class="qrbox" id="qrBox" style="display:none;">
+        <img id="qrImg" alt="QR" />
+      </div>
+
+      <div class="qrtext" id="qrTexto" style="display:none;">
         Escanéame en caja para buscar tu cuenta rápidamente en el sistema de lealtad 🔎
       </div>
-    </div>
 
-    <button class="boton" id="btnRefrescar">Actualizar datos</button>
+      <button class="btn" id="btnRefresh">Actualizar datos</button>
 
-    <div class="estado" id="estado"></div>
-    <div class="info-pequeña">
-      Consejo: agrégala a tu pantalla de inicio para tenerla siempre a la mano ✨
+      <div class="status" id="estado"></div>
+      <div class="small">Consejo: agrégala a tu pantalla de inicio para tenerla siempre a la mano ✨</div>
+
+      <div class="badge" id="tokenBadge" style="display:none;"></div>
     </div>
   </div>
 
   <script>
-    // ⬇️ URL de tu Apps Script (sin parámetros)
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxhJEhjk3ISS04cmE9aACiIs5vtlK9-jb1udSRlG8_4tsCS-qPq16AIh4uC0r0Yy2wBTg/exec';
+    // ✅ Cambia SOLO si tu API es otra
+    const API_BASE = "https://api-oabqydrhoq-uc.a.run.app";
 
-    function getTokenFromURL() {
-      const url = new URL(window.location.href);
-      return url.searchParams.get('token');
+    function getToken() {
+      return new URLSearchParams(location.search).get("token") || "";
     }
 
-    async function cargarTarjeta(mostrarMensaje = false) {
-      const token = getTokenFromURL();
-      const estado = document.getElementById('estado');
+    function money(n){
+      const v = Number(n || 0);
+      return v.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+    }
 
-      if (!token) {
-        document.getElementById('nombreCliente').textContent = 'Sin token';
-        document.getElementById('puntosCliente').innerHTML = '-- <span>pts</span>';
-        document.getElementById('visitasCliente').textContent = '--';
-        document.getElementById('codigoCliente').textContent = '---';
-        document.getElementById('qrToken').style.display = 'none';
-        estado.textContent = 'El enlace no tiene token, pide uno nuevo en Haruja 🙏';
-        estado.classList.add('error');
+    // QR sin librerías: usamos Google Chart para renderizar el QR.
+    // (Esto es para la tarjeta pública en Vercel; no debería estar bloqueado como en embedded)
+    function setQrFromLink(link){
+      const img = document.getElementById("qrImg");
+      const qrUrl = "https://chart.googleapis.com/chart?cht=qr&chs=240x240&chl=" + encodeURIComponent(link);
+      img.src = qrUrl;
+      document.getElementById("qrBox").style.display = "flex";
+      document.getElementById("qrTexto").style.display = "block";
+    }
+
+    function setNotFound(msg){
+      document.getElementById('nombreCliente').textContent = 'Cliente no encontrado';
+      document.getElementById('puntosCliente').innerHTML = '-- <span>pts</span>';
+      document.getElementById('visitasCliente').textContent = '--';
+      document.getElementById('nivelCliente').textContent = '--';
+      document.getElementById('comprasCliente').textContent = money(0);
+
+      document.getElementById("qrBox").style.display = "none";
+      document.getElementById("qrTexto").style.display = "none";
+      document.getElementById("tokenBadge").style.display = "none";
+
+      const estado = document.getElementById("estado");
+      estado.textContent = msg || "No encontramos tu tarjeta, revisa el link con Haruja.";
+      estado.classList.add("error");
+    }
+
+    async function cargarTarjeta(){
+      const token = getToken();
+      const estado = document.getElementById("estado");
+      estado.classList.remove("error");
+      estado.textContent = "";
+
+      if(!token){
+        setNotFound("Falta el token en el link.");
         return;
       }
 
-      try {
-        if (mostrarMensaje) {
-          estado.textContent = 'Actualizando datos...';
-          estado.classList.remove('error');
-        }
+      // Para que el cliente pueda copiar/ver el token si hace falta soporte
+      const badge = document.getElementById("tokenBadge");
+      badge.style.display = "inline-flex";
+      badge.textContent = "Token: " + token;
 
-        const res = await fetch(`${API_URL}?modo=cliente-json&token=${encodeURIComponent(token)}`);
-        const data = await res.json();
+      try{
+        const url = `${API_BASE}/api/loyalty/getByToken?token=${encodeURIComponent(token)}`;
+        const res = await fetch(url, { method: "GET" });
+        const data = await res.json().catch(() => ({}));
 
-        if (!data.ok || !data.cliente) {
-          document.getElementById('nombreCliente').textContent = 'Cliente no encontrado';
-          document.getElementById('puntosCliente').innerHTML = '-- <span>pts</span>';
-          document.getElementById('visitasCliente').textContent = '--';
-          document.getElementById('codigoCliente').textContent = '---';
-          document.getElementById('qrToken').style.display = 'none';
-          estado.textContent = 'No encontramos tu tarjeta, revisa el link con Haruja.';
-          estado.classList.add('error');
+        // ✅ AQUÍ ESTÁ EL FIX: clientPublic (no "cliente")
+        if (!data.ok || !data.clientPublic) {
+          setNotFound("No encontramos tu tarjeta, revisa el link con Haruja.");
           return;
         }
 
-        const c = data.cliente;
+        const c = data.clientPublic;
 
-        document.getElementById('nombreCliente').textContent  = c.nombre || 'Cliente Haruja';
-        document.getElementById('puntosCliente').innerHTML   = (c.puntos || 0) + ' <span>pts</span>';
-        document.getElementById('visitasCliente').textContent = c.visitas || 0;
-        document.getElementById('codigoCliente').textContent  = c.id || '—';
+        document.getElementById('nombreCliente').textContent = c.name || 'Cliente Haruja';
+        document.getElementById('puntosCliente').innerHTML = (c.points ?? 0) + ' <span>pts</span>';
+        document.getElementById('visitasCliente').textContent = (c.visits ?? 0);
+        document.getElementById('nivelCliente').textContent = (c.level || 'Nuevo');
+        document.getElementById('comprasCliente').textContent = money(c.totalPurchases ?? 0);
 
-        // 🔳 Generar QR con el TOKEN (para que al escanear salga el token tal cual)
-        if (c.token) {
-          const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(c.token);
-          const img = document.getElementById('qrToken');
-          img.src = qrUrl;
-          img.style.display = 'block';
-        } else {
-          document.getElementById('qrToken').style.display = 'none';
-        }
+        // QR apunta al link PWA (esta misma página con token)
+        const pwaLink = `https://haruja-panel.vercel.app/tarjeta-lealtad.html?token=${encodeURIComponent(token)}`;
+        setQrFromLink(pwaLink);
 
-        if (mostrarMensaje) {
-          estado.textContent = 'Datos actualizados ✔';
-          estado.classList.remove('error');
-        } else {
-          estado.textContent = '';
-        }
-      } catch (err) {
-        console.error(err);
-        estado.textContent = 'Hubo un problema al conectar, intenta de nuevo más tarde.';
-        estado.classList.add('error');
+        estado.textContent = "";
+      } catch(e){
+        console.error(e);
+        setNotFound("No pudimos cargar tu tarjeta. Intenta de nuevo.");
       }
     }
 
-    document.getElementById('btnRefrescar').addEventListener('click', () => {
-      cargarTarjeta(true);
-    });
-
-    // Cargar datos al entrar
-    cargarTarjeta(false);
-
-    // Registrar service worker para PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('/service-worker.js')
-          .catch((err) => console.error('SW error', err));
-      });
-    }
+    document.getElementById("btnRefresh").addEventListener("click", cargarTarjeta);
+    cargarTarjeta();
   </script>
 </body>
 </html>
