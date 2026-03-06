@@ -109,9 +109,16 @@
           <input id="costo" type="number" step="0.01" min="0.01" inputmode="decimal" placeholder="0.00" required />
           <div id="err-costo" class="error" style="display:none"></div>
         </div>
+
         <div>
-          <label>Margen</label>
-          <span class="pill"><span id="margenPill">65%</span> (fijo/por categoría)</span>
+          <label for="margen">Margen</label>
+          <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+            <input id="margen" type="range" min="40" max="65" step="1" value="65" style="flex:1;" />
+            <input id="margenInput" type="number" min="40" max="65" step="1" value="65" inputmode="numeric" style="width:88px;" />
+          </div>
+          <span class="pill"><span id="margenPill">65%</span> editable</span>
+          <div class="hint">Puedes ajustar el margen entre 40% y 65%.</div>
+          <div id="err-margen" class="error" style="display:none"></div>
         </div>
       </div>
 
@@ -163,7 +170,7 @@
   const API_URL = 'https://script.google.com/macros/s/AKfycby4NNyRSFmQm-dgXf9dpTqVxBDORBtOnPywiffLNyvotUM66ZKjWCFgyIqAX-kPo_M/exec';
 
   let IVA = 0.16;
-  let MARGEN = 0.65;
+  let MARGEN = 0.65; // valor interno decimal: 0.40 a 0.65
   let imageDataUrl = null;
   let imageFileName = null;
   let busy = false;
@@ -182,10 +189,42 @@
     fecha.value = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
 
     $('#iva').value = (IVA*100).toFixed(2) + '%';
-    $('#margenPill').textContent = (MARGEN*100).toFixed(0) + '%';
+    setMargenFromPct(decimalToPct(MARGEN));
 
     $('#costo').addEventListener('input', recalc);
     $('#chk9').addEventListener('change', recalc);
+
+    $('#margen').addEventListener('input', e => {
+      setMargenFromPct(e.target.value);
+      clearMargenError();
+      recalc();
+    });
+
+    $('#margenInput').addEventListener('input', e => {
+      const raw = Number(e.target.value);
+      if (!Number.isFinite(raw)) return;
+      setMargenFromPct(raw);
+      clearMargenError();
+      recalc();
+    });
+
+    $('#margenInput').addEventListener('blur', () => {
+      const raw = Number($('#margenInput').value);
+      if (!Number.isFinite(raw)) {
+        setMargenFromPct(65);
+        showMargenError('Ingresa un margen válido entre 40 y 65.');
+      } else {
+        const clamped = clamp(raw, 40, 65);
+        setMargenFromPct(clamped);
+        if (raw !== clamped) {
+          showMargenError('El margen se ajustó automáticamente al rango permitido (40% a 65%).');
+        } else {
+          clearMargenError();
+        }
+      }
+      recalc();
+    });
+
     $('#desc').addEventListener('input', e => {
       $('#desc-count').textContent = `${e.target.value.length}/140`;
     });
@@ -229,6 +268,25 @@
     });
   }
   function round2(n){ return Math.round(Number(n)*100)/100; }
+  function clamp(n, min, max){
+    return Math.min(max, Math.max(min, n));
+  }
+  function pctToDecimal(pct){
+    return Number(pct) / 100;
+  }
+  function decimalToPct(dec){
+    return Math.round(Number(dec || 0) * 100);
+  }
+  function getMargenPct(){
+    return decimalToPct(MARGEN);
+  }
+  function setMargenFromPct(pct){
+    const pctSafe = clamp(Number(pct || 0), 40, 65);
+    MARGEN = pctToDecimal(pctSafe);
+    if ($('#margen')) $('#margen').value = String(pctSafe);
+    if ($('#margenInput')) $('#margenInput').value = String(pctSafe);
+    if ($('#margenPill')) $('#margenPill').textContent = pctSafe + '%';
+  }
   function nextEnding9(n){
     let p = Math.ceil(Number(n)||0);
     const mod = p % 10;
@@ -240,8 +298,20 @@
     el.className = type ? type : '';
   }
   function setImgMsg(t){ $('#imgMsg').textContent = t || ''; }
+  function showMargenError(msg){
+    const e = $('#err-margen');
+    if (!e) return;
+    e.textContent = msg || '';
+    e.style.display = msg ? 'block' : 'none';
+  }
+  function clearMargenError(){
+    const e = $('#err-margen');
+    if (!e) return;
+    e.textContent = '';
+    e.style.display = 'none';
+  }
   function clearErrors(){
-    ['fecha','categoria','desc','costo'].forEach(id => {
+    ['fecha','categoria','desc','costo','margen'].forEach(id => {
       const el = $('#err-'+id);
       if (el) { el.style.display='none'; el.textContent=''; }
     });
@@ -250,6 +320,13 @@
   function recalc(){
     const costo = Number($('#costo').value || 0);
     const aplicar9 = $('#chk9').checked;
+    const margenPct = Number($('#margenInput')?.value || getMargenPct());
+
+    if (isFinite(margenPct)) {
+      MARGEN = pctToDecimal(clamp(margenPct, 40, 65));
+      $('#margenPill').textContent = clamp(margenPct, 40, 65) + '%';
+    }
+
     if (!costo || costo <= 0){
       $('#psiniva').value = '';
       $('#pfinal').value = '';
@@ -291,6 +368,7 @@
     const desc = $('#desc').value.trim();
     const costo = Number($('#costo').value);
     const fecha = $('#fecha').value;
+    const margenPct = Number($('#margenInput')?.value);
 
     if (!categoria){
       const e = $('#err-categoria');
@@ -308,6 +386,18 @@
       const e = $('#err-fecha');
       e.textContent = 'Selecciona una fecha.'; e.style.display='block'; ok=false;
     }
+
+    if (!isFinite(margenPct) || margenPct < 40 || margenPct > 65){
+      const e = $('#err-margen');
+      e.textContent = 'Ingresa un margen entre 40% y 65%.';
+      e.style.display = 'block';
+      ok = false;
+    }
+
+    if (ok) {
+      setMargenFromPct(margenPct);
+    }
+
     return ok;
   }
 
@@ -322,6 +412,7 @@
     const categoria = $('#categoria').value;
     const descripcion = $('#desc').value.trim().replace(/[\r\n]+/g,' ').slice(0,140);
     const costo = Number($('#costo').value);
+    const margenPct = Number($('#margenInput').value);
     const aplicarRedondeo = $('#chk9').checked;
 
     const payload = {
@@ -329,6 +420,8 @@
       categoria,
       descripcion,
       costo,
+      margen: pctToDecimal(margenPct),
+      margenPct,
       aplicarRedondeo,
       imageDataUrl,
       imageFileName
@@ -360,8 +453,7 @@
         if (typeof calc.iva === 'number')
           $('#iva').value = (calc.iva*100).toFixed(2)+'%';
         if (typeof calc.margen === 'number'){
-          MARGEN = calc.margen;
-          $('#margenPill').textContent = (MARGEN*100).toFixed(0)+'%';
+          setMargenFromPct(Number($('#margenInput')?.value || 65));
         }
       }
 
